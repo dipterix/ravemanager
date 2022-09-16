@@ -196,13 +196,11 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
 
   if(missing(libpath) || !length(libpath)) {
     utils::install.packages(
-      packages_to_install, repos = repos, Ncpus = 2, type = type,
-      dependencies = c("Depends", "Imports", "LinkingTo")
+      packages_to_install, repos = repos, Ncpus = 4, type = type
     )
   } else {
     utils::install.packages(
-      packages_to_install, lib = libpath, repos = repos, Ncpus = 2, type = type,
-      dependencies = c("Depends", "Imports", "LinkingTo")
+      packages_to_install, lib = libpath, repos = repos, Ncpus = 4, type = type
     )
   }
 
@@ -248,40 +246,37 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
   if(system.file(package = "rspm") == "") {
     utils::install.packages("rspm", lib = get_libpaths())
   }
+
+  rspm_enabled <- FALSE
   if(system.file(package = "rspm") != "" && is_loaded("rspm")) {
     rspm <- asNamespace("rspm")
-    suppressWarnings({
-      try({ rspm$enable() })
+
+    try({
+      rspm$enable()
+      rspm_enabled <- TRUE
     })
     on.exit({
       try({ rspm$disable() })
     }, after = FALSE, add = TRUE)
 
-    # install the packages without dev repo so we can use the compiled
-    if(length(libpath)) {
-      utils::install.packages(
-        needs_compilation, lib = libpath, repos = repos,
-        dependencies = c("Depends", "Imports", "LinkingTo")
-      )
-    } else {
-      utils::install.packages(
-        needs_compilation, repos = repos,
-        dependencies = c("Depends", "Imports", "LinkingTo")
-      )
-    }
-    try({ rspm$disable() })
   }
+
+  if( rspm_enabled ){
+    message("Trying to install binary (pre-built) dependence")
+  } else {
+    message("RSPM disabled: fallback to normal installation")
+  }
+
 
   if(!length(libpath)) {
     utils::install.packages(
-      packages_to_install, repos = repos, Ncpus = 2,
-      dependencies = c("Depends", "Imports", "LinkingTo")
+      packages_to_install, repos = repos, Ncpus = 4
     )
   } else {
     utils::install.packages(
-      packages_to_install, lib = libpath, repos = repos, Ncpus = 2,
-      dependencies = c("Depends", "Imports", "LinkingTo")
+      packages_to_install, lib = libpath, repos = repos, Ncpus = 4
     )
   }
 
+  try({ rspm$disable() })
 }
