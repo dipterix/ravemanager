@@ -56,13 +56,11 @@ get_mirror <- function(nightly = TRUE) {
   if(nightly) {
     mirrors <- c(
       beauchamplab = 'https://beauchamplab.r-universe.dev',
-      dipterix = 'https://dipterix.r-universe.dev',
-      CRAN = 'https://cloud.r-project.org'
+      dipterix = 'https://dipterix.r-universe.dev'
     )
   } else {
     mirrors <- c(
-      beauchamplab = 'https://beauchamplab.r-universe.dev',
-      CRAN = 'https://cloud.r-project.org'
+      beauchamplab = 'https://beauchamplab.r-universe.dev'
     )
   }
 
@@ -81,6 +79,7 @@ get_mirror <- function(nightly = TRUE) {
       }
     }
   )
+  mirrors[["CRAN"]] <- 'https://cloud.r-project.org'
   mirrors
 }
 
