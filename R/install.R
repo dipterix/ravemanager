@@ -263,6 +263,22 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
 
   if( rspm_enabled ){
     message("Trying to install binary (pre-built) dependence")
+    rspm_toinstall <- rspm_install
+    rspm_toinstall <- rspm_toinstall[vapply(rspm_toinstall, function(pkg){
+      system.file(package = pkg) == ""
+    }, FALSE)]
+    if(length(rspm_toinstall)) {
+      if(!length(libpath)) {
+        utils::install.packages(
+          rspm_toinstall, Ncpus = 4
+        )
+      } else {
+        utils::install.packages(
+          rspm_toinstall, lib = libpath, Ncpus = 4
+        )
+      }
+    }
+
   } else {
     message("RSPM disabled: fallback to normal installation")
   }
