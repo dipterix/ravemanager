@@ -71,13 +71,13 @@ get_mirror <- function(nightly = TRUE) {
   switch(
     os_type,
     "windows" = {
-      mirrors[["RSPM"]] <- "https://packagemanager.rstudio.com/all/latest"
+      mirrors[["RSPM"]] <- "https://packagemanager.rstudio.com/cran/latest"
     },
     "linux" = {
       lsb <- getOption("ravemanager.os.release", default = NULL)
       lsb <- lsb[lsb %in% c("opensuse153", "centos7", "centos8", "bionic", "focal", "jammy")]
       if(length(lsb)) {
-        mirrors[["RSPM"]] <- sprintf("https://packagemanager.rstudio.com/all/__linux__/%s/latest", lsb[[1]])
+        mirrors[["RSPM"]] <- sprintf("https://packagemanager.rstudio.com/cran/__linux__/%s/latest", lsb[[1]])
       }
     }
   )
