@@ -120,22 +120,26 @@ install <- function(nightly = TRUE) {
     }
   }
 
-  # Get R version info
-  tryCatch({
-    r_ver <- get_latest_R_version()
-    latest_ver <- package_version(r_ver$latest_R_version)
-    current_ver <- package_version(r_ver$current_R_version)
-
-    if(identical(current_ver$major, latest_ver$major)) {
-      if( latest_ver$minor - current_ver$minor <= 1 ) {
-        options("ravemanager.binary_available" = TRUE)
-      }
-    }
-  }, error = function(e){})
-
-
   # Get os information
   os_type <- get_os()
+  os_arch <- get_arch()
+
+  # Get R version info
+  if(os_type %in% c("windows", "darwin") && os_arch %in% c("x64")) {
+    tryCatch({
+      r_ver <- get_latest_R_version()
+      latest_ver <- package_version(r_ver$latest_R_version)
+      current_ver <- package_version(r_ver$current_R_version)
+
+      if(identical(current_ver$major, latest_ver$major)) {
+        if( latest_ver$minor - current_ver$minor <= 1 ) {
+
+          options("ravemanager.binary_available" = TRUE)
+        }
+      }
+    }, error = function(e){})
+  }
+
 
   switch(
     os_type,
@@ -234,32 +238,32 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
     stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
   }
 
-  # Make sure `bspm` is installed
-  if(system.file(package = "bspm") == "") {
-    utils::install.packages("bspm", lib = get_libpaths())
-  }
-  if(system.file(package = "bspm") != "") {
-    options("bspm.always.install.deps" = TRUE)
-    suppressWarnings({
-      bspm <- asNamespace("bspm")
-      bspm$enable()
-    })
-    on.exit({
-      bspm$disable()
-    }, after = FALSE, add = TRUE)
-
-    # install the packages without dev repo so we can use the compiled
-    if(length(libpath)) {
-      utils::install.packages(
-        needs_compilation, lib = libpath,
-        dependencies = c("Depends", "Imports", "LinkingTo")
-      )
-    } else {
-      utils::install.packages(
-        needs_compilation,
-        dependencies = c("Depends", "Imports", "LinkingTo")
-      )
-    }
+  # # Make sure `bspm` is installed
+  # if(system.file(package = "bspm") == "") {
+  #   utils::install.packages("bspm", lib = get_libpaths())
+  # }
+  if(system.file(package = "bspm") != "" && is_loaded("bspm")) {
+    bspm <- asNamespace("bspm")
+    # options("bspm.always.install.deps" = TRUE)
+    # suppressWarnings({
+    #   bspm$enable()
+    # })
+    # on.exit({
+    #   bspm$disable()
+    # }, after = FALSE, add = TRUE)
+    #
+    # # install the packages without dev repo so we can use the compiled
+    # if(length(libpath)) {
+    #   utils::install.packages(
+    #     needs_compilation, lib = libpath,
+    #     dependencies = c("Depends", "Imports", "LinkingTo")
+    #   )
+    # } else {
+    #   utils::install.packages(
+    #     needs_compilation,
+    #     dependencies = c("Depends", "Imports", "LinkingTo")
+    #   )
+    # }
     bspm$disable()
   }
 
