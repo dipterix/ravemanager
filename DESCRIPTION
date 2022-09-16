@@ -1,0 +1,14 @@
+Package: ravemanager
+Title: Manage 'RAVE' Packages
+Version: 0.0.1
+Authors@R: 
+    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", 
+           role = c("aut", "cre"))
+Description: 
+    Manages installation, upgrade, and removal of packages and corresponding 
+    dependence for the project 'RAVE' (R Analysis and Visualization for 'iEEG').
+License: MIT + file LICENSE
+Language: en-US
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
