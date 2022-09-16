@@ -150,14 +150,20 @@ install <- function(nightly = TRUE) {
     }
   )
 
+  message("Packages have been installed. Finalizing settings.")
 
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages
+  )
+  finalize_installation(packages = packages_to_install,
+                        upgrade = 'config-only', async = FALSE)
 
 }
 
 install_rave_osx <- function(libpath, nightly = TRUE) {
 
   packages_to_install <- c(
-    rave_packages, "rave", rave_packages
+    rave_depends, "rave", rave_packages
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
@@ -200,5 +206,76 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
 
   finalize_installation(packages = packages_to_install,
                         upgrade = 'config-only', async = FALSE)
+
+}
+
+install_rave_linux <- function(libpath, nightly = TRUE) {
+
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages
+  )
+
+  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
+
+  if(length(loaded)) {
+
+    for(nm in loaded) {
+      try(
+        expr = {
+          unload_namespace(nm)
+        },
+        silent = TRUE
+      )
+    }
+  }
+
+  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
+  if(length(loaded)) {
+    stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
+  }
+
+  # Make sure `bspm` is installed
+  if(system.file(package = "bspm") == "") {
+    utils::install.packages("bspm", lib = get_libpaths())
+  }
+  if(system.file(package = "bspm") != "") {
+    options("bspm.always.install.deps" = TRUE)
+    suppressWarnings({
+      bspm <- asNamespace("bspm")
+      bspm$enable()
+    })
+    on.exit({
+      bspm$disable()
+    }, after = FALSE, add = TRUE)
+
+    # install the packages without dev repo so we can use the compiled
+    if(length(libpath)) {
+      utils::install.packages(
+        needs_compilation, lib = libpath,
+        dependencies = c("Depends", "Imports", "LinkingTo")
+      )
+    } else {
+      utils::install.packages(
+        needs_compilation,
+        dependencies = c("Depends", "Imports", "LinkingTo")
+      )
+    }
+    bspm$disable()
+  }
+
+  # install the CRAN dependencies with dev repos
+  repos <- get_mirror(nightly = nightly)
+
+  if(missing(libpath) || !length(libpath)) {
+    utils::install.packages(
+      packages_to_install, repos = repos, Ncpus = 2,
+      dependencies = c("Depends", "Imports", "LinkingTo")
+    )
+  } else {
+    utils::install.packages(
+      packages_to_install, lib = libpath, repos = repos, Ncpus = 2,
+      dependencies = c("Depends", "Imports", "LinkingTo")
+    )
+  }
 
 }

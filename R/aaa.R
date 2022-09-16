@@ -5,6 +5,24 @@ rave_depends <- c(
 
 rave_packages <- c("rutabaga", "ravebuiltins")
 
+needs_compilation <- c(
+  "anytime", "askpass", "backports", "base64enc", "base64url",
+  "bit", "bit64", "bitops", "brio", "cachem", "circular", "cli",
+  "colorspace", "commonmark", "curl", "data.table", "diffobj",
+  "digest", "dipsaus", "dplyr", "ellipsis", "fansi", "farver",
+  "fastmap", "fftwtools", "filearray", "foreign", "fs", "fst",
+  "fstcore", "gert", "glue", "hdf5r", "htmltools", "httpuv", "igraph",
+  "isoband", "jsonlite", "later", "lattice", "lazyeval", "lme4",
+  "magrittr", "maptools", "MASS", "Matrix", "mgcv", "mime", "minqa",
+  "mvtnorm", "nlme", "nloptr", "nnet", "openssl", "pbdZMQ", "plyr",
+  "png", "processx", "profvis", "promises", "ps", "purrr", "quantreg",
+  "ragg", "rappdirs", "ravetools", "Rcpp", "RcppEigen", "RcppParallel",
+  "RcppTOML", "reshape2", "reticulate", "rlang", "RNifti", "roxygen2",
+  "sass", "signal", "sourcetools", "sp", "SparseM", "stringi",
+  "survival", "sys", "systemfonts", "testthat", "textshaping",
+  "tibble", "tidyr", "tidyselect", "utf8", "uuid", "vctrs", "waveslim",
+  "xfun", "xml2", "yaml", "zip")
+
 get_os <- function () {
   if ("windows" %in% tolower(.Platform$OS.type)) {
     return("windows")
