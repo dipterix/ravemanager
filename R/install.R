@@ -238,39 +238,41 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
     stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
   }
 
-  # # Make sure `bspm` is installed
-  # if(system.file(package = "bspm") == "") {
-  #   utils::install.packages("bspm", lib = get_libpaths())
-  # }
-  if(system.file(package = "bspm") != "" && is_loaded("bspm")) {
-    bspm <- asNamespace("bspm")
-    # options("bspm.always.install.deps" = TRUE)
-    # suppressWarnings({
-    #   bspm$enable()
-    # })
-    # on.exit({
-    #   bspm$disable()
-    # }, after = FALSE, add = TRUE)
-    #
-    # # install the packages without dev repo so we can use the compiled
-    # if(length(libpath)) {
-    #   utils::install.packages(
-    #     needs_compilation, lib = libpath,
-    #     dependencies = c("Depends", "Imports", "LinkingTo")
-    #   )
-    # } else {
-    #   utils::install.packages(
-    #     needs_compilation,
-    #     dependencies = c("Depends", "Imports", "LinkingTo")
-    #   )
-    # }
-    bspm$disable()
-  }
-
   # install the CRAN dependencies with dev repos
   repos <- get_mirror(nightly = nightly)
+  if(missing(libpath)) {
+    libpath <- NULL
+  }
 
-  if(missing(libpath) || !length(libpath)) {
+  # Make sure `rspm` is installed
+  if(system.file(package = "rspm") == "") {
+    utils::install.packages("rspm", lib = get_libpaths())
+  }
+  if(system.file(package = "rspm") != "" && is_loaded("rspm")) {
+    rspm <- asNamespace("rspm")
+    suppressWarnings({
+      try({ rspm$enable() })
+    })
+    on.exit({
+      try({ rspm$disable() })
+    }, after = FALSE, add = TRUE)
+
+    # install the packages without dev repo so we can use the compiled
+    if(length(libpath)) {
+      utils::install.packages(
+        needs_compilation, lib = libpath, repos = repos,
+        dependencies = c("Depends", "Imports", "LinkingTo")
+      )
+    } else {
+      utils::install.packages(
+        needs_compilation, repos = repos,
+        dependencies = c("Depends", "Imports", "LinkingTo")
+      )
+    }
+    try({ rspm$disable() })
+  }
+
+  if(!length(libpath)) {
     utils::install.packages(
       packages_to_install, repos = repos, Ncpus = 2,
       dependencies = c("Depends", "Imports", "LinkingTo")

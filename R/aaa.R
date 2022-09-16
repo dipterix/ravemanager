@@ -74,6 +74,18 @@ get_mirror <- function(nightly = TRUE) {
     "linux" = {
       lsb <- getOption("ravemanager.os.release", default = NULL)
       lsb <- lsb[lsb %in% c("opensuse153", "centos7", "centos8", "bionic", "focal", "jammy")]
+      if(!length(lsb)) {
+        info <- utils::sessionInfo()
+        if(grepl("Ubuntu 22", info$running)) {
+          lsb <- "jammy"
+        } else if(grepl("Ubuntu 20", info$running)) {
+          lsb <- "focal"
+        } else if(grepl("Ubuntu 18", info$running)) {
+          lsb <- "bionic"
+        } else {
+          # TODO: add more
+        }
+      }
       if(length(lsb)) {
         mirrors[["RSPM"]] <- sprintf("https://packagemanager.rstudio.com/cran/__linux__/%s/latest", lsb[[1]])
       }
