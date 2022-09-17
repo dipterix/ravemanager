@@ -22,7 +22,7 @@ finalize_installation <- function(
   upgrade <- match.arg(upgrade)
 
   # Get all packages with rave.yaml
-  lib_path <- get_libpaths()
+  lib_path <- get_libpaths(first = FALSE)
 
   allpackages <- unlist(sapply(lib_path, function(lp){
     list.dirs(lp, recursive = FALSE, full.names = FALSE)
@@ -195,14 +195,11 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
   type <- ifelse(binary, "binary", "source")
 
   if(missing(libpath) || !length(libpath)) {
-    utils::install.packages(
-      packages_to_install, repos = repos, Ncpus = 4, type = type
-    )
-  } else {
-    utils::install.packages(
-      packages_to_install, lib = libpath, repos = repos, Ncpus = 4, type = type
-    )
+    libpath <- NULL
   }
+  utils::install.packages(
+    packages_to_install, lib = libpath, repos = repos, Ncpus = 4, type = type
+  )
 
   message("Packages have been installed. Finalizing settings.")
 
@@ -238,13 +235,13 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
 
   # install the CRAN dependencies with dev repos
   repos <- get_mirror(nightly = nightly)
-  if(missing(libpath)) {
+  if(missing(libpath) || !length(libpath)) {
     libpath <- NULL
   }
 
   # Make sure `rspm` is installed
   if(system.file(package = "rspm") == "") {
-    utils::install.packages("rspm", lib = get_libpaths())
+    utils::install.packages("rspm", lib = libpath)
   }
 
   rspm_enabled <- FALSE
@@ -268,15 +265,9 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
       system.file(package = pkg) == ""
     }, FALSE)]
     if(length(rspm_toinstall)) {
-      if(!length(libpath)) {
-        utils::install.packages(
-          rspm_toinstall, Ncpus = 4
-        )
-      } else {
-        utils::install.packages(
-          rspm_toinstall, lib = libpath, Ncpus = 4
-        )
-      }
+      utils::install.packages(
+        rspm_toinstall, lib = libpath, Ncpus = 4
+      )
     }
 
   } else {
@@ -284,15 +275,9 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
   }
 
 
-  if(!length(libpath)) {
-    utils::install.packages(
-      packages_to_install, repos = repos, Ncpus = 4
-    )
-  } else {
-    utils::install.packages(
-      packages_to_install, lib = libpath, repos = repos, Ncpus = 4
-    )
-  }
+  utils::install.packages(
+    packages_to_install, lib = libpath, repos = repos, Ncpus = 4
+  )
 
   try({ rspm$disable() })
 }
