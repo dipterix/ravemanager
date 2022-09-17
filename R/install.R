@@ -97,7 +97,7 @@ finalize_installation <- function(
   if(async) {
     message("Please wait until the background installations are finished.")
   } else {
-    message("Done")
+    message("Done finalizing installations! Please close all your R/RStudio sessions and restart.")
   }
 }
 
@@ -190,15 +190,15 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
 
   repos <- get_mirror(nightly = nightly)
 
-  binary <- isTRUE(getOption("ravemanager.binary_available", FALSE))
+  # binary <- isTRUE(getOption("ravemanager.binary_available", FALSE))
 
-  type <- ifelse(binary, "binary", "source")
+  # type <- ifelse(binary, "binary", "source")
 
   if(missing(libpath) || !length(libpath)) {
     libpath <- NULL
   }
   utils::install.packages(
-    packages_to_install, lib = libpath, repos = repos, Ncpus = 4, type = type
+    packages_to_install, lib = libpath, repos = repos
   )
 
   message("Packages have been installed. Finalizing settings.")
@@ -256,28 +256,31 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
       try({ rspm$disable() })
     }, after = FALSE, add = TRUE)
 
-  }
+    if( rspm_enabled ){
+      message("Trying to install binary (pre-built) dependence")
+      rspm_toinstall <- rspm_install
+      rspm_toinstall <- rspm_toinstall[vapply(rspm_toinstall, function(pkg){
+        system.file(package = pkg) == ""
+      }, FALSE)]
+      if(length(rspm_toinstall)) {
+        utils::install.packages(
+          rspm_toinstall, lib = libpath
+        )
+      }
 
-  if( rspm_enabled ){
-    message("Trying to install binary (pre-built) dependence")
-    rspm_toinstall <- rspm_install
-    rspm_toinstall <- rspm_toinstall[vapply(rspm_toinstall, function(pkg){
-      system.file(package = pkg) == ""
-    }, FALSE)]
-    if(length(rspm_toinstall)) {
-      utils::install.packages(
-        rspm_toinstall, lib = libpath, Ncpus = 4
-      )
+    } else {
+      message("RSPM disabled: fallback to normal installation")
     }
 
-  } else {
-    message("RSPM disabled: fallback to normal installation")
+    try({ rspm$disable() })
+
   }
+
+
 
 
   utils::install.packages(
-    packages_to_install, lib = libpath, repos = repos, Ncpus = 4
+    packages_to_install, lib = libpath, repos = repos
   )
 
-  try({ rspm$disable() })
 }
