@@ -245,7 +245,7 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
   }
 
   rspm_enabled <- FALSE
-  if(system.file(package = "rspm") != "" && is_loaded("rspm")) {
+  if(system.file(package = "rspm") != "") {
     rspm <- asNamespace("rspm")
 
     try({
