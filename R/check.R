@@ -15,6 +15,15 @@
 #   })
 # }
 
+ravemanager_version <- function() {
+  desc <- utils::packageDescription("ravemanager")
+  desc$Version
+}
+
+is_installed <- function(pkg) {
+  system.file(package = pkg) != ""
+}
+
 get_latest_R_version <- function(url = "https://cran.rstudio.com/bin/windows/base/", pat = "R-[0-9.]+.+-win\\.exe") {
   page <- readLines(url, warn = FALSE)
 

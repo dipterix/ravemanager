@@ -12,6 +12,24 @@
 #' @return Nothing
 NULL
 
+upgrade_ravemanager <- function() {
+  lib_path <- get_libpaths(first = TRUE)
+  unload_namespace("ravemanager")
+  if(is_installed("remotes")) {
+
+    tryCatch({
+      remotes <- asNamespace("remotes")
+      remotes$install_github("dipterix/ravemanager", quiet = TRUE, lib = lib_path)
+    }, error = function(e) {
+      utils::install.packages("ravemanager", lib = lib_path, repos = c(
+        beauchamplab = "https://beauchamplab.r-universe.dev",
+        dipterix = "https://dipterix.r-universe.dev",
+        CRAN = "https://cloud.r-project.org"
+      ))
+    })
+  }
+}
+
 #' @rdname RAVE-install
 #' @export
 finalize_installation <- function(
@@ -143,19 +161,15 @@ install <- function(nightly = TRUE) {
   # Make sure ravemanager is the latest
   message("Upgrade ravemanager")
 
-  # ravemanager::
-  unload_namespace("ravemanager")
+  # ravemanager upgrade
   tryCatch({
-    utils::install.packages("ravemanager", lib = lib_path, repos = c(
-      beauchamplab = "https://beauchamplab.r-universe.dev",
-      dipterix = "https://dipterix.r-universe.dev",
-      CRAN = "https://cloud.r-project.org"
-    ))
+    upgrade_ravemanager()
   }, error = function(e) {
     message("Failed to upgrade `ravemanager`: using current version")
   })
 
   ravemanager <- asNamespace("ravemanager")
+  message("Current `ravemanager` version: ", ravemanager$ravemanager_version())
 
   switch(
     os_type,
@@ -172,11 +186,12 @@ install <- function(nightly = TRUE) {
 
   message("Packages have been installed. Finalizing settings.")
 
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages
-  )
-  ravemanager$finalize_installation(packages = packages_to_install,
-                        upgrade = 'config-only', async = FALSE)
+  packages_to_install <- c(ravemanager$rave_depends, "rave",
+                           ravemanager$rave_packages)
+
+  ravemanager$finalize_installation(
+    packages = packages_to_install,
+    upgrade = 'config-only', async = FALSE)
 
 }
 
