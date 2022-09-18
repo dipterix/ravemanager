@@ -26,6 +26,9 @@ processes}
 \item{...}{reserved for future use}
 
 \item{nightly}{whether to install the nightly build}
+
+\item{upgrade_manager}{whether to upgrade the installer (\code{ravemanager})
+before updating other packages}
 }
 \value{
 Nothing

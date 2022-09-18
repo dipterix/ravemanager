@@ -4,6 +4,8 @@
 #' packages; executes the scripts to finalize installation to update
 #' configuration files.
 #' @param nightly whether to install the nightly build
+#' @param upgrade_manager whether to upgrade the installer (\code{ravemanager})
+#' before updating other packages
 #' @param packages packages to run finalizing installation scripts
 #' @param upgrade upgrade type
 #' @param async whether to execute finalizing installation scripts in other
@@ -237,6 +239,59 @@ install <- function(nightly = TRUE, upgrade_manager = TRUE) {
   ravemanager$finalize_installation(
     packages = packages_to_install,
     upgrade = 'config-only', async = FALSE)
+
+}
+
+install_rave_windows <- function(libpath, nightly = TRUE) {
+
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages
+  )
+
+  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
+
+  if(length(loaded)) {
+
+    for(nm in loaded) {
+      try(
+        expr = {
+          unload_namespace(nm)
+        },
+        silent = TRUE
+      )
+    }
+  }
+  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
+  if(length(loaded)) {
+    stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
+  }
+
+  repos <- get_mirror(nightly = nightly)
+
+  # binary <- isTRUE(getOption("ravemanager.binary_available", FALSE))
+
+  # type <- ifelse(binary, "binary", "source")
+
+  if(missing(libpath) || !length(libpath)) {
+    libpath <- NULL
+  }
+
+  # Fast install binary deps
+  install_packages(
+    packages_to_install, lib = libpath,
+    repos = repos, type = "binary",
+  )
+
+  # Make sure the source package is compiled and updated
+  install_packages(
+    c("filearray", "ravetools", "dipsaus"), lib = libpath,
+    repos = repos, type = "source"
+  )
+
+  message("Packages have been installed. Finalizing settings.")
+
+  finalize_installation(packages = packages_to_install,
+                        upgrade = 'config-only', async = FALSE)
 
 }
 
