@@ -4,6 +4,8 @@
 \alias{RAVE-install}
 \alias{finalize_installation}
 \alias{install}
+\alias{update}
+\alias{upgrade_installer}
 \title{Install or upgrade 'RAVE'}
 \usage{
 finalize_installation(
@@ -13,7 +15,11 @@ finalize_installation(
   ...
 )
 
-install(nightly = TRUE, upgrade_manager = TRUE)
+install(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE)
+
+update(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE)
+
+upgrade_installer()
 }
 \arguments{
 \item{packages}{packages to run finalizing installation scripts}
@@ -29,6 +35,8 @@ processes}
 
 \item{upgrade_manager}{whether to upgrade the installer (\code{ravemanager})
 before updating other packages}
+
+\item{finalize}{whether to run finalizing installation scripts}
 }
 \value{
 Nothing

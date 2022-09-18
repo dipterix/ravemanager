@@ -6,6 +6,7 @@
 #' @param nightly whether to install the nightly build
 #' @param upgrade_manager whether to upgrade the installer (\code{ravemanager})
 #' before updating other packages
+#' @param finalize whether to run finalizing installation scripts
 #' @param packages packages to run finalizing installation scripts
 #' @param upgrade upgrade type
 #' @param async whether to execute finalizing installation scripts in other
@@ -146,7 +147,8 @@ finalize_installation <- function(
 
 #' @rdname RAVE-install
 #' @export
-install <- function(nightly = TRUE, upgrade_manager = TRUE) {
+install <- function(nightly = TRUE, upgrade_manager = TRUE,
+                    finalize = TRUE) {
   # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
   lib_path <- guess_libpath()
 
@@ -187,32 +189,10 @@ install <- function(nightly = TRUE, upgrade_manager = TRUE) {
 
   # ravemanager upgrade
   if( upgrade_manager ) {
-
-    # check if upgrade is available
-    v1 <- ravemanager_version()
-    v2 <- ravemanager_latest_version()
-    if(length(v1) == 1 && length(v2) == 1 && utils::compareVersion(v1, v2) < 0) {
-      # Make sure ravemanager is the latest
-      message("Upgrade ravemanager")
-
-      tryCatch({
-        upgrade_ravemanager()
-      }, error = function(e) {
-        message("Failed to upgrade `ravemanager`: using current version")
-      })
-
-      v1 <- package_version(v1)
-      v2 <- package_version(v2)
-      if(v1$major < v2$major) {
-        message(sprintf(
-          "[ravemanager] The installer's major version has been updated (from %s -> %s). \nPlease close all R & RStudio sessions, restart R, and run the following command again:\n\n\t\travemanager::install()",
-          v1, v2
-        ))
-        return(invisible())
-      }
+    needs_restart <- upgrade_installer()
+    if(isTRUE(needs_restart)) {
+      return(invisible())
     }
-
-
   }
   ravemanager <- asNamespace("ravemanager")
   manager_version <- ravemanager$ravemanager_version()
@@ -231,15 +211,55 @@ install <- function(nightly = TRUE, upgrade_manager = TRUE) {
     }
   )
 
-  message("Packages have been installed. Finalizing settings.")
+  if(finalize) {
+    message("Packages have been installed. Finalizing settings.")
 
-  packages_to_install <- c(ravemanager$rave_depends, "rave",
-                           ravemanager$rave_packages)
+    packages_to_install <- c(ravemanager$rave_depends, "rave",
+                             ravemanager$rave_packages)
 
-  ravemanager$finalize_installation(
-    packages = packages_to_install,
-    upgrade = 'config-only', async = FALSE)
+    ravemanager$finalize_installation(
+      packages = packages_to_install,
+      upgrade = 'config-only', async = FALSE)
+  } else {
+    message("Done installing/updating RAVE! Please close all your R/RStudio sessions and restart. If you want to update package add-ons, please run `ravemanager::finalize_installation()` after restart.")
+  }
 
+
+}
+
+#' @rdname RAVE-install
+#' @export
+update <- install
+
+#' @rdname RAVE-install
+#' @export
+upgrade_installer <- function() {
+  v1 <- ravemanager_version()
+  v2 <- ravemanager_latest_version()
+  if(utils::compareVersion(v1, v2) < 0) {
+    # Make sure ravemanager is the latest
+    message("Upgrade ravemanager")
+
+    tryCatch({
+      upgrade_ravemanager()
+
+      v1 <- package_version(v1)
+      v2 <- package_version(v2)
+      if(v1$major < v2$major) {
+        message(sprintf(
+          "[ravemanager] The installer's major version has been updated (from %s -> %s). \nPlease close all R & RStudio sessions, restart R, and run the following command again:\n\n\t\travemanager::install()",
+          v1, v2
+        ))
+        return(invisible(TRUE))
+      }
+    }, error = function(e) {
+      message("Failed to upgrade `ravemanager`: using current version")
+    })
+
+  } else {
+    message("The installer has the latest version.")
+  }
+  return(invisible(FALSE))
 }
 
 install_rave_windows <- function(libpath, nightly = TRUE) {
