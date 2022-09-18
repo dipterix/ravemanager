@@ -125,7 +125,7 @@ install <- function(nightly = TRUE) {
   os_arch <- get_arch()
 
   # Get R version info
-  if(os_type %in% c("windows", "darwin") && os_arch %in% c("x64")) {
+  if(os_type %in% c("windows", "darwin") && os_arch %in% c("x86")) {
     tryCatch({
       r_ver <- get_latest_R_version()
       latest_ver <- package_version(r_ver$latest_R_version)
@@ -140,17 +140,33 @@ install <- function(nightly = TRUE) {
     }, error = function(e){})
   }
 
+  # Make sure ravemanager is the latest
+  message("Upgrade ravemanager")
+
+  # ravemanager::
+  unload_namespace("ravemanager")
+  tryCatch({
+    utils::install.packages("ravemanager", lib = lib_path, repos = c(
+      beauchamplab = "https://beauchamplab.r-universe.dev",
+      dipterix = "https://dipterix.r-universe.dev",
+      CRAN = "https://cloud.r-project.org"
+    ))
+  }, error = function(e) {
+    message("Failed to upgrade `ravemanager`: using current version")
+  })
+
+  ravemanager <- asNamespace("ravemanager")
 
   switch(
     os_type,
     "darwin" = {
-      install_rave_osx(nightly = nightly, libpath = lib_path)
+      ravemanager$install_rave_osx(nightly = nightly, libpath = lib_path)
     },
     "windows" = {
-      install_rave_windows(nightly = nightly, libpath = lib_path)
+      ravemanager$install_rave_windows(nightly = nightly, libpath = lib_path)
     },
     "linux" = {
-      install_rave_linux(nightly = nightly, libpath = lib_path)
+      ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path)
     }
   )
 
@@ -159,7 +175,7 @@ install <- function(nightly = TRUE) {
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
   )
-  finalize_installation(packages = packages_to_install,
+  ravemanager$finalize_installation(packages = packages_to_install,
                         upgrade = 'config-only', async = FALSE)
 
 }
@@ -197,8 +213,17 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
   if(missing(libpath) || !length(libpath)) {
     libpath <- NULL
   }
+
+  # Fast install binary deps
   utils::install.packages(
-    packages_to_install, lib = libpath, repos = repos
+    packages_to_install, lib = libpath,
+    repos = repos, type = "binary",
+  )
+
+  # Make sure the source package is compiled and updated
+  utils::install.packages(
+    c("filearray", "ravetools", "dipsaus"), lib = libpath,
+    repos = repos, type = "source"
   )
 
   message("Packages have been installed. Finalizing settings.")

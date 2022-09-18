@@ -1,4 +1,20 @@
 
+# ravemanager_latest_version <- function() {
+#   tryCatch({
+#     suppressWarnings({
+#       versions <- readLines("https://dipterix.r-universe.dev/packages/rave")
+#       versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
+#       versions <- gsub("[^0-9\\.]", "", versions)
+#       return(list(
+#         version = versions[[1]],
+#         built = versions$Built$Date[[1]]
+#       ))
+#     })
+#   }, error = function(e){
+#     NULL
+#   })
+# }
+
 get_latest_R_version <- function(url = "https://cran.rstudio.com/bin/windows/base/", pat = "R-[0-9.]+.+-win\\.exe") {
   page <- readLines(url, warn = FALSE)
 

@@ -33,7 +33,7 @@ get_arch <- function() {
   if(grepl("arch64", R.version$arch)) {
     return("aarch64")
   } else {
-    return("x64")
+    return("x86")
   }
 }
 
