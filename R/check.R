@@ -1,20 +1,20 @@
 
-# ravemanager_latest_version <- function() {
-#   tryCatch({
-#     suppressWarnings({
-#       versions <- readLines("https://dipterix.r-universe.dev/packages/rave")
-#       versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
-#       versions <- gsub("[^0-9\\.]", "", versions)
-#       return(list(
-#         version = versions[[1]],
-#         built = versions$Built$Date[[1]]
-#       ))
-#     })
-#   }, error = function(e){
-#     NULL
-#   })
-# }
+ravemanager_latest_version <- function() {
+  tryCatch({
+    suppressWarnings({
+      versions <- readLines("https://dipterix.r-universe.dev/packages/ravemanager")
+      versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
+      versions <- gsub("[^0-9\\.]", "", versions)
+      return(versions[[1]])
+    })
+  }, error = function(e){
+    NULL
+  })
+}
 
+#' @title Get current 'RAVE' installer's version
+#' @return Returns the \code{ravemanager} version
+#' @export
 ravemanager_version <- function() {
   desc <- utils::packageDescription("ravemanager")
   desc$Version

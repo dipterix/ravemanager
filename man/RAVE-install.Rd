@@ -13,7 +13,7 @@ finalize_installation(
   ...
 )
 
-install(nightly = TRUE)
+install(nightly = TRUE, upgrade_manager = TRUE)
 }
 \arguments{
 \item{packages}{packages to run finalizing installation scripts}

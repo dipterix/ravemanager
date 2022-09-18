@@ -21,13 +21,36 @@ upgrade_ravemanager <- function() {
       remotes <- asNamespace("remotes")
       remotes$install_github("dipterix/ravemanager", quiet = TRUE, lib = lib_path)
     }, error = function(e) {
-      utils::install.packages("ravemanager", lib = lib_path, repos = c(
-        beauchamplab = "https://beauchamplab.r-universe.dev",
-        dipterix = "https://dipterix.r-universe.dev",
-        CRAN = "https://cloud.r-project.org"
-      ))
+      install_packages("ravemanager")
     })
   }
+}
+
+clear_uninstalled <- function() {
+  libs <- get_libpaths(first = FALSE)
+  for(lib in libs) {
+    if(dir.exists(lib)) {
+      locked <- list.files(lib, all.files = FALSE, full.names = FALSE,
+                       recursive = FALSE, pattern = "^00",
+                       include.dirs = TRUE, no.. = FALSE)
+      for(f in locked) {
+        absf <- file.path(lib, f)
+        if(dir.exists(absf)) {
+          tryCatch({
+            message(sprintf("Trying to unlock [%s] from previous installation", f))
+            unlink(absf, recursive = TRUE, force = TRUE)
+          }, error = function(e) {
+            message(sprintf("Failed to remove [%s]", absf))
+          })
+        }
+      }
+    }
+  }
+}
+
+install_packages <- function(pkgs, lib = get_libpaths(), repos = get_mirror(),
+                             ..., INSTALL_opts = '--no-lock') {
+  utils::install.packages(pkgs, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts)
 }
 
 #' @rdname RAVE-install
@@ -121,7 +144,7 @@ finalize_installation <- function(
 
 #' @rdname RAVE-install
 #' @export
-install <- function(nightly = TRUE) {
+install <- function(nightly = TRUE, upgrade_manager = TRUE) {
   # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
   lib_path <- guess_libpath()
 
@@ -158,18 +181,40 @@ install <- function(nightly = TRUE) {
     }, error = function(e){})
   }
 
-  # Make sure ravemanager is the latest
-  message("Upgrade ravemanager")
+  clear_uninstalled()
 
   # ravemanager upgrade
-  tryCatch({
-    upgrade_ravemanager()
-  }, error = function(e) {
-    message("Failed to upgrade `ravemanager`: using current version")
-  })
+  if( upgrade_manager ) {
 
+    # check if upgrade is available
+    v1 <- ravemanager_version()
+    v2 <- ravemanager_latest_version()
+    if(length(v1) == 1 && length(v2) == 1 && utils::compareVersion(v1, v2) < 0) {
+      # Make sure ravemanager is the latest
+      message("Upgrade ravemanager")
+
+      tryCatch({
+        upgrade_ravemanager()
+      }, error = function(e) {
+        message("Failed to upgrade `ravemanager`: using current version")
+      })
+
+      v1 <- package_version(v1)
+      v2 <- package_version(v2)
+      if(v1$major < v2$major) {
+        message(sprintf(
+          "[ravemanager] The installer's major version has been updated (from %s -> %s). \nPlease close all R & RStudio sessions, restart R, and run the following command again:\n\n\t\travemanager::install()",
+          v1, v2
+        ))
+        return(invisible())
+      }
+    }
+
+
+  }
   ravemanager <- asNamespace("ravemanager")
-  message("Current `ravemanager` version: ", ravemanager$ravemanager_version())
+  manager_version <- ravemanager$ravemanager_version()
+  message("Current `ravemanager` version: ", manager_version)
 
   switch(
     os_type,
@@ -230,13 +275,13 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
   }
 
   # Fast install binary deps
-  utils::install.packages(
+  install_packages(
     packages_to_install, lib = libpath,
     repos = repos, type = "binary",
   )
 
   # Make sure the source package is compiled and updated
-  utils::install.packages(
+  install_packages(
     c("filearray", "ravetools", "dipsaus"), lib = libpath,
     repos = repos, type = "source"
   )
@@ -281,7 +326,7 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
 
   # Make sure `rspm` is installed
   if(system.file(package = "rspm") == "") {
-    utils::install.packages("rspm", lib = libpath)
+    install_packages("rspm", lib = libpath)
   }
 
   rspm_enabled <- FALSE
@@ -303,7 +348,7 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
         system.file(package = pkg) == ""
       }, FALSE)]
       if(length(rspm_toinstall)) {
-        utils::install.packages(
+        install_packages(
           rspm_toinstall, lib = libpath
         )
       }
@@ -319,7 +364,7 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
 
 
 
-  utils::install.packages(
+  install_packages(
     packages_to_install, lib = libpath, repos = repos
   )
 
