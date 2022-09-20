@@ -1,8 +1,49 @@
 
+package_needs_update <- function(pkg, lib = NULL, url = "https://beauchamplab.r-universe.dev/packages") {
+  if(length(pkg) != 1) {
+    stop("package_needs_update: `pkg` must be length of 1")
+  }
+  if(!pkg %in% loadedNamespaces() && is.null(lib)) {
+    lib <- get_libpaths(first = FALSE)
+  }
+  current_version <- tryCatch({
+    utils::packageVersion(pkg, lib.loc = lib)
+  }, error = function(e) {
+    NULL
+  })
+
+  if(is.null(current_version)) { return(TRUE) }
+
+  # get r-universe
+  available_version <- tryCatch({
+    suppressWarnings({
+      pkg_url <- gsub("[/]+$", '', url)
+      pkg_url <- paste0(pkg_url, "/", pkg)
+      versions <- readLines(pkg_url)
+      versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
+      versions <- gsub("[^0-9\\.]", "", versions)
+      package_version(versions[[1]])
+    })
+  }, error = function(e) {
+    NULL
+  })
+
+  if(is.null(available_version)) {
+    return(NA)
+  }
+
+  needs_update <- NA
+  try({
+    needs_update <- isTRUE(utils::compareVersion(as.character(available_version), as.character(current_version)) > 0)
+  })
+
+  needs_update
+}
+
 ravemanager_latest_version <- function() {
   tryCatch({
     suppressWarnings({
-      versions <- readLines("https://dipterix.r-universe.dev/packages/ravemanager")
+      versions <- readLines("https://beauchamplab.r-universe.dev/packages/ravemanager")
       versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
       versions <- gsub("[^0-9\\.]", "", versions)
       return(versions[[1]])

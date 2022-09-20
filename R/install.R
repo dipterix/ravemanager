@@ -6,6 +6,8 @@
 #' @param nightly whether to install the nightly build
 #' @param upgrade_manager whether to upgrade the installer (\code{ravemanager})
 #' before updating other packages
+#' @param force whether to force updating packages even the installed have
+#' the latest versions
 #' @param finalize whether to run finalizing installation scripts
 #' @param packages packages to run finalizing installation scripts
 #' @param upgrade upgrade type
@@ -52,8 +54,21 @@ clear_uninstalled <- function() {
 }
 
 install_packages <- function(pkgs, lib = get_libpaths(), repos = get_mirror(),
-                             ..., INSTALL_opts = '--no-lock') {
-  utils::install.packages(pkgs, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts)
+                             ..., INSTALL_opts = '--no-lock', force = TRUE, verbose = TRUE) {
+
+  if(!force) {
+    pkgs <- pkgs[sapply(pkgs, function(pkg) {
+      re <- isFALSE(package_needs_update(pkg, lib = lib))
+      if(verbose && re) {
+        message("Package [", pkg, "] is up-to-date. Skipping")
+      }
+      !re
+    })]
+  }
+
+  if(length(pkgs)) {
+    utils::install.packages(pkgs, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts)
+  }
 }
 
 #' @rdname RAVE-install
@@ -82,7 +97,7 @@ finalize_installation <- function(
   if(length(packages)){
     sel <- sel & (allpackages %in% packages)
   }
-  packages <- allpackages[sel]
+  packages <- unique(allpackages[sel])
 
   lapply(packages, function(pkg) {
     tryCatch({
@@ -148,7 +163,7 @@ finalize_installation <- function(
 #' @rdname RAVE-install
 #' @export
 install <- function(nightly = TRUE, upgrade_manager = TRUE,
-                    finalize = TRUE) {
+                    finalize = TRUE, force = FALSE) {
   # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
   lib_path <- guess_libpath()
 
@@ -201,13 +216,13 @@ install <- function(nightly = TRUE, upgrade_manager = TRUE,
   switch(
     os_type,
     "darwin" = {
-      ravemanager$install_rave_osx(nightly = nightly, libpath = lib_path)
+      ravemanager$install_rave_osx(nightly = nightly, libpath = lib_path, force = force)
     },
     "windows" = {
-      ravemanager$install_rave_windows(nightly = nightly, libpath = lib_path)
+      ravemanager$install_rave_windows(nightly = nightly, libpath = lib_path, force = force)
     },
     "linux" = {
-      ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path)
+      ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path, force = force)
     }
   )
 
@@ -262,7 +277,7 @@ upgrade_installer <- function() {
   return(invisible(FALSE))
 }
 
-install_rave_windows <- function(libpath, nightly = TRUE) {
+install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -299,13 +314,13 @@ install_rave_windows <- function(libpath, nightly = TRUE) {
   # Fast install binary deps
   install_packages(
     packages_to_install, lib = libpath,
-    repos = repos, type = "binary",
+    repos = repos, type = "binary", force = force
   )
 
   # Make sure the source package is compiled and updated
   install_packages(
     c("filearray", "ravetools", "dipsaus"), lib = libpath,
-    repos = repos, type = "source"
+    repos = repos, type = "source", force = force
   )
 
   message("Packages have been installed. Finalizing settings.")
@@ -315,7 +330,7 @@ install_rave_windows <- function(libpath, nightly = TRUE) {
 
 }
 
-install_rave_osx <- function(libpath, nightly = TRUE) {
+install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -352,13 +367,13 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
   # Fast install binary deps
   install_packages(
     packages_to_install, lib = libpath,
-    repos = repos, type = "binary",
+    repos = repos, type = "binary", force = force
   )
 
   # Make sure the source package is compiled and updated
   install_packages(
     c("filearray", "ravetools", "dipsaus"), lib = libpath,
-    repos = repos, type = "source"
+    repos = repos, type = "source",  force = force
   )
 
   message("Packages have been installed. Finalizing settings.")
@@ -368,7 +383,7 @@ install_rave_osx <- function(libpath, nightly = TRUE) {
 
 }
 
-install_rave_linux <- function(libpath, nightly = TRUE) {
+install_rave_linux <- function(libpath, nightly = TRUE, force = FALSE) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -440,7 +455,7 @@ install_rave_linux <- function(libpath, nightly = TRUE) {
 
 
   install_packages(
-    packages_to_install, lib = libpath, repos = repos
+    packages_to_install, lib = libpath, repos = repos, force = force
   )
 
 }

@@ -15,9 +15,9 @@ finalize_installation(
   ...
 )
 
-install(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE)
+install(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE, force = FALSE)
 
-update(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE)
+update(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE, force = FALSE)
 
 upgrade_installer()
 }
@@ -37,6 +37,9 @@ processes}
 before updating other packages}
 
 \item{finalize}{whether to run finalizing installation scripts}
+
+\item{force}{whether to force updating packages even the installed have
+the latest versions}
 }
 \value{
 Nothing
