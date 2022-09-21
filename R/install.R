@@ -53,21 +53,39 @@ clear_uninstalled <- function() {
   }
 }
 
-install_packages <- function(pkgs, lib = get_libpaths(), repos = get_mirror(),
+install_packages <- function(pkgs, lib = get_libpaths(), repos = get_mirror(), type = getOption("pkgType"),
                              ..., INSTALL_opts = '--no-lock', force = TRUE, verbose = TRUE) {
 
   if(!force) {
     pkgs <- pkgs[sapply(pkgs, function(pkg) {
       re <- isFALSE(package_needs_update(pkg, lib = lib))
       if(verbose && re) {
-        message("Package [", pkg, "] is up-to-date. Skipping")
+        if(identical(type, "binary")) {
+          message(sprintf("Package [%s] (binary) is up-to-date. Skipping", pkg))
+        } else if(identical(type, "source")) {
+          message(sprintf("Package [%s] (source) is up-to-date. Skipping", pkg))
+        } else {
+          message(sprintf("Package [%s] is up-to-date. Skipping", pkg))
+        }
       }
       !re
     })]
   }
 
   if(length(pkgs)) {
-    utils::install.packages(pkgs, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts)
+    utils::install.packages(pkgs, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts, type = type)
+    # Set package installation date
+    root_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "config"), "last_updates")
+    if(!dir.exists(root_path)) {
+      dir.create(root_path, showWarnings = FALSE, recursive = TRUE)
+    }
+    now <- as.character(Sys.time())
+    for(pkg in pkgs) {
+      writeLines(text = now, con = file.path(root_path, pkg))
+    }
+    if(any(pkgs %in% c("rave", rave_depends, rave_packages))) {
+      writeLines(text = now, con = file.path(root_path, "rave-family"))
+    }
   }
 }
 
