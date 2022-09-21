@@ -205,6 +205,14 @@ finalize_installation <- function(
 #' @export
 install <- function(nightly = TRUE, upgrade_manager = TRUE,
                     finalize = TRUE, force = FALSE, ...) {
+
+  # check R version
+  rversion <- R.Version()
+  rversion <- sprintf("%s.%s", rversion$major, rversion$minor)
+  if(utils::compareVersion(rversion, "4.0.0") < 1) {
+    stop(sprintf("Your R version (%s) is too low. Please install the latest R on your machine\n  Please check https://cran.r-project.org/ for more information.", rversion))
+  }
+
   # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
   lib_path <- guess_libpath()
 
