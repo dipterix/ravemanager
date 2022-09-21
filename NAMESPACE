@@ -2,6 +2,7 @@
 
 S3method(print,ravemanager_cmd)
 S3method(print,ravemanager_printable)
+export(add_shortcuts)
 export(finalize_installation)
 export(install)
 export(ravemanager_version)

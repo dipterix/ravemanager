@@ -17,6 +17,28 @@
 #' @return Nothing
 NULL
 
+
+#' @rdname RAVE-install
+#' @export
+add_shortcuts <- function() {
+  os <- get_os()
+  switch(
+    os,
+    "darwin" = {
+      app <- system.file("shell/rave-2.0.app", package = "ravemanager")
+      dir.create("/Applications/RAVE/", showWarnings = FALSE, recursive = TRUE)
+      if(dir.exists("/Applications/RAVE/rave-2.0.app")) {
+        unlink("/Applications/RAVE/rave-2.0.app", recursive = TRUE)
+      }
+      file.copy(app, "/Applications/RAVE/",
+                overwrite = TRUE, copy.date = TRUE, recursive = TRUE)
+      Sys.chmod("/Applications/RAVE/rave-2.0.app/Contents/MacOS/executable",
+                mode = "0755", use_umask = FALSE)
+      system("open /Applications/RAVE/")
+    }
+  )
+}
+
 upgrade_ravemanager <- function() {
   lib_path <- get_libpaths(first = TRUE)
   unload_namespace("ravemanager")

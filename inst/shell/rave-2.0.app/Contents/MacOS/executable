@@ -1,0 +1,8 @@
+#!/bin/sh
+
+/usr/local/bin/Rscript --no-save --no-restore -e 'source(system.file(package="ravemanager","shell/rave-2.0.sh"))'
+
+
+
+
+

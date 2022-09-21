@@ -2,12 +2,15 @@
 % Please edit documentation in R/install.R
 \name{RAVE-install}
 \alias{RAVE-install}
+\alias{add_shortcuts}
 \alias{finalize_installation}
 \alias{install}
 \alias{update}
 \alias{upgrade_installer}
 \title{Install or upgrade 'RAVE'}
 \usage{
+add_shortcuts()
+
 finalize_installation(
   packages = NULL,
   upgrade = c("config-only", "ask", "always", "never", "data-only"),
