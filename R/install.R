@@ -13,7 +13,8 @@
 #' @param upgrade upgrade type
 #' @param async whether to execute finalizing installation scripts in other
 #' processes
-#' @param ... reserved for future use
+#' @param ... passed to internal functions, useful arguments include
+#' \code{use_rspm} to whether use \code{'RSPM'} on \code{'Ubuntu'} (enabled by default)
 #' @return Nothing
 NULL
 
@@ -203,7 +204,7 @@ finalize_installation <- function(
 #' @rdname RAVE-install
 #' @export
 install <- function(nightly = TRUE, upgrade_manager = TRUE,
-                    finalize = TRUE, force = FALSE) {
+                    finalize = TRUE, force = FALSE, ...) {
   # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
   lib_path <- guess_libpath()
 
@@ -256,13 +257,13 @@ install <- function(nightly = TRUE, upgrade_manager = TRUE,
   switch(
     os_type,
     "darwin" = {
-      ravemanager$install_rave_osx(nightly = nightly, libpath = lib_path, force = force)
+      ravemanager$install_rave_osx(nightly = nightly, libpath = lib_path, force = force, ...)
     },
     "windows" = {
-      ravemanager$install_rave_windows(nightly = nightly, libpath = lib_path, force = force)
+      ravemanager$install_rave_windows(nightly = nightly, libpath = lib_path, force = force, ...)
     },
     "linux" = {
-      ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path, force = force)
+      ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path, force = force, ...)
     }
   )
 
@@ -317,7 +318,7 @@ upgrade_installer <- function() {
   return(invisible(FALSE))
 }
 
-install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE) {
+install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -370,7 +371,7 @@ install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE) {
 
 }
 
-install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE) {
+install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -423,7 +424,7 @@ install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE) {
 
 }
 
-install_rave_linux <- function(libpath, nightly = TRUE, force = FALSE) {
+install_rave_linux <- function(libpath, nightly = TRUE, force = FALSE, use_rspm = TRUE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -455,12 +456,12 @@ install_rave_linux <- function(libpath, nightly = TRUE, force = FALSE) {
   }
 
   # Make sure `rspm` is installed
-  if(system.file(package = "rspm") == "") {
+  if(use_rspm && system.file(package = "rspm") == "") {
     install_packages("rspm", lib = libpath)
   }
 
   rspm_enabled <- FALSE
-  if(system.file(package = "rspm") != "") {
+  if(use_rspm && system.file(package = "rspm") != "") {
     rspm <- asNamespace("rspm")
 
     try({

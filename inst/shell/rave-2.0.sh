@@ -2,9 +2,9 @@
 
 if(system.file(package="ravedash") == "") {
   if(system.file(package="ravemanager") == "") {
-    utils::install.packages('ravemanager', repos = options(repos = c(
+    utils::install.packages('ravemanager', repos = c(
       beauchamplab = 'https://beauchamplab.r-universe.dev',
-      CRAN = 'https://cloud.r-project.org')))
+      CRAN = 'https://cloud.r-project.org'))
   }
   ravemanager::install()
 }

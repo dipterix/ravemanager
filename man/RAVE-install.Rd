@@ -18,9 +18,21 @@ finalize_installation(
   ...
 )
 
-install(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE, force = FALSE)
+install(
+  nightly = TRUE,
+  upgrade_manager = TRUE,
+  finalize = TRUE,
+  force = FALSE,
+  ...
+)
 
-update(nightly = TRUE, upgrade_manager = TRUE, finalize = TRUE, force = FALSE)
+update(
+  nightly = TRUE,
+  upgrade_manager = TRUE,
+  finalize = TRUE,
+  force = FALSE,
+  ...
+)
 
 upgrade_installer()
 }
@@ -32,7 +44,8 @@ upgrade_installer()
 \item{async}{whether to execute finalizing installation scripts in other
 processes}
 
-\item{...}{reserved for future use}
+\item{...}{passed to internal functions, useful arguments include
+\code{use_rspm} to whether use \code{'RSPM'} on \code{'Ubuntu'} (enabled by default)}
 
 \item{nightly}{whether to install the nightly build}
 
