@@ -369,7 +369,7 @@ install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE, ...) {
 
   # Make sure the source package is compiled and updated
   install_packages(
-    c("filearray", "ravetools", "dipsaus"), lib = libpath,
+    packages_to_install, lib = libpath,
     repos = repos, type = "source", force = force
   )
 
@@ -417,7 +417,7 @@ install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE, ...) {
 
   # Make sure the source package is compiled and updated
   install_packages(
-    c("filearray", "ravetools", "dipsaus"), lib = libpath,
+    packages_to_install, lib = libpath,
     repos = repos, type = "source",  force = force
   )
 
