@@ -41,7 +41,7 @@ add_shortcuts <- function() {
 }
 
 upgrade_ravemanager <- function() {
-  lib_path <- get_libpaths(first = TRUE)
+  lib_path <- get_libpaths(first = TRUE, check = TRUE)
   unload_namespace("ravemanager")
   if(is_installed("remotes")) {
 
@@ -76,7 +76,8 @@ clear_uninstalled <- function() {
   }
 }
 
-install_packages <- function(pkgs, lib = get_libpaths(), repos = get_mirror(), type = getOption("pkgType"),
+install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
+                             repos = get_mirror(), type = getOption("pkgType"),
                              ..., INSTALL_opts = '--no-lock', force = TRUE, verbose = TRUE) {
 
   if(!force) {
@@ -372,11 +373,6 @@ install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE, ...) {
     repos = repos, type = "source", force = force
   )
 
-  message("Packages have been installed. Finalizing settings.")
-
-  finalize_installation(packages = packages_to_install,
-                        upgrade = 'config-only', async = FALSE)
-
 }
 
 install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE, ...) {
@@ -424,11 +420,6 @@ install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE, ...) {
     c("filearray", "ravetools", "dipsaus"), lib = libpath,
     repos = repos, type = "source",  force = force
   )
-
-  message("Packages have been installed. Finalizing settings.")
-
-  finalize_installation(packages = packages_to_install,
-                        upgrade = 'config-only', async = FALSE)
 
 }
 

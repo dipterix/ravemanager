@@ -70,10 +70,23 @@ unload_namespace <- function(name) {
   invisible()
 }
 
-get_libpaths <- function(first = TRUE) {
-  re <- normalizePath(unique(c(guess_libpath(), .libPaths())),
-                winslash = "/", mustWork = FALSE)
-  re <- unique(re)
+get_libpaths <- function(first = TRUE, check = FALSE) {
+  libpath <- normalizePath(guess_libpath(), winslash = "/", mustWork = FALSE)
+  current_paths <- normalizePath(.libPaths(), winslash = "/", mustWork = FALSE)
+
+  print(current_paths)
+
+  if(length(libpath)) {
+    if(check) {
+      dir_create2(libpath)
+    }
+    if( !libpath %in% current_paths ) {
+      .libPaths(libpath)
+    }
+  }
+
+  re <- unique(c(libpath, current_paths))
+
   if(length(re) && first) {
     re <- re[[1]]
   }
@@ -86,7 +99,7 @@ ensure_depends <- function(name) {
     name <- c(rave_depends, "rave")
   }
 
-  lib_path <- get_libpaths(first = FALSE)
+  lib_path <- get_libpaths(first = FALSE, check = TRUE)
 
   lapply(name, function(nm) {
     tryCatch({
