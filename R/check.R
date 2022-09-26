@@ -47,16 +47,26 @@ package_needs_update <- function(pkg, lib = NULL, url = "https://beauchamplab.r-
 }
 
 ravemanager_latest_version <- function() {
+
   tryCatch({
-    suppressWarnings({
-      versions <- readLines("https://beauchamplab.r-universe.dev/packages/ravemanager")
-      versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
-      versions <- gsub("[^0-9\\.]", "", versions)
-      return(versions[[1]])
+    descr <- readLines("https://raw.githubusercontent.com/dipterix/ravemanager/main/DESCRIPTION")
+    dev_descr <- read.dcf(textConnection(descr))
+    dev_descr <- structure(as.list(dev_descr), names = colnames(dev_descr))
+    versions <- dev_descr$Version
+    versions
+  }, error = function(e) {
+    tryCatch({
+      suppressWarnings({
+        versions <- readLines("https://beauchamplab.r-universe.dev/packages/ravemanager")
+        versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
+        versions <- gsub("[^0-9\\.]", "", versions)
+        return(versions[[1]])
+      })
+    }, error = function(e){
+      NULL
     })
-  }, error = function(e){
-    NULL
   })
+
 }
 
 #' @title Get current 'RAVE' installer's version
