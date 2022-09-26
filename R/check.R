@@ -22,7 +22,13 @@ package_needs_update <- function(pkg, lib = NULL, url = "https://beauchamplab.r-
       versions <- readLines(pkg_url)
       versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
       versions <- gsub("[^0-9\\.]", "", versions)
-      package_version(versions[[1]])
+      max_ver <- versions[[1]]
+      for(v in versions) {
+        if( utils::compareVersion(max_ver, v) < 0 ) {
+          max_ver <- v
+        }
+      }
+      package_version(max_ver)
     })
   }, error = function(e) {
     NULL

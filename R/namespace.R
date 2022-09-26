@@ -74,8 +74,6 @@ get_libpaths <- function(first = TRUE, check = FALSE) {
   libpath <- normalizePath(guess_libpath(), winslash = "/", mustWork = FALSE)
   current_paths <- normalizePath(.libPaths(), winslash = "/", mustWork = FALSE)
 
-  print(current_paths)
-
   if(length(libpath)) {
     if(check) {
       dir_create2(libpath)
