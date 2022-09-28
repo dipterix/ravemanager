@@ -20,7 +20,7 @@ finalize_installation(
 
 install(
   nightly = TRUE,
-  upgrade_manager = TRUE,
+  upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
   ...
@@ -28,7 +28,7 @@ install(
 
 update(
   nightly = TRUE,
-  upgrade_manager = TRUE,
+  upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
   ...

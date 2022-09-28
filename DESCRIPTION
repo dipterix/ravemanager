@@ -1,6 +1,6 @@
 Package: ravemanager
 Title: Manage 'RAVE' Packages
-Version: 0.0.11
+Version: 0.0.12
 Authors@R: 
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", 
            role = c("aut", "cre"))

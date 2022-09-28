@@ -45,11 +45,25 @@ upgrade_ravemanager <- function() {
   unload_namespace("ravemanager")
   if(is_installed("remotes")) {
 
+    # remove existing packages
+    current_paths <- .libPaths()
+    for(path in current_paths) {
+      if(system.file(package = 'ravemanager', lib.loc = path) != "") {
+        message("Removing ravemanager at: ", path)
+        utils::remove.packages("ravemanager", lib = path)
+      }
+    }
+    message("Upgrading ravemanager at: ", lib_path)
+
     tryCatch({
       remotes <- asNamespace("remotes")
       remotes$install_github("dipterix/ravemanager", quiet = TRUE, lib = lib_path)
     }, error = function(e) {
-      install_packages("ravemanager")
+
+      utils::install.packages(
+        pkgs = 'ravemanager',
+        repos = 'https://beauchamplab.r-universe.dev',
+        lib = lib_path)
     })
   }
 }
@@ -204,7 +218,7 @@ finalize_installation <- function(
 
 #' @rdname RAVE-install
 #' @export
-install <- function(nightly = TRUE, upgrade_manager = TRUE,
+install <- function(nightly = TRUE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, ...) {
 
   # check R version
@@ -254,9 +268,14 @@ install <- function(nightly = TRUE, upgrade_manager = TRUE,
 
   # ravemanager upgrade
   if( upgrade_manager ) {
-    needs_restart <- upgrade_installer()
-    if(isTRUE(needs_restart)) {
+    if( os_type == "windows" ) {
+      message("Cannot upgrade RAVE installer on Windows. Please the following command to upgrade ravemanager instead:\n  install.packages('ravemanager', repos = 'https://beauchamplab.r-universe.dev')")
       return(invisible())
+    } else {
+      needs_restart <- upgrade_installer()
+      if(isTRUE(needs_restart)) {
+        return(invisible())
+      }
     }
   }
   ravemanager <- asNamespace("ravemanager")
