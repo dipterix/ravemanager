@@ -109,4 +109,7 @@ execute npm install
 execute npx electron-forge import
 execute npm run make
 
+execute cd ${cwd}
+execute rm -rf "${tmpdir}"
+
 open /Applications/RAVE
