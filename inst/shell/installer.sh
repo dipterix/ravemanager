@@ -106,10 +106,14 @@ execute git clone https://github.com/dipterix/rave-electron-app.git
 execute cd rave-electron-app
 
 execute npm install
-execute npx electron-forge import
+execute npm exec electron-forge import --package=@electron-forge/cli --yes
 execute npm run make
 
 execute cd ${cwd}
 execute rm -rf "${tmpdir}"
 
+
+open ~/Downloads/RAVE
 open /Applications/RAVE
+
+ohai "rave-2.0.app has been generated at your downloads folder."
