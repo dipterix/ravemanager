@@ -5,7 +5,7 @@
 \alias{add_shortcuts}
 \alias{finalize_installation}
 \alias{install}
-\alias{update}
+\alias{update_rave}
 \alias{upgrade_installer}
 \title{Install or upgrade 'RAVE'}
 \usage{
@@ -26,7 +26,7 @@ install(
   ...
 )
 
-update(
+update_rave(
   nightly = TRUE,
   upgrade_manager = FALSE,
   finalize = TRUE,

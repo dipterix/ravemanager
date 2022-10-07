@@ -313,7 +313,7 @@ install <- function(nightly = TRUE, upgrade_manager = FALSE,
 
 #' @rdname RAVE-install
 #' @export
-update <- install
+update_rave <- install
 
 #' @rdname RAVE-install
 #' @export
