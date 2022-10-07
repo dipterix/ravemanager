@@ -45,6 +45,7 @@ version_info <- function() {
   names(vinfos) <- core_packages
 
   ravemanager_needsUpdate <- vinfos$ravemanager$needsUpdate
+  core_needsUpdate <- any(unlist(lapply(vinfos[-1], '[', "needsUpdate")))
   packageStartupMessage(
     "RAVE core package information: \n",
     paste(unlist(lapply(vinfos, "[", "message")), collapse = "\n"), "\n",
@@ -52,7 +53,7 @@ version_info <- function() {
     ifelse(
       isFALSE(ravemanager_needsUpdate), "",
       paste(
-        "\n*. Please update [ravemanager] using\n",
+        "\n* Please update [ravemanager] using\n",
         '    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))',
         '    install.packages("ravemanager", repos = "https://beauchamplab.r-universe.dev", lib = lib_path)',
         '\nMake sure you restart R after this step.',
@@ -61,15 +62,17 @@ version_info <- function() {
       )
     ),
     ifelse(
-      any(unlist(lapply(vinfos[-1], '[', "needsUpdate"))),
+      core_needsUpdate,
       paste(
-        "\n*. Please update core dependencies using\n",
+        "\n* Please update core dependencies using\n",
         '    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))',
         '    loadNamespace("ravemanager", lib.loc = lib_path)',
         '    ravemanager::update_rave()',
         sep = "\n"
       ),
-      ""
+      ifelse(
+        ravemanager_needsUpdate, "", "\n* Everything is up to date"
+      )
     )
 
   )
