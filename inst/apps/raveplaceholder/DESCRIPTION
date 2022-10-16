@@ -1,0 +1,80 @@
+Package: rave
+Type: Package
+Title: R Analysis and Visualization of 'ECOG/iEEG' Data
+Version: 1.0.4
+Authors@R: c(
+    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("cph", "aut", "cre")),
+    person("John", "Magnotti", role = c("aut")),
+    person("Michael S.", "Beauchamp", role = c("aut", "fnd")),
+    person("Beauchamp lab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
+    )
+Description: R Analysis and Visualization of 'ECOG/iEEG' Data 
+    RAVE provides cross-platform analysis and visualizations for neuroscience 
+    'ECoG/iEEG' data by "just clicking buttons". This package include: (a) pre-processing 
+    of 'ECoG/iEEG' raw data into 'HDF5' format (a cross-platform data format that can be 
+    used for R, Matlab, Python, Java and C/C++); (b) 'ECoG/iEEG' epoch and visualizations
+    in real time; (c) Users can write customized analysis as R packages and easily 
+    insert into RAVE for interactive visualizations. (d) 3D viewers driven by 
+    'WebGL'.
+License: GPL-3
+Encoding: UTF-8
+Language: en-US
+URL: https://rave.wiki
+BugReports: https://github.com/beauchamplab/rave/issues
+RoxygenNote: 7.2.1
+Imports: 
+  utils, 
+  methods, 
+  stats, 
+  graphics, 
+  grDevices, 
+  abind,
+  assertthat,
+  car, 
+  circular (>= 0.4-93),
+  data.table,
+  devtools, 
+  digest (>= 0.6.13), 
+  dipsaus (>= 0.1.9),
+  DT (>= 0.4), 
+  emmeans (>= 1.4.8),
+  fftwtools (>= 0.9-7), 
+  filearray,
+  future (>= 1.10.0), 
+  fst,
+  grid,
+  htmltools (>= 0.3.6),
+  jsonlite,
+  knitr,
+  lmerTest (>= 3.1-0),
+  lme4 (>= 1.1.26),
+  lsmeans,
+  magrittr (>= 1.5),
+  R6 (>= 2.2.2), 
+  ravedash,
+  raveio (>= 0.0.5),
+  ravetools (>= 0.0.3), 
+  reshape2,
+  reticulate,
+  rlang (>= 0.1.6.9000),
+  rmarkdown,
+  rpymat,
+  rstudioapi,
+  shiny (>= 1.0.5), 
+  shinydashboard (>= 0.6.0), 
+  shinyFiles (>= 0.7.3), 
+  shinyjs (>= 1.0), 
+  shinyvalidate,
+  shinyWidgets (>= 0.5.3), 
+  targets,
+  threeBrain (>= 0.2.1), 
+  servr,
+  signal (>= 0.7-6), 
+  startup (>= 0.12.0), 
+  stringr (>= 1.2.0), 
+  yaml
+Author: Zhengjia Wang [cph, aut, cre],
+  John Magnotti [aut],
+  Michael S. Beauchamp [aut, fnd],
+  Beauchamp lab [cph, fnd]
+Maintainer: Zhengjia Wang <dipterix.wang@gmail.com>

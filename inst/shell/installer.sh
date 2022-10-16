@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # set -u
 
@@ -92,28 +92,28 @@ execute_sudo() {
   fi
 }
 
-# ------------------------------------ RAVE Installer Starts: ------------------
 cwd=$(pwd)
 
-ohai "# Installing some system dependencies here... You might see some warnings if you have already done so."
-execute brew install fftw hdf5 pkg-config npm git curl
+# ------------------------------------ RAVE Installer Starts: ------------------
 
 # Create a temporary directory
-tmpdir=$(mktemp -d -t "rave-electron")
+tmpdir=$(mktemp -d -t "rave-installer")
 cd "$tmpdir"
 
-execute git clone https://github.com/dipterix/rave-electron-app.git
-execute cd rave-electron-app
+# Install ravemanager
+lib_path=$(Rscript --no-save --no-restore -e 'cat(Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]])))')
 
-execute npm install
-execute npm exec electron-forge import --package=@electron-forge/cli --yes
-execute npm run make
+ohai "R Library path: $lib_path"
 
-execute cd ${cwd}
-execute rm -rf "${tmpdir}"
+mkdir -p "$lib_path"
+
+execute Rscript -e "install.packages('ravemanager', repos = 'https://beauchamplab.r-universe.dev', lib = '$lib_path')"
+
+# TODO: Check if system libraries should be installed
+
+# ohai "# Installing some system dependencies here... You might see some warnings if you have already done so."
+# execute brew install fftw hdf5 pkg-config npm git curl
+
+execute Rscript -e "loadNamespace('ravemanager', lib.loc = '$lib_path'); ravemanager::install()"
 
 
-open ~/Downloads/RAVE
-open /Applications/RAVE
-
-ohai "rave-2.0.app has been generated at your downloads folder."
