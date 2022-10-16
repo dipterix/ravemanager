@@ -95,25 +95,25 @@ execute_sudo() {
 cwd=$(pwd)
 
 # ------------------------------------ RAVE Installer Starts: ------------------
-
-# Create a temporary directory
-tmpdir=$(mktemp -d -t "rave-installer")
-cd "$tmpdir"
-
-# Install ravemanager
-lib_path=$(Rscript --no-save --no-restore -e 'cat(Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]])))')
-
-ohai "R Library path: $lib_path"
-
-mkdir -p "$lib_path"
-
-execute Rscript -e "install.packages('ravemanager', repos = 'https://beauchamplab.r-universe.dev', lib = '$lib_path')"
-
-# TODO: Check if system libraries should be installed
-
-# ohai "# Installing some system dependencies here... You might see some warnings if you have already done so."
-# execute brew install fftw hdf5 pkg-config npm git curl
-
-execute Rscript -e "loadNamespace('ravemanager', lib.loc = '$lib_path'); ravemanager::install()"
+#
+# # Create a temporary directory
+# tmpdir=$(mktemp -d -t "rave-installer")
+# cd "$tmpdir"
+#
+# # Install ravemanager
+# lib_path=$(Rscript --no-save --no-restore -e 'cat(Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]])))')
+#
+# ohai "R Library path: $lib_path"
+#
+# mkdir -p "$lib_path"
+#
+# execute Rscript -e "install.packages('ravemanager', repos = 'https://beauchamplab.r-universe.dev', lib = '$lib_path')"
+#
+# # TODO: Check if system libraries should be installed
+#
+# # ohai "# Installing some system dependencies here... You might see some warnings if you have already done so."
+# # execute brew install fftw hdf5 pkg-config npm git curl
+#
+# execute Rscript -e "loadNamespace('ravemanager', lib.loc = '$lib_path'); ravemanager::install()"
 
 
