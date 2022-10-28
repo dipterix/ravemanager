@@ -218,7 +218,7 @@ finalize_installation <- function(
 
 #' @rdname RAVE-install
 #' @export
-install <- function(nightly = TRUE, upgrade_manager = FALSE,
+install <- function(nightly = FALSE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, ...) {
 
   # check R version
@@ -346,7 +346,7 @@ upgrade_installer <- function() {
   return(invisible(FALSE))
 }
 
-install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE, ...) {
+install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -394,7 +394,7 @@ install_rave_windows <- function(libpath, nightly = TRUE, force = FALSE, ...) {
 
 }
 
-install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE, ...) {
+install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages
@@ -442,7 +442,7 @@ install_rave_osx <- function(libpath, nightly = TRUE, force = FALSE, ...) {
 
 }
 
-install_rave_linux <- function(libpath, nightly = TRUE, force = FALSE, use_rspm = TRUE, ...) {
+install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, use_rspm = TRUE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages

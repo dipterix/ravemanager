@@ -38,7 +38,7 @@ get_arch <- function() {
 }
 
 
-get_mirror <- function(nightly = TRUE) {
+get_mirror <- function(nightly = FALSE) {
   if(nightly) {
     mirrors <- c(
       beauchamplab = 'https://beauchamplab.r-universe.dev',
