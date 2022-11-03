@@ -1,0 +1,423 @@
+---
+title: "Introduction to Analysis & Visualization of iEEG"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ravetools)
+library(raveio)
+
+knitr::opts_chunk$set(echo = FALSE, message=FALSE)
+## If you are not sure about which epoch to use
+# subject <- as_rave_subject("demo/DemoSubject")
+# print(subject$epoch_names)
+
+repository <- prepare_subject_raw_voltage_with_epoch(
+  subject = "demo/DemoSubject",
+  electrodes = 14,
+  epoch_name = "auditory_onset", 
+  time_windows = c(-1, 2)
+)
+voltage_baseline(
+  x = repository, 
+  baseline_windows = c(-1, 0), 
+  method = "subtract_mean"
+)
+
+baselined_data <- repository$raw_voltage$baselined
+
+# Load 10 trials from the first and only one electrode
+slice <- baselined_data[, 1:10, 1]
+```
+
+## Introduction
+
+This series of discussions aims at sharing the knowledge on how to use R & RAVE to perform iEEG studies at Beauchamp's lab. The goal is by the end of the sessions, you can
+
+* Understand the basic knowledge about what iEEG study does and doesn't
+* Explain what preprocessing steps we do (high-level ideas and low-level implementations)
+  - signal processing
+  - imaging data
+* Learn the basics of programming in R to perform valid statistical analyses and generate publication-ready figures
+
+This tutorial is NOT designed 
+
+* for those who want to master their programming skills
+* to deliver how to use famous/fancy libraries
+
+The discussion list will grow as the discussion sessions continue. Please stay tuned for updates using R command `ravemanager::version_info()`, and update to the latest tutorials using:
+
+```{r install-ravemanager, eval=FALSE, echo=TRUE}
+lib_path <- Sys.getenv(
+  "RAVE_LIB_PATH", unset = Sys.getenv(
+    "R_LIBS_USER", unset = .libPaths()[[1]]
+  ))
+install.packages(
+  "ravemanager", lib = lib_path,
+  repos = "https://beauchamplab.r-universe.dev"
+)
+```
+
+Have a good trip :)
+
+## What's iEEG
+
+```{r example-signal-of-ieeg, results='hide', out.width="100%", message=FALSE}
+repository <- raveio::prepare_subject_raw_voltage_with_epoch(
+  subject = "demo/DemoSubject",
+  electrodes = c(13:16,24),
+  epoch_name = "auditory_onset",
+  time_windows = c(-1, 2),
+  quiet = TRUE
+)
+raveio::voltage_baseline(repository, c(-1, -0.5), method = "subtract_mean")
+
+# This plot is not real 
+params <- ravetools::plot_signals(
+  t(cbind(
+    repository$raw_voltage$baselined[, 1, 1:5],
+    repository$raw_voltage$baselined[, 2, 1:5],
+    repository$raw_voltage$baselined[, 3, 1:5],
+    repository$raw_voltage$baselined[, 4, 1:5]
+  )), 
+  sample_rate = 100, 
+  main = "What does iEEG look like"
+)
+```
+
+
+<img style="max-width:90%" src="images/Cohen1.png" />
+
+<details>
+  <summary>Transcript</summary>
+  This figure will give you a little bit of a sense of what some typical iEEG data look like. This figure here shows the voltage fluctuations over time from 20 different channels that are placed inside of the head. 
+  
+  For how those electrodes look like and how they are placed inside of the head, please check the ROSA videos in the supp materials. I will also give a short introduction in the next figure. 
+  
+  The idea is that you have a bunch of electrodes placed inside of head, inside of dura. They're attached to bunch of neurons on the one side, and connected to wires that go through the scalp so machines can record signals The electrodes record voltage activity that comes from populations of neurons in the brain I'll talk more about soon. 
+  
+  You can see that there are some striking features of iEEG so there's a lot of really small deflections some of that is noise some of that is high-frequency activity and then there are some kind of slower fluctuations. Some of these patterns of activity are consistent across many electrodes and some are a little bit more local and they're just isolated to a single electrode.  Very often with iEEG if you see common activities on all the electrodes, it's probably some noise contamination. 
+  
+  But where do iEEG data come from. Here we have drawings of a neuron a brain cell. You can see they have this kind of fat triangular shaped body, and this long extension up here these are the dendrites and another extension going down here this is the axon neurons communicate with each other through electro-chemical signaling. 
+  
+  Essentially what happens when a neuron becomes active, there is a flow of ions, a transmission of electrically charged ions that go into the neuron and out of the neuron. This flow has a spatial organization and that creates this spatial symmetry of ions flowing into the neuron versus ions flowing out of the neuron. 
+  
+  Now this generates an electrical field just like when you run a current through a wire, you're also going to generate an electrical field. If we have a really tiny electrode that goes through the brain and is sitting right next to this electrode, we can actually measure the this electrical field coming from one individual neuron. The single unit recording is trying to achieve that goal. However what we (our lab) usually do with iEEG is we put a larger electrode near this firing neurons. Instead of recording from single neurons, we record from a larger scale. 
+  
+  Does it matter? It turns out that in the brain many neurons become active synchronously so they are active at the same time and their electrical fields are individually really really small and weak but collectively they end up being large and powerful. It is so powerful in fact that our electrodes far-away may pick up signals sometimes. 
+  
+  Now this is a like really brief introduction to the by a physical origin of iEEG. There is a lot more complications with biological and biophysical details that are involved in every aspect of populations that are generating the iEEG signal. But we are more interested in these these Wiggles in the signals. Every time you know these lines are going up and down, these are voltage deflections that reflect the instantaneous activity of these populations of cells. Remember an iEEG electrode is going to be measuring the synchronous activity from anywhere from a few tens of thousands of cells that are all active synchronously. This is why the signals are called local-field potential.
+</details>
+
+## Why and why not iEEG
+
+### Advantages
+
+Compared to fMRI, DTI:
+
+* Direct measure of electrical brain activity
+* High temporal resolution and precision (match the speed of cognition)
+
+Compared to EEG:
+
+* **Higher signal to noise ratio (especially at >80Hz)**
+* Higher spatial precision & smaller-scale potentials
+* In-depth recording signals from deep-brain
+* Allowing brain stimulation
+
+### Disadvantages
+
+* Invasive
+* Limited spatial density
+* High temporal resolution and precision
+  - statistical analyses & data visualizations are time-consuming 
+  - hard for analyzing slower cognitive process
+
+## Terminology
+
+* **Electrode**: are the physical sensors which form the "point of contact" between the acquisition system and the brain (Holdgraf et al, 2019). 
+* **Channels**: are the digital signals recorded by the amplifiers. It is important to distinguish them from the sensors. Channels consist of two electrodes whose activity is referenced to another more distant electrode to form the signal (referential montages).
+* **iEEG Signals**: are voltages at given sites at series of given time-point. 
+
+More [terminologies here](https://www.sv.uio.no/psi/english/research/projects/human-time-data/documents/data-lifecycle/ieeg/resources/ieeg-doc-firstdraft.pdf)
+
+The key is always remember that voltage is the electric potential between two locations (electrodes). [It's relative!](https://youtu.be/-A9jK7mKZbs)
+
+## What is special about Broadband high frequency activities (BHA)?
+
+<img src="images/Ray2.png" width="150px"/>
+
+Background: [Studies on brain waves reveal oscillatory activity in blocks frequency bands ](https://en.wikipedia.org/wiki/Neural_oscillation)
+
+Two hypotheses on BHA:
+
+* 1. BHA oscillations serve just like gamma oscillations, operating at a higher frequency and consequently at a faster timescale
+  - Hypo. 1 tries to include BHA into gamma band. 
+* 2. BHA power is related to spiking activity (of single neurons)
+  - Hypo. 2 tries to dissociate BHA from gamma activities.
+
+### Paper reading:
+
+https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1000610#s1
+
+<img src="images/Ray1.png" width="100%"/>
+
+> <small>Tips: Couple of years ago, we call signals higher than 80 Hz "high-gamma". It seems that we don't use that name nowadays. Instead, we tend to call it "Broadband high-frequency". The paper was published in 2011, hence it still used the term "high-gamma". </small>
+
+Questions: 
+
+* Why V1 (primary visual cortex)?
+* What are the pre-existing conditions/observations used to help with the proof?
+* How the data are presented?
+
+:::: {style="display: flex;"}
+
+::: {}
+<img src="images/Ray3.png" width="100%"/>
+:::
+
+::: {}
+<img src="images/Ray4.png" width="100%"/>
+:::
+
+::::
+
+## What's next
+
+In the coming sessions, we want to go through the details of signal processing steps and statistical analyses used in this paper.
+
+The code will be presented in `R`, with both high level library functions and low level implementations.
+
+## Introduction to R
+
+### Install R & RStudio
+
+> If you haven't installed R & RStudio, please following the following videos to install them
+
+* Install R:
+  - Instruction video: https://vimeo.com/203516510
+  - Official website: https://cran.r-project.org/
+
+* Install RStudio:
+  - Instruction video: https://vimeo.com/203516968
+  - Official website: https://posit.co/download/rstudio-desktop/
+
+### Cheetsheet
+
+[Check Base-R Cheatsheet Here!](https://posit.co/wp-content/uploads/2022/10/base-r.pdf)
+
+## Basic syntax
+
+Commenting, assigning variables, printing
+
+```{r basic-R-syntax-1, exercise=TRUE}
+
+# 1. Use `#` to start commenting 
+
+# 2. Load a library
+library(raveio)
+
+# 3. Use `<-` (`option` + `-`) to assign variables
+x <- 1
+
+# 4. Print an object with `print`
+print("Hello")
+```
+
+Other ways to inspect an object is via functions `typeof(x)`, `class(x)`, `str(x)`, and `mode(x)`
+
+
+### How to get help?
+
+```{r, echo=TRUE}
+?ravetools::pwelch
+```
+
+Try it here:
+
+```{r use-helps, exercise=TRUE}
+
+# Uncomment the following line and run
+# ?ravetools::pwelch
+
+```
+
+### Vectors, matrices, arrays
+
+Create vectors
+
+```{r examples-vectors, exercise=TRUE}
+
+c(1, 2, 3.4)
+
+1:10
+
+seq(1, 10, by = 3)
+
+rep(1, 10)
+
+rep(1:3, times = 3)
+
+rep(1:3, each = 3)
+
+```
+
+Create matrices
+
+```{r examples-matrices, exercise = TRUE}
+matrix(1:4, nrow = 2)
+
+x <- matrix(1:4, nrow = 2, byrow = TRUE)
+print(x)
+
+dim(x)
+```
+
+Append columns/rows to a matrix
+
+```{r examples-matrix-bind, exercise=TRUE}
+x <- matrix(1:4, nrow = 2, byrow = TRUE)
+
+cbind(x, c(5, 6))
+
+rbind(x, c(5, 6))
+```
+
+
+Create arrays
+
+```{r examples-arrays, exercise = TRUE}
+array(1:8, dim = c(2, 2, 2))
+```
+
+### Subset data
+
+```{r examples-subset, exercise = TRUE}
+x1 <- 1:10
+x1[1:5]
+
+x1[-(1:5)]
+
+x <- matrix(1:16, nrow = 4)
+x[,1]
+
+x[,1, drop = FALSE]
+
+x[1:2, ]
+```
+
+## An iEEG example
+
+Let's load raw voltage signals from our demo subject. Our goal is to load the ERP (trial-epoched) data from electrode channel `14` and visualize the first 20 trials:
+
+To do so, we need to load one of the RAVE package `raveio` and `ravetools`
+
+```{r ieeg-load, echo = TRUE}
+library(ravetools)
+library(raveio)
+
+## If you are not sure about which epoch to use
+# subject <- as_rave_subject("demo/DemoSubject")
+# print(subject$epoch_names)
+
+repository <- prepare_subject_raw_voltage_with_epoch(
+  subject = "demo/DemoSubject",
+  electrodes = 14,
+  epoch_name = "auditory_onset", 
+  time_windows = c(-1, 2)
+)
+print(repository)
+
+repository <- voltage_baseline(
+  x = repository, 
+  baseline_windows = c(-1, 0), 
+  method = "subtract_mean"
+)
+
+baselined_data <- repository$raw_voltage$baselined
+print(baselined_data)
+```
+
+`baselined_data` is a special type of array, you can slice it like other normal arrays. 
+
+Next, we want to get the first 20 trials and visualize them
+
+```{r ieeg-load-subset-exercise, echo=TRUE}
+# Load 10 trials from the first and only one electrode
+slice <- baselined_data[, 1:10, 1]
+
+# Graphics parameters, will learn in the future
+par(mar = c(3.1, 2.1, 2.1, 0.8) * (0.25 + 1 * 0.75),
+    mgp = c(2, 0.5, 0))
+
+# Plot the signals in paralell flavor
+plot_signals(
+  signals = t(slice), 
+  sample_rate = 2000,
+  main = "First 10 trials from electrode channel 14", 
+  ylab = "Trial", 
+  time_shift = -1
+)
+
+# Add a vertical line
+abline(v = 0, lty = 2, col = "red")
+```
+
+
+Try it by yourself!
+
+```{r ieeg-load-exercise-try, exercise=TRUE}
+library(ravetools)
+library(raveio)
+
+## If you are not sure about which epoch to use
+# subject <- as_rave_subject("demo/DemoSubject")
+# print(subject$epoch_names)
+
+repository <- prepare_subject_raw_voltage_with_epoch(
+  subject = "demo/DemoSubject",
+  electrodes = 14,
+  epoch_name = "auditory_onset", 
+  time_windows = c(-1, 2)
+)
+
+repository <- voltage_baseline(
+  x = repository, 
+  baseline_windows = c(-1, 0), 
+  method = "subtract_mean"
+)
+
+baselined_data <- repository$raw_voltage$baselined
+
+# Load 10 trials from the first and only one electrode
+slice <- baselined_data[, 1:10, 1]
+
+# Graphics parameters, will learn in the future
+par(mar = c(3.1, 2.1, 2.1, 0.8) * (0.25 + 1 * 0.75),
+    mgp = c(2, 0.5, 0))
+
+# Plot the signals in paralell flavor
+plot_signals(
+  signals = t(slice), 
+  sample_rate = 2000,
+  main = "First 10 trials from electrode channel 14", 
+  ylab = "Trial", 
+  time_shift = -1
+)
+
+# Add a vertical line
+abline(v = 0, lty = 2, col = "red")
+```
+
+## Reference
+
+* This tutorial is inspired by Cohen's video about [Origin, significance, and interpretation of EEG](https://www.youtube.com/watch?v=Bmt89hHyxuM)
+* The paper we discussed: 
+  - Ray S, Maunsell JH. [Different origins of gamma rhythm and high-gamma activity in macaque visual cortex.](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1000610#s1) PLoS biology. 2011 Apr 12;9(4):e1000610.
+* Other contents:
+  - quick animation of the ROSA robot that’s used for sEEG: https://youtu.be/kPzDq9Tb0uE
+  - These two videos from Steve Luck are a nice quick refresher for reference and grounding, focused on EEG, but still applies similarly to our recordings:
+    - https://youtu.be/-A9jK7mKZbs
+    - https://youtu.be/-iVamIZhYpo

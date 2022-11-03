@@ -19,7 +19,7 @@ finalize_installation(
 )
 
 install(
-  nightly = TRUE,
+  nightly = FALSE,
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
@@ -27,7 +27,7 @@ install(
 )
 
 update_rave(
-  nightly = TRUE,
+  nightly = FALSE,
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,

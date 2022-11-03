@@ -4,12 +4,14 @@
 \alias{system_requirements}
 \title{Get system requirements for 'RAVE'}
 \usage{
-system_requirements(os, os_release = NULL, curl = Sys.which("curl"))
+system_requirements(os, os_release = NULL, curl = Sys.which("curl"), ...)
 }
 \arguments{
 \item{os, os_release}{operating system and release version, see \url{https://github.com/rstudio/r-system-requirements#operating-systems}}
 
 \item{curl}{the location of the curl binary on your system}
+
+\item{...}{reserved for future use}
 }
 \description{
 Get system requirements for 'RAVE'
