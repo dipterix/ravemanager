@@ -33,7 +33,8 @@ run_tutorials <- function(topic = NULL, ...) {
   if(!length(topic)) {
 
     titles <- sprintf("  %d. %s", seq_along(topics$title), topics$title)
-    ans <- dipsaus::ask_or_default(
+    dipsaus <- asNamespace("dipsaus")
+    ans <- dipsaus$ask_or_default(
       paste(c("Please enter a topic number to start: ",
               titles), collapse = "\n"),
       default = 0

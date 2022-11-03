@@ -88,7 +88,7 @@ params <- ravetools::plot_signals(
 ```
 
 
-<img style="max-width:90%" src="images/Cohen1.png" />
+<img style="max-width:90%" src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Cohen1.png" />
 
 <details>
   <summary>Transcript</summary>
@@ -147,7 +147,7 @@ The key is always remember that voltage is the electric potential between two lo
 
 ## What is special about Broadband high frequency activities (BHA)?
 
-<img src="images/Ray2.png" width="150px"/>
+<img src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Ray2.png" width="150px"/>
 
 Background: [Studies on brain waves reveal oscillatory activity in blocks frequency bands ](https://en.wikipedia.org/wiki/Neural_oscillation)
 
@@ -162,7 +162,7 @@ Two hypotheses on BHA:
 
 https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1000610#s1
 
-<img src="images/Ray1.png" width="100%"/>
+<img src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Ray1.png" width="100%"/>
 
 > <small>Tips: Couple of years ago, we call signals higher than 80 Hz "high-gamma". It seems that we don't use that name nowadays. Instead, we tend to call it "Broadband high-frequency". The paper was published in 2011, hence it still used the term "high-gamma". </small>
 
@@ -175,11 +175,11 @@ Questions:
 :::: {style="display: flex;"}
 
 ::: {}
-<img src="images/Ray3.png" width="100%"/>
+<img src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Ray3.png" width="100%"/>
 :::
 
 ::: {}
-<img src="images/Ray4.png" width="100%"/>
+<img src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Ray4.png" width="100%"/>
 :::
 
 ::::
