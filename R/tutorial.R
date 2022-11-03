@@ -37,7 +37,7 @@ run_tutorials <- function(topic = NULL, ...) {
     ans <- dipsaus$ask_or_default(
       paste(c("Please enter a topic number to start: ",
               titles), collapse = "\n"),
-      default = 0
+      default = ""
     )
     ans <- as.integer(ans)
     if(!length(ans) || is.na(ans) || ans > length(topics$name) || ans <= 0) {

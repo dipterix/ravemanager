@@ -47,6 +47,12 @@ This tutorial is NOT designed
 * for those who want to master their programming skills
 * to deliver how to use famous/fancy libraries
 
+To run this tutorial, use the following command
+
+```{r eval=FALSE, echo=TRUE}
+ravemanager::run_tutorials()
+```
+
 The discussion list will grow as the discussion sessions continue. Please stay tuned for updates using R command `ravemanager::version_info()`, and update to the latest tutorials using:
 
 ```{r install-ravemanager, eval=FALSE, echo=TRUE}
