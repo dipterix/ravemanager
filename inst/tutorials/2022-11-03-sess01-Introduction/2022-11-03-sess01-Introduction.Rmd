@@ -157,16 +157,11 @@ The key is always remember that voltage is the electric potential between two lo
 
 Background: [Studies on brain waves reveal oscillatory activity in blocks frequency bands ](https://en.wikipedia.org/wiki/Neural_oscillation)
 
-Two hypotheses on BHA:
-
-* 1. BHA oscillations serve just like gamma oscillations, operating at a higher frequency and consequently at a faster timescale
-  - Hypo. 1 tries to include BHA into gamma band. 
-* 2. BHA power is related to spiking activity (of single neurons)
-  - Hypo. 2 tries to dissociate BHA from gamma activities.
-
 ### Paper reading:
 
 https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1000610#s1
+
+Two hypotheses on BHA:
 
 <img src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Ray1.png" width="100%"/>
 
@@ -177,6 +172,10 @@ Questions:
 * Why V1 (primary visual cortex)?
 * What are the pre-existing conditions/observations used to help with the proof?
 * How the data are presented?
+
+::: {}
+<img src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Ray5.png" width="100%"/>
+:::
 
 :::: {style="display: flex;"}
 
