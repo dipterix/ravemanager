@@ -96,27 +96,6 @@ params <- ravetools::plot_signals(
 
 <img style="max-width:90%" src="https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/tutorials/2022-11-03-sess01-Introduction/images/Cohen1.png" />
 
-<details>
-  <summary>Transcript</summary>
-  This figure will give you a little bit of a sense of what some typical iEEG data look like. This figure here shows the voltage fluctuations over time from 20 different channels that are placed inside of the head. 
-  
-  For how those electrodes look like and how they are placed inside of the head, please check the ROSA videos in the supp materials. I will also give a short introduction in the next figure. 
-  
-  The idea is that you have a bunch of electrodes placed inside of head, inside of dura. They're attached to bunch of neurons on the one side, and connected to wires that go through the scalp so machines can record signals The electrodes record voltage activity that comes from populations of neurons in the brain I'll talk more about soon. 
-  
-  You can see that there are some striking features of iEEG so there's a lot of really small deflections some of that is noise some of that is high-frequency activity and then there are some kind of slower fluctuations. Some of these patterns of activity are consistent across many electrodes and some are a little bit more local and they're just isolated to a single electrode.  Very often with iEEG if you see common activities on all the electrodes, it's probably some noise contamination. 
-  
-  But where do iEEG data come from. Here we have drawings of a neuron a brain cell. You can see they have this kind of fat triangular shaped body, and this long extension up here these are the dendrites and another extension going down here this is the axon neurons communicate with each other through electro-chemical signaling. 
-  
-  Essentially what happens when a neuron becomes active, there is a flow of ions, a transmission of electrically charged ions that go into the neuron and out of the neuron. This flow has a spatial organization and that creates this spatial symmetry of ions flowing into the neuron versus ions flowing out of the neuron. 
-  
-  Now this generates an electrical field just like when you run a current through a wire, you're also going to generate an electrical field. If we have a really tiny electrode that goes through the brain and is sitting right next to this electrode, we can actually measure the this electrical field coming from one individual neuron. The single unit recording is trying to achieve that goal. However what we (our lab) usually do with iEEG is we put a larger electrode near this firing neurons. Instead of recording from single neurons, we record from a larger scale. 
-  
-  Does it matter? It turns out that in the brain many neurons become active synchronously so they are active at the same time and their electrical fields are individually really really small and weak but collectively they end up being large and powerful. It is so powerful in fact that our electrodes far-away may pick up signals sometimes. 
-  
-  Now this is a like really brief introduction to the by a physical origin of iEEG. There is a lot more complications with biological and biophysical details that are involved in every aspect of populations that are generating the iEEG signal. But we are more interested in these these Wiggles in the signals. Every time you know these lines are going up and down, these are voltage deflections that reflect the instantaneous activity of these populations of cells. Remember an iEEG electrode is going to be measuring the synchronous activity from anywhere from a few tens of thousands of cells that are all active synchronously. This is why the signals are called local-field potential.
-</details>
-
 ## Why and why not iEEG
 
 ### Advantages

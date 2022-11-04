@@ -8,3 +8,5 @@
 ^pkgdown$
 ^\.github$
 \.png$
+\.docs$
+\.pptx$
