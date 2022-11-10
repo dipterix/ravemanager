@@ -466,31 +466,33 @@ Frequency selection:
 In `R`, we use `fft` (fast-Fourier transform) to obtain the Fourier coefficients. However, 
 
 ```{r, echo = TRUE}
-signal <- sin(2 * pi * 12 * time)
+signal <- (1 + sin(24 * pi * time)) * cos(sin(100 * pi * time)-time)
 n <- length(signal)
 coef <- fft(signal)
 amplitude <- abs(coef)
 freq <- seq(0, srate, length.out = n)
-plot(freq, amplitude, type = "h", main = "Frequency Domain")
+plot(freq, amplitude, type = "h", main = "Frequency Domain",
+     xlab = "Frequency (Hz)", ylab = "Amplitude (unnormalized)")
 ```
 
 The amplitude needs to be normalized:
 
 ```{r, echo = TRUE}
-signal <- sin(2 * pi * 12 * time)
+signal <- (1 + sin(24 * pi * time)) * cos(sin(100 * pi * time)-time)
 n <- length(signal)
 # Normalize!
 coef <- fft(signal) / n
 amplitude <- abs(coef)
 amplitude[-1] <- amplitude[-1] * 2
 freq <- seq(0, srate, length.out = n)
-plot(freq, amplitude, type = "h", main = "Frequency Domain")
+plot(freq, amplitude, type = "h", main = "Frequency Domain",
+     xlab = "Frequency (Hz)", ylab = "Amplitude")
 ```
 
 Nyquist frequency is `r srate/2` Hz, we usually only display frequencies up to Nyquist:
 
 ```{r, fft-impl, exercise=TRUE, echo = TRUE}
-signal <- sin(2 * pi * 12 * time)
+signal <- (1 + sin(24 * pi * time)) * cos(sin(100 * pi * time)-time)
 n <- length(signal)
 # Normalize!
 coef <- fft(signal) / n
@@ -504,7 +506,33 @@ is_negative_frequency <- freq > nq
 freq <- freq[!is_negative_frequency]
 amplitude <- amplitude[!is_negative_frequency]
 par(mfrow = c(2, 1), mar = c(4.1,4.1,2.1,1.1))
-plot(freq, amplitude, type = "h", main = "Frequency Domain")
+plot(freq, amplitude, type = "h", main = "Frequency Domain",
+     xlab = "Frequency (Hz)", ylab = "Amplitude")
 plot(freq, amplitude, type = "h", 
-     main = "Frequency Domain", xlim = c(0,25))
+     main = "Frequency Domain", xlim = c(0,200),
+     xlab = "Frequency (Hz)", ylab = "Amplitude")
 ```
+
+## Extended reading
+
+* What is the Fourier Transform? A visual introduction. https://youtu.be/spUNpyF58BY
+
+![](https://youtu.be/spUNpyF58BY)
+
+I also recommend the following YT videos:
+
+* Complex Sine Waves https://youtu.be/iZCDOuzfsY0
+
+![](https://youtu.be/iZCDOuzfsY0)
+
+* The complex dot product https://youtu.be/Xa4veFZpEkA
+
+![](https://youtu.be/Xa4veFZpEkA)
+
+* Fourier coefficients https://youtu.be/_htCsieA0_U
+
+![](https://youtu.be/_htCsieA0_U)
+
+* Time and frequency domains https://youtu.be/fYtVHhk3xJ0
+
+![](https://youtu.be/fYtVHhk3xJ0)
