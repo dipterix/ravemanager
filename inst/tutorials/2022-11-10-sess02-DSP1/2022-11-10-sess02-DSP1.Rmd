@@ -2,6 +2,8 @@
 title: "Frequency Analysis: Intro. to Fourier Transform"
 output: learnr::tutorial
 runtime: shiny_prerendered
+description: >
+  Basics of Fourier transform and frequency decomposition
 ---
 
 ```{r setup, include=FALSE}

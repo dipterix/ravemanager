@@ -2,6 +2,8 @@
 title: "Introduction to Analysis & Visualization of iEEG"
 output: learnr::tutorial
 runtime: shiny_prerendered
+description: >
+  Basics of iEEG; what's the advantage of iEEG; why broad-band high frequency is interesting to us
 ---
 
 ```{r setup, include=FALSE}
