@@ -482,33 +482,29 @@ n <- length(signal)
 # Normalize!
 coef <- fft(signal) / n
 amplitude <- abs(coef)
+amplitude[-1] <- amplitude[-1] * 2
 freq <- seq(0, srate, length.out = n)
 plot(freq, amplitude, type = "h", main = "Frequency Domain")
 ```
 
-Nyquist frequency is `r srate/2` Hz, we fold amplitude greater than Nyquist back
+Nyquist frequency is `r srate/2` Hz, we usually only display frequencies up to Nyquist:
 
 ```{r, fft-impl, exercise=TRUE, echo = TRUE}
 signal <- sin(2 * pi * 12 * time)
 n <- length(signal)
-
 # Normalize!
 coef <- fft(signal) / n
 amplitude <- abs(coef)
-
-# Nyquist
+amplitude[-1] <- amplitude[-1] * 2
 freq <- seq(0, srate, length.out = n)
+
+# Only show 0 - Nyquist
 nq <- srate / 2
-
-is_alias <- freq > nq
-valid_frequency <- freq[ !is_alias ]
-valid_amplitude <- amplitude[ !is_alias ]
-alias_amplitude <- amplitude[ is_alias ]
-
-# fold alias amplitude back
-fold_index <- seq(length(valid_amplitude), by = -1, length.out = sum(is_alias))
-valid_amplitude[fold_index] <- valid_amplitude[fold_index] + alias_amplitude
-
-plot(valid_frequency, valid_amplitude, type = "h", 
+is_negative_frequency <- freq > nq
+freq <- freq[!is_negative_frequency]
+amplitude <- amplitude[!is_negative_frequency]
+par(mfrow = c(2, 1), mar = c(4.1,4.1,2.1,1.1))
+plot(freq, amplitude, type = "h", main = "Frequency Domain")
+plot(freq, amplitude, type = "h", 
      main = "Frequency Domain", xlim = c(0,25))
 ```
