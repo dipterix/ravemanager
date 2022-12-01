@@ -318,7 +318,7 @@ axis(2, pretty(c(0, 150)))
 
 ### How to use RAVE to generate Welch's plot?
 
-```{r, eval = FALSE}
+```{r}
 library(ravetools)
 pwel <- pwelch(sample_signal, fs = 2000, window = 4000, noverlap = 2000)
 plot(pwel)
