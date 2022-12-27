@@ -18,36 +18,6 @@ Manages package dependence for the [RAVE project](https://rave.wiki/)
 |[dipsaus](https://github.com/dipterix/dipsaus)|![r-universe](https://beauchamplab.r-universe.dev/badges/dipsaus?color=blue&style=classic)|[![R-CMD-check](https://github.com/dipterix/dipsaus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dipterix/dipsaus/actions/workflows/R-CMD-check.yaml)|Utility functions|
 
 
-## Install for the first time
-
-Please make sure you have [R](https://cran.r-project.org/) installed first!
-
-1. Open the R application. Copy and paste the following command into the "R" (or "RStudio") console: 
-
-``` r
- install.packages('ravemanager', repos = 'https://beauchamplab.r-universe.dev')
-```
-
-2. Install system libraries (To be added)
-
-
-
-3. Install `RAVE`
-
-Enter the following command into R console:
-
-```r
-ravemanager::install()
-```
-
-## Check for updates
-
-To check if `RAVE` and its dependencies are in the latest version, use the following R command
-
-``` r
-ravemanager::version_info()
-```
-
 ## Citation
 
 Please cite the following paper for publication use:
