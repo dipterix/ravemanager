@@ -221,6 +221,12 @@ finalize_installation <- function(
 install <- function(nightly = FALSE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, ...) {
 
+  if( nightly ) {
+    options("ravemanager.nightly" = TRUE)
+  } else {
+    options("ravemanager.nightly" = FALSE)
+  }
+
   # check R version
   rversion <- R.Version()
   rversion <- sprintf("%s.%s", rversion$major, rversion$minor)
