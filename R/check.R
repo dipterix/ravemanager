@@ -4,8 +4,17 @@ is_installed <- function(pkg) {
 }
 
 #' Print out 'RAVE' version information
+#' @param nightly whether to check 'nightly' build which contains the newest
+#' experimental features. However, 'nightly' builds are not stable. This
+#' option is only recommended for zero-day bug fixes.
 #' @export
-version_info <- function() {
+version_info <- function(nightly = FALSE) {
+  if( nightly ) {
+    options("ravemanager.nightly" = TRUE)
+  } else {
+    options("ravemanager.nightly" = FALSE)
+  }
+
   versions <- new.env()
   versions$ravemanager <- list(
     current = ravemanager_version()
@@ -67,7 +76,11 @@ version_info <- function() {
         "\n* Please update core dependencies using\n",
         '    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))',
         '    loadNamespace("ravemanager", lib.loc = lib_path)',
-        '    ravemanager::update_rave()',
+        ifelse(
+          nightly,
+          '    ravemanager::update_rave(nightly = TRUE)',
+          '    ravemanager::update_rave()'
+        ),
         sep = "\n"
       ),
       ifelse(

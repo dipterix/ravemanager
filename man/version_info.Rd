@@ -4,7 +4,12 @@
 \alias{version_info}
 \title{Print out 'RAVE' version information}
 \usage{
-version_info()
+version_info(nightly = FALSE)
+}
+\arguments{
+\item{nightly}{whether to check 'nightly' build which contains the newest
+experimental features. However, 'nightly' builds are not stable. This
+option is only recommended for zero-day bug fixes.}
 }
 \description{
 Print out 'RAVE' version information

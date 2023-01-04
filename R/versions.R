@@ -1,5 +1,13 @@
 
-package_latest_version <- function(pkg, url = "https://beauchamplab.r-universe.dev/packages") {
+package_latest_version <- function(pkg, url = NULL) {
+  if( length(url) != 1 ) {
+    if(getOption("ravemanager.nightly", FALSE)) {
+      url <- "https://beauchamplab.r-universe.dev/packages"
+    } else {
+      url <- "https://dipterix.r-universe.dev/packages"
+    }
+  }
+
   if(length(pkg) != 1) {
     stop("package_needs_update: `pkg` must be length of 1")
   }
@@ -44,7 +52,15 @@ package_current_version <- function(pkg, lib = NULL) {
   return( current_version )
 }
 
-package_needs_update <- function(pkg, lib = NULL, url = "https://beauchamplab.r-universe.dev/packages") {
+package_needs_update <- function(pkg, lib = NULL, url = NULL) {
+  if( length(url) != 1 ) {
+    if(getOption("ravemanager.nightly", FALSE)) {
+      url <- "https://beauchamplab.r-universe.dev/packages"
+    } else {
+      url <- "https://dipterix.r-universe.dev/packages"
+    }
+  }
+
   if(length(pkg) != 1) {
     stop("package_needs_update: `pkg` must be length of 1")
   }
