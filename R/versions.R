@@ -2,9 +2,9 @@
 package_latest_version <- function(pkg, url = NULL) {
   if( length(url) != 1 ) {
     if(getOption("ravemanager.nightly", FALSE)) {
-      url <- "https://beauchamplab.r-universe.dev/packages"
-    } else {
       url <- "https://dipterix.r-universe.dev/packages"
+    } else {
+      url <- "https://beauchamplab.r-universe.dev/packages"
     }
   }
 
@@ -55,9 +55,9 @@ package_current_version <- function(pkg, lib = NULL) {
 package_needs_update <- function(pkg, lib = NULL, url = NULL) {
   if( length(url) != 1 ) {
     if(getOption("ravemanager.nightly", FALSE)) {
-      url <- "https://beauchamplab.r-universe.dev/packages"
-    } else {
       url <- "https://dipterix.r-universe.dev/packages"
+    } else {
+      url <- "https://beauchamplab.r-universe.dev/packages"
     }
   }
 
