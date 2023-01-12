@@ -68,87 +68,47 @@
 #'
 #' @export
 validate_python <- function(verbose = TRUE) {
-  if(verbose) {
-    message("Initializing python environment: ")
+  verb <- function(expr) {
+    if(verbose) {
+      force( expr )
+    }
   }
+  verb(message("Initializing python environment: "))
 
   rpymat <- asNamespace("rpymat")
   rpymat$ensure_rpymat(verbose = verbose)
 
   reticulate <- asNamespace("reticulate")
 
-  if( verbose ) {
+  verb({
     message("Trying to get installed packages...")
-    Sys.sleep(3)
-  }
+  })
   tbl <- reticulate$py_list_packages(envname = rpymat$env_path())
   pkgs <- tbl$package
   pkgs <- pkgs[grepl("^[a-zA-Z0-9]", pkgs)]
 
-  if( verbose ) {
+  verb({
     cat("Installed packages:", paste(pkgs, collapse = ", "), "\n")
-  }
+  })
 
   # Check environment
-  if( verbose ) {
+  verb({
     message("Trying to validate packages...")
-    Sys.sleep(1)
-    cat("numpy: ...")
-  }
-  numpy <- reticulate$import("numpy")
-  if( verbose ) {
-    cat("\b\b\b", numpy$`__version__`, "\n", sep = "")
+  })
 
-    cat("h5py: ...")
+  package_missing <- NULL
+  for(package in c("numpy", "h5py", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy")) {
+    tryCatch({
+      verb({ cat(sprintf("%s: ...", package)) })
+      module <- reticulate$import(package)
+      verb({ cat("\b\b\b", module$`__version__`, "\n", sep = "") })
+    }, error = function(e) {
+      verb({ cat("\b\b\bN/A\n", sep = "") })
+      package_missing <<- c(package_missing, package)
+    })
   }
-  h5py <- reticulate$import("h5py")
-  if( verbose ) {
-    cat("\b\b\b", h5py$`__version__`, "\n", sep = "")
 
-    cat("cython: ...")
-  }
-  cython <- reticulate$import("cython")
-  if( verbose ) {
-    cat("\b\b\b", cython$`__version__`, "\n", sep = "")
-
-    cat("pandas: ...")
-  }
-  pandas <- reticulate$import("pandas")
-  if( verbose ) {
-    cat("\b\b\b", pandas$`__version__`, "\n", sep = "")
-
-    cat("scipy: ...")
-  }
-  scipy <- reticulate$import("scipy")
-  if( verbose ) {
-    cat("\b\b\b", scipy$`__version__`, "\n", sep = "")
-    cat("jupyterlab: ...")
-  }
-  jupyterlab <- reticulate$import("jupyterlab")
-  if( verbose ) {
-    cat("\b\b\b", jupyterlab$`__version__`, "\n", sep = "")
-    cat("pynwb: ...")
-  }
-  pynwb <- reticulate$import("pynwb")
-  if( verbose ) {
-    cat("\b\b\b", pynwb$`__version__`, "\n", sep = "")
-    cat("mne: ...")
-  }
-  mne <- reticulate$import("mne")
-  if( verbose ) {
-    cat("\b\b\b", mne$`__version__`, "\n", sep = "")
-    cat("nibabel: ...")
-  }
-  nibabel <- reticulate$import("nibabel")
-  if( verbose ) {
-    cat("\b\b\b", nibabel$`__version__`, "\n", sep = "")
-    cat("nipy: ...")
-  }
-  nipy <- reticulate$import("nipy")
-  if( verbose ) {
-    cat("\b\b\b", nipy$`__version__`, "\n", sep = "")
-  }
-  return(invisible(TRUE))
+  return(invisible(package_missing))
 }
 
 #' @rdname configure-python
