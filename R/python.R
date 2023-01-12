@@ -133,9 +133,12 @@ configure_python <- function(python_ver = "auto", verbose = TRUE) {
   }
 
   # install jupyter lab to the conda environment
-  pkgs <- c("jupyter", "jupyter_server", "jupyterlab", "jupyterlab_server")
+  pkgs <- c("jupyter", "jupyterlab")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
-    rpymat$add_jupyter()
+    try({
+      rpymat$add_packages(packages = c("jupyter", "numpy", "h5py", "matplotlib", "pandas", "jupyterlab"))
+      rpymat$jupyter_register_R()
+    })
   }
 
   # install nipy family
