@@ -179,7 +179,7 @@ configure_python <- function(python_ver = "auto", verbose = TRUE) {
   }
 
   # install nipy family
-  pkgs <- c("nipype", "dipy", "nibabel", "nipy", "nitime", "nilearn", "mne", "niwidgets", "pynwb")
+  pkgs <- c("nibabel", "nipy", "pynwb")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if(length(pkgs)) {
     rpymat$add_packages(packages = pkgs, pip = TRUE)
