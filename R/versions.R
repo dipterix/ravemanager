@@ -3,9 +3,13 @@ package_latest_version <- function(pkg, url = NULL) {
   if( length(url) != 1 ) {
     if(getOption("ravemanager.nightly", FALSE)) {
       url <- "https://dipterix.r-universe.dev/packages"
+      url_backup <- "https://beauchamplab.r-universe.dev/packages"
     } else {
       url <- "https://beauchamplab.r-universe.dev/packages"
+      url_backup <- NA
     }
+  } else {
+    url_backup <- NA
   }
 
   if(length(pkg) != 1) {
@@ -33,7 +37,8 @@ package_latest_version <- function(pkg, url = NULL) {
   })
 
   if(is.null(available_version)) {
-    return(NA)
+    if(is.na(url_backup)) { return(NA) }
+    return( Recall(pkg, url = url_backup) )
   }
   return(available_version)
 }
