@@ -305,7 +305,8 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
     message("Packages have been installed. Finalizing settings.")
 
     packages_to_install <- c(ravemanager$rave_depends, "rave",
-                             ravemanager$rave_packages)
+                             ravemanager$rave_packages,
+                             ravemanager$rave_suggests)
 
     ravemanager$finalize_installation(
       packages = packages_to_install,
@@ -355,7 +356,7 @@ upgrade_installer <- function() {
 install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
-    rave_depends, "rave", rave_packages
+    rave_depends, "rave", rave_packages, rave_suggests
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
@@ -393,6 +394,10 @@ install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
   )
 
   # Make sure the source package is compiled and updated
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
+  )
   install_packages(
     packages_to_install, lib = libpath,
     repos = repos, type = "source", force = force
@@ -403,7 +408,7 @@ install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
-    rave_depends, "rave", rave_packages
+    rave_depends, "rave", rave_packages, rave_suggests
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
@@ -440,7 +445,11 @@ install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
     repos = repos, type = "binary", force = force
   )
 
-  # Make sure the source package is compiled and updated
+  # Make sure the source package is compiled and updated for core packages
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
+  )
   install_packages(
     packages_to_install, lib = libpath,
     repos = repos, type = "source",  force = force
@@ -451,7 +460,7 @@ install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, use_rspm = TRUE, ...) {
 
   packages_to_install <- c(
-    rave_depends, "rave", rave_packages
+    rave_depends, "rave", rave_packages, rave_suggests
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
@@ -517,6 +526,10 @@ install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, use_rspm
   }
 
 
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
+  )
 
 
   install_packages(

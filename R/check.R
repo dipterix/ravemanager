@@ -1,6 +1,8 @@
 
 is_installed <- function(pkg) {
-  system.file(package = pkg) != ""
+  re <- system.file(package = pkg) != ""
+  if(length(re) > 1) { return (re[[1]]) }
+  return(isTRUE(re))
 }
 
 #' Print out 'RAVE' version information
