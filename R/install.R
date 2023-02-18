@@ -356,7 +356,8 @@ upgrade_installer <- function() {
 install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
-    rave_depends, "rave", rave_packages, rave_suggests
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
@@ -408,7 +409,8 @@ install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
-    rave_depends, "rave", rave_packages, rave_suggests
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
@@ -460,7 +462,8 @@ install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, use_rspm = TRUE, ...) {
 
   packages_to_install <- c(
-    rave_depends, "rave", rave_packages, rave_suggests
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
   )
 
   loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
