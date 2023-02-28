@@ -1,3 +1,17 @@
+PYTHON_PACKAGES <- list(
+  "nibabel" = "nibabel==4.0.2",
+  "ants" = "antspyx"
+)
+
+get_python_package_name <- function(lib) {
+  unlist(lapply(unlist(lib), function(x) {
+    re <- PYTHON_PACKAGES[[x]]
+    if(is.null(re)) { re <- x }
+    re
+  }))
+}
+
+
 #' @name configure-python
 #' @title Install & Configure 'python' environment for 'RAVE'
 #' @description Installs 'python' environment for 'RAVE'
@@ -5,6 +19,7 @@
 #' a specific python version is needed, please specify explicitly, for example,
 #' \code{python_ver='3.8'}
 #' @param verbose whether to verbose messages
+#' @param ask whether to ask before resetting the 'python' environment
 #' @details Use \code{ravemanager::configure_python()} to install and configure
 #' python environment using \code{miniconda}. The \code{conda} binary and
 #' environment will be completely isolated. This means the installation will be
@@ -68,45 +83,60 @@
 #'
 #' @export
 validate_python <- function(verbose = TRUE) {
-  verb <- function(expr) {
-    if(verbose) {
-      force( expr )
+  callr <- asNamespace("callr")
+
+  f <- function() {}
+  body(f) <- bquote({
+
+    verbose <- .(verbose)
+
+    verb <- function(expr) {
+      if(verbose) {
+        force( expr )
+      }
     }
-  }
-  verb(message("Initializing python environment: "))
+    verb(message("Initializing python environment: "))
 
-  rpymat <- asNamespace("rpymat")
-  rpymat$ensure_rpymat(verbose = verbose)
+    rpymat <- asNamespace("rpymat")
+    rpymat$ensure_rpymat(verbose = verbose)
 
-  reticulate <- asNamespace("reticulate")
+    reticulate <- asNamespace("reticulate")
 
-  verb({
-    message("Trying to get installed packages...")
-  })
-  tbl <- reticulate$py_list_packages(envname = rpymat$env_path())
-  pkgs <- tbl$package
-  pkgs <- pkgs[grepl("^[a-zA-Z0-9]", pkgs)]
-
-  verb({
-    cat("Installed packages:", paste(pkgs, collapse = ", "), "\n")
-  })
-
-  # Check environment
-  verb({
-    message("Trying to validate packages...")
-  })
-
-  package_missing <- NULL
-  for(package in c("numpy", "h5py", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy")) {
-    tryCatch({
-      verb({ cat(sprintf("%s: ...", package)) })
-      module <- reticulate$import(package)
-      verb({ cat("\b\b\b", module$`__version__`, "\n", sep = "") })
-    }, error = function(e) {
-      verb({ cat("\b\b\bN/A\n", sep = "") })
-      package_missing <<- c(package_missing, package)
+    verb({
+      message("Trying to get installed packages...")
     })
-  }
+    tbl <- reticulate$py_list_packages(envname = rpymat$env_path())
+    pkgs <- tbl$package
+    pkgs <- pkgs[grepl("^[a-zA-Z0-9]", pkgs)]
+
+    verb({
+      message("Installed packages: ", paste(pkgs, collapse = ", "), "\n")
+    })
+
+    # Check environment
+    verb({
+      message("Trying to validate packages...")
+    })
+
+    package_missing <- NULL
+    for(package in c("numpy", "h5py", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants")) {
+      tryCatch({
+        verb({ message(sprintf("  %s: ", package), appendLF = FALSE) })
+        module <- reticulate$import(package)
+        verb({ message("  ", package, ": ", module$`__version__`) })
+      }, error = function(e) {
+        verb({ message("  ", package, ": N/A") })
+        package_missing <<- c(package_missing, package)
+      })
+    }
+    package_missing
+  })
+
+  package_missing <- callr$r(
+    func = f,
+    show = TRUE,
+    spinner = interactive()
+  )
 
   return(invisible(package_missing))
 }
@@ -129,23 +159,35 @@ configure_python <- function(python_ver = "auto", verbose = TRUE) {
   # install necessary libraries
   pkgs <- c("h5py", "numpy", "scipy", "pandas", "cython")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
-    rpymat$add_packages(pkgs)
+    rpymat$add_packages(get_python_package_name(pkgs))
   }
 
   # install jupyter lab to the conda environment
   pkgs <- c("jupyter", "jupyterlab")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
     try({
-      rpymat$add_packages(packages = c("jupyter", "numpy", "h5py", "matplotlib", "pandas", "jupyterlab"))
+      rpymat$add_packages(packages = get_python_package_name(c("jupyter", "numpy", "h5py", "matplotlib", "pandas", "jupyterlab")))
       rpymat$jupyter_register_R()
     })
   }
 
   # install nipy family
-  pkgs <- c("nibabel", "nipy", "pynwb")
+  pkgs <- c("nibabel", "nipy", "pynwb", "mne")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if(length(pkgs)) {
-    rpymat$add_packages(packages = pkgs, pip = TRUE)
+    for(pkg in get_python_package_name(pkgs)) {
+      try({
+        rpymat$add_packages(packages = pkg, pip = TRUE)
+      })
+    }
+  }
+
+  # ants
+  if(!'antspyx' %in% installed_pkgs_tbl$package) {
+    try({
+      rpymat$add_packages(packages = get_python_package_name("antspyx"),
+                          pip = TRUE)
+    })
   }
 
   # Initialize
@@ -157,6 +199,21 @@ configure_python <- function(python_ver = "auto", verbose = TRUE) {
 
   validate_python(verbose = verbose)
   if( verbose ) {
-    message("Done. Use `rpymat::ensure_rpymat()` to activate this environment.")
+    message("Done. Use `ravemanager::ensure_rpymat()` to activate this environment.")
   }
+}
+
+
+#' @rdname configure-python
+#' @export
+remove_conda <- function(ask = TRUE) {
+  rpymat <- asNamespace("rpymat")
+  rpymat$remove_conda(ask = ask)
+}
+
+#' @rdname configure-python
+#' @export
+ensure_rpymat <- function() {
+  rpymat <- asNamespace("rpymat")
+  rpymat$ensure_rpymat()
 }

@@ -4,11 +4,17 @@
 \alias{configure-python}
 \alias{validate_python}
 \alias{configure_python}
+\alias{remove_conda}
+\alias{ensure_rpymat}
 \title{Install & Configure 'python' environment for 'RAVE'}
 \usage{
 validate_python(verbose = TRUE)
 
 configure_python(python_ver = "auto", verbose = TRUE)
+
+remove_conda(ask = TRUE)
+
+ensure_rpymat()
 }
 \arguments{
 \item{verbose}{whether to verbose messages}
@@ -16,6 +22,8 @@ configure_python(python_ver = "auto", verbose = TRUE)
 \item{python_ver}{python version; default is automatically determined. If
 a specific python version is needed, please specify explicitly, for example,
 \code{python_ver='3.8'}}
+
+\item{ask}{whether to ask before resetting the 'python' environment}
 }
 \description{
 Installs 'python' environment for 'RAVE'
