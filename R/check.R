@@ -66,7 +66,7 @@ version_info <- function(nightly = FALSE) {
       paste(
         "\n* Please update [ravemanager] using\n",
         '    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))',
-        '    install.packages("ravemanager", repos = "https://beauchamplab.r-universe.dev", lib = lib_path)',
+        '    install.packages("ravemanager", repos = "https://rave-ieeg.r-universe.dev", lib = lib_path)',
         '\nMake sure you restart R after this step.',
         paste(rep("-", mnchars + 14), collapse = ""),
         sep = "\n"

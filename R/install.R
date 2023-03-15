@@ -62,7 +62,7 @@ upgrade_ravemanager <- function() {
 
       utils::install.packages(
         pkgs = 'ravemanager',
-        repos = 'https://beauchamplab.r-universe.dev',
+        repos = 'https://rave-ieeg.r-universe.dev',
         lib = lib_path)
     })
   }
@@ -275,7 +275,7 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   # ravemanager upgrade
   if( upgrade_manager ) {
     if( os_type == "windows" ) {
-      message("Cannot upgrade RAVE installer on Windows. Please the following command to upgrade ravemanager instead:\n  install.packages('ravemanager', repos = 'https://beauchamplab.r-universe.dev')")
+      message("Cannot upgrade RAVE installer on Windows. Please the following command to upgrade ravemanager instead:\n  install.packages('ravemanager', repos = 'https://rave-ieeg.r-universe.dev')")
       return(invisible())
     } else {
       needs_restart <- upgrade_installer()

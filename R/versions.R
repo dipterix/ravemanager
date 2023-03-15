@@ -3,9 +3,9 @@ package_latest_version <- function(pkg, url = NULL) {
   if( length(url) != 1 ) {
     if(getOption("ravemanager.nightly", FALSE)) {
       url <- "https://dipterix.r-universe.dev/packages"
-      url_backup <- "https://beauchamplab.r-universe.dev/packages"
+      url_backup <- "https://rave-ieeg.r-universe.dev/packages"
     } else {
-      url <- "https://beauchamplab.r-universe.dev/packages"
+      url <- "https://rave-ieeg.r-universe.dev/packages"
       url_backup <- NA
     }
   } else {
@@ -62,7 +62,7 @@ package_needs_update <- function(pkg, lib = NULL, url = NULL) {
     if(getOption("ravemanager.nightly", FALSE)) {
       url <- "https://dipterix.r-universe.dev/packages"
     } else {
-      url <- "https://beauchamplab.r-universe.dev/packages"
+      url <- "https://rave-ieeg.r-universe.dev/packages"
     }
   }
 
@@ -123,7 +123,7 @@ ravemanager_latest_version <- function() {
   }, error = function(e) {
     tryCatch({
       suppressWarnings({
-        versions <- readLines("https://beauchamplab.r-universe.dev/packages/ravemanager")
+        versions <- readLines("https://rave-ieeg.r-universe.dev/packages/ravemanager")
         versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
         versions <- gsub("[^0-9\\.]", "", versions)
         return(versions[[1]])

@@ -44,12 +44,12 @@ get_arch <- function() {
 get_mirror <- function(nightly = FALSE) {
   if(nightly) {
     mirrors <- c(
-      beauchamplab = 'https://beauchamplab.r-universe.dev',
+      raveieeg = 'https://rave-ieeg.r-universe.dev',
       dipterix = 'https://dipterix.r-universe.dev'
     )
   } else {
     mirrors <- c(
-      beauchamplab = 'https://beauchamplab.r-universe.dev'
+      raveieeg = 'https://rave-ieeg.r-universe.dev'
     )
   }
 
