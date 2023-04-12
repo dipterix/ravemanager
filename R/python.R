@@ -143,7 +143,7 @@ validate_python <- function(verbose = TRUE) {
 
 #' @rdname configure-python
 #' @export
-configure_python <- function(python_ver = "auto", verbose = TRUE) {
+configure_python <- function(python_ver = "3.9", verbose = TRUE) {
 
   rpymat <- asNamespace("rpymat")
 
