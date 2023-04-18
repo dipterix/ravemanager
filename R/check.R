@@ -101,18 +101,11 @@ version_info <- function(nightly = FALSE, vanilla = FALSE) {
 
         # message('    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))')
         # message('    loadNamespace("ravemanager", lib.loc = lib_path)')
-        if( cli$ansi_has_hyperlink_support() ) {
-          if( nightly ) {
-            cli$cli_text(cli$col_cyan('{.run ravemanager::update_rave(nightly = TRUE)}'))
-          } else {
-            cli$cli_text(cli$col_cyan('{.run ravemanager::update_rave()}'))
-          }
+        cli$cli_text(cli$col_cyan(sprintf('loadNamespace("ravemanager", lib.loc = "%s")', get_libpaths(first = TRUE, check = TRUE))))
+        if( nightly ) {
+          cli$cli_text(cli$col_cyan('ravemanager::update_rave(nightly = TRUE)'))
         } else {
-          if( nightly ) {
-            cli$cli_text(cli$col_cyan('ravemanager::update_rave(nightly = TRUE)'))
-          } else {
-            cli$cli_text(cli$col_cyan('ravemanager::update_rave()'))
-          }
+          cli$cli_text(cli$col_cyan('ravemanager::update_rave()'))
         }
         cat("\n")
       }
