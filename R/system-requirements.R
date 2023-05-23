@@ -1,11 +1,15 @@
 #' Get system requirements for 'RAVE'
-#' @param os,os_release operating system and release version, see \url{https://github.com/rstudio/r-system-requirements#operating-systems}
+#' @param os,os_release operating system and release version, currently only
+#' supports \code{'ubuntu'}, \code{'centos'}, \code{'redhat'}, \code{'opensuse'},
+#' and \code{'sle'}; see
+#' \url{https://github.com/rstudio/r-system-requirements#operating-systems}
 #' @param curl the location of the curl binary on your system
+#' @param sudo whether to pre-pend \code{'sudo'} to the commands
 #' @param ... reserved for future use
 #' @examples
 #'
 #'
-#'
+#' if("remotes" %in% loadedNamespaces()) {
 #' # Please check your operating system & version!!!
 #'
 #' # =============== On Ubuntu Linux ===============
@@ -45,10 +49,11 @@
 #' # SUSE Linux Enterprise 12.3
 #' ravemanager::system_requirements("sle", "12")
 #'
+#' }
 #'
 #'
 #' @export
-system_requirements <- function(os, os_release = NULL, curl = Sys.which("curl"), ...) {
+system_requirements <- function(os, os_release = NULL, curl = Sys.which("curl"), sudo = FALSE, ...) {
   if(!is_installed("remotes")) {
     install_packages("remotes")
   }
@@ -56,11 +61,58 @@ system_requirements <- function(os, os_release = NULL, curl = Sys.which("curl"),
     stop(sprintf("Please specify your operating system. See Examples in %s", sQuote("?ravemanager::system_requirements")))
   }
   remotes <- asNamespace("remotes")
-  res <- remotes$system_requirements(
-    os = os, os_release = os_release,
-    path = system.file("apps/raveplaceholder", package = "ravemanager"),
-    curl = curl
-  )
+
+  res <- NA
+
+  try(silent = TRUE, {
+    res <- remotes$system_requirements(
+      os = os, os_release = os_release,
+      path = system.file("apps/raveplaceholder", package = "ravemanager"),
+      curl = curl
+    )
+  })
+
+  if(length(res) == 1L && isTRUE(is.na(res))) {
+
+    try(silent = TRUE, {
+
+      Sys.setenv(RSPM_ROOT = "https://packagemanager.posit.co")
+      res <- remotes$system_requirements(
+        os = os, os_release = os_release,
+        path = system.file("apps/raveplaceholder", package = "ravemanager"),
+        curl = curl
+      )
+
+    })
+
+  }
+
+  if(length(res) == 1L && isTRUE(is.na(res))) {
+
+    try(silent = TRUE, {
+
+      Sys.setenv(RSPM_ROOT = "https://packagemanager.posit.co")
+      if(!is_installed("pak")) {
+        install_packages("pak")
+      }
+      pak <- asNamespace("pak")
+      res <- pak$local_system_requirements(
+        os = os, os_release = os_release,
+        root = system.file("apps/raveplaceholder", package = "ravemanager"),
+        execute = FALSE, sudo = FALSE, echo = FALSE
+      )
+    })
+
+  }
+
+  if(length(res) == 1L && isTRUE(is.na(res))) {
+    res <- character()
+    warning("Cannot get system libraries from Posit (Rstudio) package manager website. Please contact RAVE team if you cannot install.")
+  }
+
+  if( sudo ) {
+    res <- sprintf("sudo %s", res)
+  }
 
   attr(res, "caveats") <- sprintf("Please consider the following system libraries under %s", paste(c(os, os_release), collapse = "-"))
   class(res) <- c("ravemanager_cmd", "ravemanager_printable", "character")

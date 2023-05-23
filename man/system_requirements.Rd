@@ -4,12 +4,23 @@
 \alias{system_requirements}
 \title{Get system requirements for 'RAVE'}
 \usage{
-system_requirements(os, os_release = NULL, curl = Sys.which("curl"), ...)
+system_requirements(
+  os,
+  os_release = NULL,
+  curl = Sys.which("curl"),
+  sudo = FALSE,
+  ...
+)
 }
 \arguments{
-\item{os, os_release}{operating system and release version, see \url{https://github.com/rstudio/r-system-requirements#operating-systems}}
+\item{os, os_release}{operating system and release version, currently only
+supports \code{'ubuntu'}, \code{'centos'}, \code{'redhat'}, \code{'opensuse'},
+and \code{'sle'}; see
+\url{https://github.com/rstudio/r-system-requirements#operating-systems}}
 
 \item{curl}{the location of the curl binary on your system}
+
+\item{sudo}{whether to pre-pend \code{'sudo'} to the commands}
 
 \item{...}{reserved for future use}
 }
@@ -19,7 +30,7 @@ Get system requirements for 'RAVE'
 \examples{
 
 
-
+if("remotes" \%in\% loadedNamespaces()) {
 # Please check your operating system & version!!!
 
 # =============== On Ubuntu Linux ===============
@@ -59,6 +70,7 @@ ravemanager::system_requirements("opensuse", "42")
 # SUSE Linux Enterprise 12.3
 ravemanager::system_requirements("sle", "12")
 
+}
 
 
 }
