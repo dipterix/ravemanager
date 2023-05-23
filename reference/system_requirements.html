@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">ravemanager</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.19</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,263 +71,47 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Ubuntu 20</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"ubuntu"</span>, <span class="st">"20"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under ubuntu-20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libicu-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y zlib1g-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libcurl4-openssl-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libssl-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfontconfig1-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfreetype6-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfribidi-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libharfbuzz-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libjpeg-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libpng-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libtiff-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libxml2-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libgit2-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfftw3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libhdf5-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libglpk-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libgmp3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libzmq3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y python3</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Ubuntu 18</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"ubuntu"</span>, <span class="st">"18"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under ubuntu-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y software-properties-common</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> add-apt-repository -y ppa:cran/libgit2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get update</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libicu-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y zlib1g-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libcurl4-openssl-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libssl-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfontconfig1-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfreetype6-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfribidi-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libharfbuzz-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libjpeg-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libpng-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libtiff-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libxml2-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libgit2-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfftw3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libhdf5-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libglpk-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libgmp3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libzmq3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y python3</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Ubuntu 16</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"ubuntu"</span>, <span class="st">"16"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under ubuntu-16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y software-properties-common</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> add-apt-repository -y ppa:cran/libgit2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get update</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libicu-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y zlib1g-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libcurl4-openssl-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libssl-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfontconfig1-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfreetype6-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfribidi-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libharfbuzz-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libjpeg-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libpng-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libtiff-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libxml2-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libgit2-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libfftw3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libhdf5-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libglpk-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libgmp3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y libzmq3-dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> apt-get install -y python3</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># =============== On Red Hat Enterprise Linux ===============</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Red Hat Enterprise Linux 8</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"redhat"</span>, <span class="st">"8"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under redhat-8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libicu-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y zlib-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libcurl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y openssl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y fontconfig-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y freetype-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y fribidi-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y harfbuzz-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libjpeg-turbo-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libpng-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libtiff-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libxml2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libgit2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y fftw-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y hdf5-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y glpk-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y gmp-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y zeromq-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y python2</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Red Hat Enterprise Linux 7</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"redhat"</span>, <span class="st">"7"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under redhat-7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rpm -q epel-release || yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y cmake3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libicu-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y zlib-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libcurl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y openssl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y fontconfig-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y freetype-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y fribidi-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y harfbuzz-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libjpeg-turbo-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libpng-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libtiff-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libxml2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libgit2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y fftw-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y hdf5-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y glpk-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y gmp-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y zeromq-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y python</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># =============== On CentOS ===============</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Red Hat Enterprise Linux 8</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"centos"</span>, <span class="st">"8"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under centos-8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y dnf-plugins-core</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf config-manager --set-enabled powertools</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y epel-release</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libicu-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y zlib-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libcurl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y openssl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y fontconfig-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y freetype-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y fribidi-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y harfbuzz-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libjpeg-turbo-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libpng-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libtiff-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libxml2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y libgit2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y fftw-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y hdf5-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y glpk-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y gmp-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y zeromq-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dnf install -y python2</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Red Hat Enterprise Linux 7</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"centos"</span>, <span class="st">"7"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under centos-7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y epel-release</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y cmake3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libicu-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y zlib-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libcurl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y openssl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y fontconfig-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y freetype-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y fribidi-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y harfbuzz-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libjpeg-turbo-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libpng-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libtiff-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libxml2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y libgit2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y fftw-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y hdf5-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y glpk-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y gmp-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y zeromq-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> yum install -y python</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># =============== On OpenSUSE ===============</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># openSUSE 42.3</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"opensuse"</span>, <span class="st">"42"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under opensuse-42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libicu-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y zlib-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libcurl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libopenssl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y fontconfig-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y freetype2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y fribidi-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y harfbuzz-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libjpeg8-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libpng16-compat-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libtiff-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y pandoc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libxml2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libgit2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y fftw3-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y hdf5-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y gmp-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y zeromq-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y python</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># =============== On SUSE Linux Enterprise ===============</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># SUSE Linux Enterprise 12.3</span></span></span>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">system_requirements</span><span class="op">(</span><span class="st">"sle"</span>, <span class="st">"12"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Please consider the following system libraries under sle-12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y make</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y cmake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libicu-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y zlib-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libcurl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libopenssl-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y fontconfig-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y freetype2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libjpeg8-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libpng16-compat-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libtiff-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libxml2-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y git</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y libgit2-24</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y fftw3-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y hdf5-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y gmp-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y zeromq-devel</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zypper install -y python</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> JSON: EXPECTED value GOT &lt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
