@@ -316,6 +316,46 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   }
 
 
+  # generate launcher
+  try({
+    switch(
+      os_type,
+      "darwin" = {
+        dir.create("/Applications/RAVE", recursive = TRUE, showWarnings = FALSE)
+        writeLines(
+          c(
+            "#!/bin/bash\n",
+            sprintf(
+              "%s --no-save --no-restore -e 'rave::start_rave2()'",
+              shQuote(file.path(R.home(component = "bin"), "Rscript")))
+          ),
+          '/Applications/RAVE/RAVE-2.command'
+        )
+        Sys.chmod('/Applications/RAVE/RAVE-2.command', "0755")
+
+        writeLines(
+          c(
+            "#!/bin/bash\n",
+            sprintf(
+              "%s --no-save --no-restore -e 'rave::start_rave()'",
+              shQuote(file.path(R.home(component = "bin"), "Rscript")))
+          ),
+          '/Applications/RAVE/RAVE-1.command'
+        )
+        Sys.chmod('/Applications/RAVE/RAVE-1.command', "0755")
+      },
+      "windows" = {
+        NULL
+      },
+      "linux" = {
+        file.path(R.home(component = "bin"), "Rscript")
+      }, {
+        NULL
+      }
+    )
+  }, silent = TRUE)
+
+
 }
 
 #' @rdname RAVE-install
