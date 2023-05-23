@@ -36,7 +36,20 @@ jobs:
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        run: |
+          # pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+          ns <- asNamespace("pkgdown")
+          env <- new.env(parent = ns)
+          for(nm in names(ns)) {
+            if(is.function(ns[[nm]]) && !inherits(ns[[nm]], "memoised")) {
+              f <- ns[[nm]]
+              environment(f) <- env
+              env[[nm]] <- f
+            }
+          }
+          env$build_tutorials <- function(...){}
+          env$find_tutorials <- function(...){ return(character()) }
+          env$build_site(new_process = FALSE, install = FALSE, pkg = ".")
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
