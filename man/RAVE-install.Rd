@@ -44,8 +44,7 @@ upgrade_installer()
 \item{async}{whether to execute finalizing installation scripts in other
 processes}
 
-\item{...}{passed to internal functions, useful arguments include
-\code{use_rspm} to whether use \code{'RSPM'} on \code{'Ubuntu'} (enabled by default)}
+\item{...}{passed to internal functions}
 
 \item{nightly}{whether to install the nightly build}
 

@@ -58,7 +58,7 @@ get_mirror <- function(nightly = FALSE) {
   switch(
     os_type,
     "windows" = {
-      mirrors[["RSPM"]] <- "https://packagemanager.rstudio.com/cran/latest"
+      mirrors[["RSPM"]] <- "https://packagemanager.posit.co/cran/latest"
     },
     "linux" = {
       lsb <- getOption("ravemanager.os.release", default = NULL)
@@ -76,7 +76,7 @@ get_mirror <- function(nightly = FALSE) {
         }
       }
       if(length(lsb)) {
-        mirrors[["RSPM"]] <- sprintf("https://packagemanager.rstudio.com/cran/__linux__/%s/latest", lsb[[1]])
+        mirrors[["RSPM"]] <- sprintf("https://packagemanager.posit.co/cran/__linux__/%s/latest", lsb[[1]])
       }
     }
   )

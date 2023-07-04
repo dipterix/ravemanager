@@ -13,8 +13,7 @@
 #' @param upgrade upgrade type
 #' @param async whether to execute finalizing installation scripts in other
 #' processes
-#' @param ... passed to internal functions, useful arguments include
-#' \code{use_rspm} to whether use \code{'RSPM'} on \code{'Ubuntu'} (enabled by default)
+#' @param ... passed to internal functions
 #' @return Nothing
 NULL
 
@@ -110,20 +109,41 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
     })]
   }
 
-  if(length(pkgs)) {
-    utils::install.packages(pkgs, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts, type = type)
-    # Set package installation date
-    root_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "config"), "last_updates")
-    if(!dir.exists(root_path)) {
-      dir.create(root_path, showWarnings = FALSE, recursive = TRUE)
+  if(!length(pkgs)) { return() }
+  pkgs2 <- pkgs
+  installed <- FALSE
+  tryCatch({
+    if(system.file(package = "pak") != "") {
+      pak <- asNamespace("pak")
+      pak$repo_add(.list = repos)
+      pak$pkg_install(pkg = pkgs, ask = FALSE, lib = lib,
+                      upgrade = FALSE, dependencies = NA)
+      installed <- TRUE
     }
-    now <- as.character(Sys.time())
-    for(pkg in pkgs) {
-      writeLines(text = now, con = file.path(root_path, pkg))
+  }, error = function(e) {
+    message("Found the following error while using `pak`. Try the native installation methods", e$message)
+    if(!force) {
+      pkgs2 <<- pkgs[sapply(pkgs, function(pkg) {
+        re <- isFALSE(package_needs_update(pkg, lib = lib))
+        !re
+      })]
     }
-    if(any(pkgs %in% c("rave", rave_depends, rave_packages))) {
-      writeLines(text = now, con = file.path(root_path, "rave-family"))
-    }
+  })
+
+  if(!installed && length(pkgs2)) {
+    utils::install.packages(pkgs2, lib = lib, repos = repos, ..., INSTALL_opts = INSTALL_opts, type = type)
+  }
+  # Set package installation date
+  root_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "config"), "last_updates")
+  if(!dir.exists(root_path)) {
+    dir.create(root_path, showWarnings = FALSE, recursive = TRUE)
+  }
+  now <- as.character(Sys.time())
+  for(pkg in pkgs) {
+    writeLines(text = now, con = file.path(root_path, pkg))
+  }
+  if(any(pkgs %in% c("rave", rave_depends, rave_packages))) {
+    writeLines(text = now, con = file.path(root_path, "rave-family"))
   }
 }
 
@@ -287,6 +307,12 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   ravemanager <- asNamespace("ravemanager")
   manager_version <- ravemanager$ravemanager_version()
   message("Current `ravemanager` version: ", manager_version)
+
+  if(system.file(package = "pak") == "") {
+    try({
+      install_packages("pak", lib = lib_path)
+    }, silent = TRUE)
+  }
 
   switch(
     os_type,
@@ -499,7 +525,7 @@ install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
 }
 
-install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, use_rspm = TRUE, ...) {
+install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, ...) {
 
   packages_to_install <- c(
     rave_depends, "rave", rave_packages,
@@ -531,49 +557,10 @@ install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, use_rspm
     libpath <- NULL
   }
 
-  # Make sure `rspm` is installed
-  if(use_rspm && system.file(package = "rspm") == "") {
-    install_packages("rspm", lib = libpath)
-  }
-
-  rspm_enabled <- FALSE
-  if(use_rspm && system.file(package = "rspm") != "") {
-    rspm <- asNamespace("rspm")
-
-    try({
-      rspm$enable()
-      rspm_enabled <- TRUE
-    })
-    on.exit({
-      try({ rspm$disable() })
-    }, after = FALSE, add = TRUE)
-
-    if( rspm_enabled ){
-      message("Trying to install binary (pre-built) dependence")
-      rspm_toinstall <- rspm_install
-      rspm_toinstall <- rspm_toinstall[vapply(rspm_toinstall, function(pkg){
-        system.file(package = pkg) == ""
-      }, FALSE)]
-      if(length(rspm_toinstall)) {
-        install_packages(
-          rspm_toinstall, lib = libpath
-        )
-      }
-
-    } else {
-      message("RSPM disabled: fallback to normal installation")
-    }
-
-    try({ rspm$disable() })
-
-  }
-
-
   packages_to_install <- c(
     rave_depends, "rave", rave_packages,
     rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
   )
-
 
   install_packages(
     packages_to_install, lib = libpath, repos = repos, force = force
