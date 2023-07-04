@@ -3,6 +3,7 @@
 S3method(print,ravemanager_cmd)
 S3method(print,ravemanager_printable)
 export(add_shortcuts)
+export(clear_cache)
 export(configure_python)
 export(ensure_rpymat)
 export(finalize_installation)

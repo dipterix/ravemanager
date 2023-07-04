@@ -4,6 +4,7 @@
 \alias{RAVE-install}
 \alias{add_shortcuts}
 \alias{finalize_installation}
+\alias{clear_cache}
 \alias{install}
 \alias{update_rave}
 \alias{upgrade_installer}
@@ -17,6 +18,8 @@ finalize_installation(
   async = FALSE,
   ...
 )
+
+clear_cache()
 
 install(
   nightly = FALSE,

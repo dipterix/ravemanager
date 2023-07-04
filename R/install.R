@@ -243,6 +243,16 @@ finalize_installation <- function(
 
 #' @rdname RAVE-install
 #' @export
+clear_cache <- function() {
+  config_libpath <- tools::R_user_dir(package = "ravemanager", which = "config")
+  cache_path <- tools::R_user_dir("ravemanager", which = "cache")
+  if(file.exists(config_libpath)) { unlink(config_libpath, recursive = TRUE, force = TRUE) }
+  if(file.exists(cache_path)) { unlink(cache_path, recursive = TRUE, force = TRUE) }
+  invisible()
+}
+
+#' @rdname RAVE-install
+#' @export
 install <- function(nightly = FALSE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, ...) {
 
