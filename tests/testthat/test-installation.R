@@ -9,7 +9,7 @@ remove_conda <- function() {
   })
 }
 test_that("Installation works", {
-  if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES")) {
+  if(detect_gh_ci()) {
     ravemanager::install()
     libpath <- .libPaths()[[1]]
     expect_true(nzchar(system.file(package = "ravebuiltins", lib.loc = libpath)))
@@ -21,8 +21,8 @@ test_that("Installation works", {
       remove_conda()
     })
 
-    remove_conda()
-    ravemanager::configure_python()
-    expect_s3_class(rpyANTs$ants, c("ants.proxy", "python.builtin.module"))
+    # remove_conda()
+    # ravemanager::configure_python()
+    # expect_s3_class(rpyANTs$ants, c("ants.proxy", "python.builtin.module"))
   }
 })

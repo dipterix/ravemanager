@@ -93,3 +93,10 @@ dir_create2 <- function (x, showWarnings = FALSE, recursive = TRUE, check = TRUE
   }
   invisible(normalizePath(x))
 }
+
+detect_gh_ci <- function() {
+  if(isTRUE(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES"))) {
+    return(TRUE)
+  }
+  return(FALSE)
+}

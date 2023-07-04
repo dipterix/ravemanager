@@ -123,7 +123,7 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
       installed <- TRUE
     }
   }, error = function(e) {
-    if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES")) {
+    if(detect_gh_ci()) {
       stop(e)
     }
     message("Found the following error while using `pak`. Try the native installation methods. \n[Original Error]: ", e$message)
@@ -268,8 +268,10 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   rdir <- Sys.getenv("R_USER_CACHE_DIR", "")
   on.exit({
     Sys.setenv(R_USER_CACHE_DIR = rdir)
-    if(length(cdir) == 1 && file.exists(cdir)) {
-      unlink(cdir, recursive = TRUE, force = TRUE)
+    if(detect_gh_ci()) {
+      if(length(cdir) == 1 && file.exists(cdir)) {
+        unlink(cdir, recursive = TRUE, force = TRUE)
+      }
     }
   })
   if(length(cdir) == 1 && is.character(cdir)) {
@@ -348,6 +350,14 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
       ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path, force = force, ...)
     }
   )
+
+  # also write down the libpath
+  if(dir.exists( lib_path )) {
+    lib_path <- normalizePath(lib_path, mustWork = TRUE)
+    options("ravemanager.libpath" = lib_path)
+    config_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "config"))
+    writeLines(text = lib_path, con = file.path(config_path, "libpath"))
+  }
 
   if(finalize) {
     message("Packages have been installed. Finalizing settings.")
