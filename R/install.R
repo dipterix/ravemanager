@@ -124,7 +124,7 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
     if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES")) {
       stop(e)
     }
-    message("Found the following error while using `pak`. Try the native installation methods", e$message)
+    message("Found the following error while using `pak`. Try the native installation methods. \n[Original Error]: ", e$message)
     if(!force) {
       pkgs2 <<- pkgs[sapply(pkgs, function(pkg) {
         re <- isFALSE(package_needs_update(pkg, lib = lib))
@@ -255,6 +255,23 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   rversion <- sprintf("%s.%s", rversion$major, rversion$minor)
   if(utils::compareVersion(rversion, "4.0.0") < 1) {
     stop(sprintf("Your R version (%s) is too low. Please install the latest R on your machine\n  Please check https://cran.r-project.org/ for more information.", rversion))
+  }
+
+  # set system environments
+  cdir <- NULL
+  tryCatch({
+    tools <- asNamespace("tools")
+    cdir <- dir_create2(tools$R_user_dir("ravemanager", which = "cache"))
+  }, error = function(e) {})
+  rdir <- Sys.getenv("R_USER_CACHE_DIR", "")
+  on.exit({
+    Sys.setenv(R_USER_CACHE_DIR = rdir)
+    if(length(cdir) == 1 && file.exists(cdir)) {
+      unlink(cdir, recursive = TRUE, force = TRUE)
+    }
+  })
+  if(length(cdir) == 1 && is.character(cdir)) {
+    Sys.setenv(R_USER_CACHE_DIR = cdir)
   }
 
   # make sure RAVE is installed in path defined by `R_LIBS_USER` system env

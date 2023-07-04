@@ -1,5 +1,13 @@
 # DIPSAUS DEBUG START
 # library(testthat)
+
+remove_conda <- function() {
+  try(silent = TRUE, {
+    rpymat <- asNamespace("rpymat")
+    root <- normalizePath(rpymat$install_root(), mustWork = FALSE)
+    unlink(root, recursive = TRUE, force = TRUE)
+  })
+}
 test_that("Installation works", {
   if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES")) {
     ravemanager::install()
@@ -10,7 +18,7 @@ test_that("Installation works", {
     rpymat <- asNamespace("rpymat")
 
     on.exit({
-      rpymat$remove_conda(ask = FALSE)
+      remove_conda()
     })
 
     # rpymat$remove_conda(ask = FALSE)
