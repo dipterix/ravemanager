@@ -121,6 +121,9 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
       installed <- TRUE
     }
   }, error = function(e) {
+    if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES")) {
+      stop(e)
+    }
     message("Found the following error while using `pak`. Try the native installation methods", e$message)
     if(!force) {
       pkgs2 <<- pkgs[sapply(pkgs, function(pkg) {
