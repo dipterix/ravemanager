@@ -115,7 +115,9 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
   tryCatch({
     if(system.file(package = "pak") != "") {
       pak <- asNamespace("pak")
-      pak$repo_add(.list = repos)
+      current_repos <- pak$repo_get(bioc = FALSE)
+      repos[current_repos$name] <- current_repos$url
+      options(repos = repos)
       pak$pkg_install(pkg = pkgs, ask = FALSE, lib = lib,
                       upgrade = FALSE, dependencies = NA)
       installed <- TRUE

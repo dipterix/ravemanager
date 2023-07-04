@@ -21,8 +21,8 @@ test_that("Installation works", {
       remove_conda()
     })
 
-    # rpymat$remove_conda(ask = FALSE)
-    # ravemanager::configure_python()
-    # expect_s3_class(rpyANTs$ants, c("ants.proxy", "python.builtin.module"))
+    remove_conda()
+    ravemanager::configure_python()
+    expect_s3_class(rpyANTs$ants, c("ants.proxy", "python.builtin.module"))
   }
 })
