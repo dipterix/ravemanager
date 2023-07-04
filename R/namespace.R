@@ -12,19 +12,6 @@ guess_libpath <- function(if_not_found = .libPaths()[[1]]) {
   if(length(lib_path)) {
     return(lib_path[[1]])
   }
-  # get from config
-  config_libpath <- file.path(tools::R_user_dir(package = "ravemanager", which = "config"), "libpath")
-  if(file.exists(config_libpath)) {
-    tryCatch({
-      lib_path <- readLines(config_libpath, n = 1L)
-      if(length(lib_path) == 1 && !is.na(lib_path) && trimws(lib_path) != "") {
-        if( dir.exists(lib_path) ) {
-          lib_path <- normalizePath(lib_path)
-          return(lib_path)
-        }
-      }
-    })
-  }
 
   return(if_not_found)
 }

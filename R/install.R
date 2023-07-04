@@ -361,13 +361,6 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
     }
   )
 
-  # also write down the libpath
-  if(dir.exists( lib_path )) {
-    lib_path <- normalizePath(lib_path, mustWork = TRUE)
-    options("ravemanager.libpath" = lib_path)
-    config_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "config"))
-    writeLines(text = lib_path, con = file.path(config_path, "libpath"))
-  }
 
   if(finalize) {
     message("Packages have been installed. Finalizing settings.")
