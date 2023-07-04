@@ -1,7 +1,7 @@
 # DIPSAUS DEBUG START
 # library(testthat)
 test_that("Installation works", {
-  if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) == "TRUE") {
+  if(toupper(as.character(Sys.getenv("TEST_INSTALLATION"))) %in% c("TRUE", "YES")) {
     ravemanager::install()
     libpath <- .libPaths()[[1]]
     expect_true(nzchar(system.file(package = "ravebuiltins", lib.loc = libpath)))
