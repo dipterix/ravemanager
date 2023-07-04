@@ -149,7 +149,20 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
 
   # Install conda and create a conda environment
   if(!dir.exists(rpymat$env_path())) {
-    rpymat$configure_conda(python_ver = python_ver, force = TRUE)
+    conda_bin <- rpymat$conda_bin()
+    standalone <- TRUE
+    if(length(conda_bin) == 1 && !is.na(conda_bin) && file.exists(conda_bin)) {
+      standalone <- FALSE
+    }
+    tryCatch({
+      rpymat$configure_conda(python_ver = python_ver, force = TRUE, standalone = standalone)
+    }, error = function(e) {
+      rpymat$set_conda(temporary = TRUE)
+      rpymat$miniconda_installer_url()
+      reticulate <- asNamespace("reticulate")
+      reticulate$install_miniconda(path = rpymat$conda_path(), update = FALSE, force = TRUE)
+      rpymat$configure_conda(python_ver = python_ver)
+    })
   }
   rpymat$ensure_rpymat(verbose = verbose)
 
@@ -186,6 +199,12 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
   if(!'antspyx' %in% installed_pkgs_tbl$package) {
     try({
       rpymat$add_packages(packages = get_python_package_name("antspyx"),
+                          pip = TRUE)
+    })
+  }
+  if(!'antspynet' %in% installed_pkgs_tbl$package) {
+    try({
+      rpymat$add_packages(packages = get_python_package_name("antspynet"),
                           pip = TRUE)
     })
   }

@@ -1,6 +1,6 @@
 Package: ravemanager
 Title: Manage 'RAVE' Packages
-Version: 1.0.20
+Version: 1.0.21
 Authors@R: 
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", 
            role = c("aut", "cre"))
@@ -15,4 +15,6 @@ RoxygenNote: 7.2.3
 URL: https://dipterix.org/ravemanager/,
     http://dipterix.org/ravemanager/
 Suggests: 
-    learnr
+    learnr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
