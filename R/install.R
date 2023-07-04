@@ -345,6 +345,8 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   if(system.file(package = "pak") == "") {
     try({
       install_packages("pak", lib = lib_path)
+      pak <- asNamespace("pak")
+      pak$pak_install_extra(upgrade = FALSE)
     }, silent = TRUE)
   }
 
