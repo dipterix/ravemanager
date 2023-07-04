@@ -1,4 +1,4 @@
-guess_libpath <- function(if_not_found = NULL) {
+guess_libpath <- function(if_not_found = .libPaths()[[1]]) {
   lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = ""))
 
   ostype <- get_os()
