@@ -332,9 +332,7 @@ installer_unload_packages <- function() {
   }
 }
 
-#' @rdname RAVE-install
-#' @export
-install <- function(nightly = FALSE, upgrade_manager = FALSE,
+install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, python = FALSE, ...) {
 
   if( nightly ) {
@@ -442,6 +440,88 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   }
 
 
+}
+
+#' @rdname RAVE-install
+#' @export
+install <- function(nightly = FALSE, upgrade_manager = FALSE,
+                             finalize = TRUE, force = FALSE, python = FALSE, ...) {
+  tryCatch({
+    install_internal(
+      nightly = nightly,
+      upgrade_manager = upgrade_manager,
+      finalize = finalize,
+      force = force,
+      python = python,
+      ...
+    )
+  }, error = function(e) {
+
+    line_width <- as.integer(getOption("width", 80L))
+    if( !isTRUE(line_width <= 80L) ) { line_width <- 80L }
+    if( line_width < 20 ) { line_width <- 20 }
+
+    message(paste(rep("=", line_width), collapse = ""), appendLF = TRUE)
+
+    error_verbosed <- FALSE
+    on.exit({
+      if(!error_verbosed) {
+        message("# ", paste(rep("-", 4), collapse = ""),
+                " RAVE installer detects the following error(s): ", paste(rep("-", 8), collapse = ""),
+                appendLF = TRUE)
+        message(e$message)
+      }
+    }, add = FALSE)
+
+    msg_troubleshoot <- NULL
+
+    os <- get_os()
+
+    tryCatch({
+      if(os == "darwin") {
+        has_brew <- brew_installed()
+        if(!has_brew) {
+          msg_troubleshoot <- c(msg_troubleshoot, 'It seems that you haven\'t installed Homebrew (open-source pacakge manager for MacOS) yet. Please go to https://brew.sh/ or copy-paste-run the following shell terminal command:\n\n  /usr/bin/env bash\n  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"\n\n\n* For the first time installer, you will need to enter your user login password (your password will not show up on typing), and hit `return` key. Then hit `return` key again to accept default installation options.\n* If you believe you have installed Homebrew, please contact RAVE developers (slack or help@rave.wiki) for troubleshooting')
+        }
+        brew_packages <- c("fftw", "hdf5", "libpng", "pkg-config", "cmake")
+        brew_packages <- brew_packages[!brew_installed(brew_packages)]
+        if(length(brew_packages)) {
+          msg_troubleshoot <- c(msg_troubleshoot, sprintf("The following **system packages** are missing. RAVE does not install system packages. You need to install them by yourself since they may require admin/sudo account privilege. If you have Homebrew installed, copy-paste-run the following terminal commands to install these libraries:\n\n  brew install %s\n\n", paste(brew_packages, collapse = " ")))
+        }
+      } else if( os == "linux" ){
+        suppressWarnings({
+          missing_pkg <- system_requirements(sudo = TRUE)
+          if(length(missing_pkg)) {
+
+            msg_troubleshoot <- c(msg_troubleshoot, sprintf("You are using Linux operating system. It is most likely that some system packages are missing. RAVE does not install system packages. You need to install them by yourself since they usually require sudo account privilege. Please consider installing the following libraries first:\n\n%s\n\n", paste("  ", missing_pkg, collapse = "\n")))
+
+          }
+        })
+      }
+    }, error = function(e){})
+
+
+    if(length(msg_troubleshoot)) {
+      message("# ", paste(rep("-", 4), collapse = ""),
+              " Toubleshoot ", paste(rep("-", 8), collapse = ""),
+              appendLF = TRUE)
+      message("Failure to install RAVE is often caused by missing system libraries. Please make sure you have installed necessary: https://openwetware.org/wiki/RAVE:Install_prerequisites\n")
+      lapply(seq_along(msg_troubleshoot), function(ii) {
+        msg <- unlist(strsplit(msg_troubleshoot[[ii]], "\n"))
+        prefix <- rep("    ", length(msg))
+        prefix[[1]] <- sprintf("%d. ", ii)
+        message(paste(prefix, msg, collapse = "\n"), appendLF = TRUE)
+      })
+
+    }
+
+    message("# ", paste(rep("-", 4), collapse = ""),
+            " RAVE installer detects the following error(s): ", paste(rep("-", 8), collapse = ""),
+            appendLF = TRUE)
+    message(e$message)
+    error_verbosed <- TRUE
+
+  })
 }
 
 #' @rdname RAVE-install
