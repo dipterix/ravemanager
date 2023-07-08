@@ -141,9 +141,22 @@ validate_python <- function(verbose = TRUE) {
   return(invisible(package_missing))
 }
 
+system_pkgpath <- function(package, ..., alternative = TRUE) {
+  libpath <- get_libpaths(first = TRUE)
+  re <- system.file(package = package, lib.loc = libpath)
+  if(re == "" && alternative) {
+    re <- system.file(package = package)
+  }
+  return(re)
+}
+
 #' @rdname configure-python
 #' @export
 configure_python <- function(python_ver = "3.9", verbose = TRUE) {
+
+  if(!is_installed("rpymat")) {
+    install_packages("rpymat")
+  }
 
   rpymat <- asNamespace("rpymat")
 
@@ -160,17 +173,18 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
       rpymat$set_conda(temporary = TRUE)
       rpymat$miniconda_installer_url()
       reticulate <- asNamespace("reticulate")
-      reticulate$install_miniconda(path = rpymat$conda_path(), update = FALSE, force = TRUE)
+      reticulate$install_miniconda(path = rpymat$conda_path(),
+                                   update = TRUE, force = TRUE)
       rpymat$configure_conda(python_ver = python_ver)
     })
   }
   rpymat$ensure_rpymat(verbose = verbose)
 
   reticulate <- asNamespace("reticulate")
-  installed_pkgs_tbl <- reticulate$py_list_packages(envname = rpymat$env_path())
+  installed_pkgs_tbl <- rpymat$list_pkgs()
 
   # install necessary libraries
-  pkgs <- c("h5py", "numpy", "scipy", "pandas", "cython")
+  pkgs <- c("h5py", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
     rpymat$add_packages(get_python_package_name(pkgs))
   }
@@ -184,29 +198,19 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
     })
   }
 
-  # install nipy family
-  pkgs <- c("nibabel", "nipy", "pynwb", "mne")
+  # install pip-only packages
+  pkgs <- c("antspynet", "antspyx", "nipy", "mne", "pynwb", "nibabel")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if(length(pkgs)) {
     for(pkg in get_python_package_name(pkgs)) {
-      try({
-        rpymat$add_packages(packages = pkg, pip = TRUE)
-      })
+      if( pkg %in% pkgs ) {
+        try({
+          rpymat$add_packages(packages = pkg, pip = TRUE)
+        })
+        installed_pkgs_tbl <- rpymat$list_pkgs()
+        pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
+      }
     }
-  }
-
-  # ants
-  if(!'antspyx' %in% installed_pkgs_tbl$package) {
-    try({
-      rpymat$add_packages(packages = get_python_package_name("antspyx"),
-                          pip = TRUE)
-    })
-  }
-  if(!'antspynet' %in% installed_pkgs_tbl$package) {
-    try({
-      rpymat$add_packages(packages = get_python_package_name("antspynet"),
-                          pip = TRUE)
-    })
   }
 
   # Initialize

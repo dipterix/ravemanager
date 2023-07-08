@@ -89,6 +89,7 @@ clear_uninstalled <- function() {
   }
 }
 
+
 install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
                              repos = get_mirror(), type = getOption("pkgType"),
                              ..., INSTALL_opts = '--no-lock', force = TRUE, verbose = TRUE) {
@@ -118,7 +119,12 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
       current_repos <- pak$repo_get(bioc = FALSE)
       repos[current_repos$name] <- current_repos$url
       options(repos = repos)
-      pak$pkg_install(pkg = pkgs, ask = FALSE, lib = lib,
+
+      pkgs3 <- pkgs
+      if(!identical(type, "source")) {
+        pkgs3 <- sprintf("any::%s", pkgs)
+      }
+      pak$pkg_install(pkg = pkgs3, ask = FALSE, lib = lib,
                       upgrade = FALSE, dependencies = NA)
       installed <- TRUE
     }
@@ -126,13 +132,13 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
     if(detect_gh_ci()) {
       stop(e)
     }
-    message("Found the following error while using `pak`. Try the native installation methods. \n[Original Error]: ", e$message)
     if(!force) {
       pkgs2 <<- pkgs[sapply(pkgs, function(pkg) {
         re <- isFALSE(package_needs_update(pkg, lib = lib))
         !re
       })]
     }
+    message("Try the native installation methods. \n[Original Error]: ", e$message)
   })
 
   if(!installed && length(pkgs2)) {
@@ -251,57 +257,13 @@ clear_cache <- function() {
   invisible()
 }
 
-#' @rdname RAVE-install
-#' @export
-install <- function(nightly = FALSE, upgrade_manager = FALSE,
-                    finalize = TRUE, force = FALSE, ...) {
 
-  if( nightly ) {
-    options("ravemanager.nightly" = TRUE)
-  } else {
-    options("ravemanager.nightly" = FALSE)
-  }
-
+assert_r_version <- function(min = "4.0.0") {
   # check R version
   rversion <- R.Version()
   rversion <- sprintf("%s.%s", rversion$major, rversion$minor)
-  if(utils::compareVersion(rversion, "4.0.0") < 1) {
+  if(utils::compareVersion(rversion, min) < 1) {
     stop(sprintf("Your R version (%s) is too low. Please install the latest R on your machine\n  Please check https://cran.r-project.org/ for more information.", rversion))
-  }
-
-  # set system environments
-  cdir <- NULL
-  tryCatch({
-    tools <- asNamespace("tools")
-    cdir <- dir_create2(tools$R_user_dir("ravemanager", which = "cache"))
-  }, error = function(e) {})
-  rdir <- Sys.getenv("R_USER_CACHE_DIR", "")
-  on.exit({
-    Sys.setenv(R_USER_CACHE_DIR = rdir)
-    if(detect_gh_ci()) {
-      if(length(cdir) == 1 && file.exists(cdir)) {
-        unlink(cdir, recursive = TRUE, force = TRUE)
-      }
-    }
-  })
-  if(length(cdir) == 1 && is.character(cdir)) {
-    Sys.setenv(R_USER_CACHE_DIR = cdir)
-  }
-
-  # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
-  lib_path <- guess_libpath()
-
-  if(length(lib_path)) {
-    tryCatch(
-      {
-        dir_create2(lib_path)
-      },
-      error = function(e) { NULL },
-      warning = function(e) { NULL }
-    )
-    if(!dir.exists(lib_path)) {
-      lib_path <- NULL
-    }
   }
 
   # Get os information
@@ -316,12 +278,94 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
       current_ver <- package_version(r_ver$current_R_version)
 
       if(identical(current_ver$major, latest_ver$major)) {
-        if( latest_ver$minor - current_ver$minor <= 1 ) {
-
+        if( latest_ver$minor == current_ver$minor ) {
           options("ravemanager.binary_available" = TRUE)
         }
       }
     }, error = function(e){})
+  }
+  return(TRUE)
+}
+
+try_setup_pak <- function(lib_path = get_libpaths(check = TRUE)) {
+  cdir <- NULL
+  tryCatch({
+    tools <- asNamespace("tools")
+    cdir <- dir_create2(tools$R_user_dir("ravemanager", which = "cache"))
+
+    # Try to install package `pak`
+    if(system.file(package = "pak") == "") {
+      install_packages("pak", lib = lib_path)
+      pak <- asNamespace("pak")
+      pak$pak_install_extra(upgrade = FALSE)
+    }
+
+  }, error = function(e) {})
+
+  return(cdir)
+}
+
+installer_unload_packages <- function() {
+
+  # Try to unload packages, may not always work but they should be unloaded anyway
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
+  )
+
+  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
+
+  if(length(loaded)) {
+
+    for(nm in loaded) {
+      try(
+        expr = {
+          unload_namespace(nm)
+        },
+        silent = TRUE
+      )
+    }
+  }
+  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
+  if(length(loaded)) {
+    warning("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
+  }
+}
+
+#' @rdname RAVE-install
+#' @export
+install <- function(nightly = FALSE, upgrade_manager = FALSE,
+                    finalize = TRUE, force = FALSE, python = FALSE, ...) {
+
+  if( nightly ) {
+    options("ravemanager.nightly" = TRUE)
+  } else {
+    options("ravemanager.nightly" = FALSE)
+  }
+
+  # Get os information
+  os_type <- get_os()
+  os_arch <- get_arch()
+  repos <- get_mirror(nightly = nightly)
+
+  assert_r_version(min = "4.0.0")
+
+  # make sure RAVE is installed in path defined by `R_LIBS_USER` system env
+  lib_path <- get_libpaths(check = TRUE)
+
+  # set system environments
+  cdir <- try_setup_pak()
+  rdir <- Sys.getenv("R_USER_CACHE_DIR", "")
+  on.exit({
+    Sys.setenv(R_USER_CACHE_DIR = rdir)
+    if(detect_gh_ci()) {
+      if(length(cdir) == 1 && file.exists(cdir)) {
+        unlink(cdir, recursive = TRUE, force = TRUE)
+      }
+    }
+  })
+  if(length(cdir) == 1 && is.character(cdir)) {
+    Sys.setenv(R_USER_CACHE_DIR = cdir)
   }
 
   clear_uninstalled()
@@ -329,7 +373,8 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   # ravemanager upgrade
   if( upgrade_manager ) {
     if( os_type == "windows" ) {
-      message("Cannot upgrade RAVE installer on Windows. Please the following command to upgrade ravemanager instead:\n  install.packages('ravemanager', repos = 'https://rave-ieeg.r-universe.dev')")
+      # TODO: try pkgload
+      message("Cannot upgrade RAVE installer on Windows. Please restart R and run the following command to upgrade ravemanager instead:\n  install.packages('ravemanager', repos = 'https://rave-ieeg.r-universe.dev')")
       return(invisible())
     } else {
       needs_restart <- upgrade_installer()
@@ -342,27 +387,41 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   manager_version <- ravemanager$ravemanager_version()
   message("Current `ravemanager` version: ", manager_version)
 
-  if(system.file(package = "pak") == "") {
-    try({
-      install_packages("pak", lib = lib_path)
-      pak <- asNamespace("pak")
-      pak$pak_install_extra(upgrade = FALSE)
-    }, silent = TRUE)
-  }
+  installer_unload_packages()
 
-  switch(
-    os_type,
-    "darwin" = {
-      ravemanager$install_rave_osx(nightly = nightly, libpath = lib_path, force = force, ...)
-    },
-    "windows" = {
-      ravemanager$install_rave_windows(nightly = nightly, libpath = lib_path, force = force, ...)
-    },
-    "linux" = {
-      ravemanager$install_rave_linux(nightly = nightly, libpath = lib_path, force = force, ...)
-    }
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
   )
 
+  repos <- get_mirror(nightly = nightly)
+
+
+  # Fast install binary deps
+  install_packages(
+    packages_to_install, lib = lib_path,
+    repos = repos, type = "binary", force = force
+  )
+
+  # Make sure the source package is compiled and updated for core packages
+  packages_to_install <- c(
+    rave_depends, "rave", rave_packages,
+    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
+  )
+  install_packages(
+    packages_to_install, lib = lib_path,
+    repos = repos, type = "source",  force = force
+  )
+
+  # Configure python
+  if( python ) {
+    try({
+      message("Configuring python...")
+      install_packages("rpymat", lib = lib_path,
+                       repos = repos, force = FALSE)
+      configure_python()
+    })
+  }
 
   if(finalize) {
     message("Packages have been installed. Finalizing settings.")
@@ -379,46 +438,6 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
   }
 
 
-  # generate launcher
-  try({
-    switch(
-      os_type,
-      "darwin" = {
-        dir.create("/Applications/RAVE", recursive = TRUE, showWarnings = FALSE)
-        writeLines(
-          c(
-            "#!/bin/bash\n",
-            sprintf(
-              "%s --no-save --no-restore -e 'rave::start_rave2()'",
-              shQuote(file.path(R.home(component = "bin"), "Rscript")))
-          ),
-          '/Applications/RAVE/RAVE-2.command'
-        )
-        Sys.chmod('/Applications/RAVE/RAVE-2.command', "0755")
-
-        writeLines(
-          c(
-            "#!/bin/bash\n",
-            sprintf(
-              "%s --no-save --no-restore -e 'rave::start_rave()'",
-              shQuote(file.path(R.home(component = "bin"), "Rscript")))
-          ),
-          '/Applications/RAVE/RAVE-1.command'
-        )
-        Sys.chmod('/Applications/RAVE/RAVE-1.command', "0755")
-      },
-      "windows" = {
-        NULL
-      },
-      "linux" = {
-        file.path(R.home(component = "bin"), "Rscript")
-      }, {
-        NULL
-      }
-    )
-  }, silent = TRUE)
-
-
 }
 
 #' @rdname RAVE-install
@@ -427,9 +446,10 @@ update_rave <- install
 
 #' @rdname RAVE-install
 #' @export
-upgrade_installer <- function() {
+upgrade_installer <- function(reload = TRUE) {
   v1 <- ravemanager_version()
   v2 <- ravemanager_latest_version()
+  updated <- FALSE
   if(utils::compareVersion(v1, v2) < 0) {
     # Make sure ravemanager is the latest
     message("Upgrade ravemanager")
@@ -444,7 +464,7 @@ upgrade_installer <- function() {
           "[ravemanager] The installer's major version has been updated (from %s -> %s). \nPlease close all R & RStudio sessions, restart R, and run the following command again:\n\n\t\travemanager::install()",
           v1, v2
         ))
-        return(invisible(TRUE))
+        updated <- TRUE
       }
     }, error = function(e) {
       message("Failed to upgrade `ravemanager`: using current version")
@@ -453,154 +473,15 @@ upgrade_installer <- function() {
   } else {
     message("The installer has the latest version.")
   }
+  if(reload && system.file(package = "pkgload") != '') {
+    lib_path <- get_libpaths(first = TRUE, check = TRUE)
+    path <- system.file(package = "ravemanager", lib.loc = lib_path)
+    if(path == "") {
+      path <- system.file(package = "ravemanager")
+    }
+    if(path != "") {
+      pkgload::load_all(path)
+    }
+  }
   return(invisible(FALSE))
-}
-
-install_rave_windows <- function(libpath, nightly = FALSE, force = FALSE, ...) {
-
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages,
-    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
-  )
-
-  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
-
-  if(length(loaded)) {
-
-    for(nm in loaded) {
-      try(
-        expr = {
-          unload_namespace(nm)
-        },
-        silent = TRUE
-      )
-    }
-  }
-  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
-  if(length(loaded)) {
-    stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
-  }
-
-  repos <- get_mirror(nightly = nightly)
-
-  # binary <- isTRUE(getOption("ravemanager.binary_available", FALSE))
-
-  # type <- ifelse(binary, "binary", "source")
-
-  if(missing(libpath) || !length(libpath)) {
-    libpath <- NULL
-  }
-
-  # Fast install binary deps
-  install_packages(
-    packages_to_install, lib = libpath,
-    repos = repos, type = "binary", force = force
-  )
-
-  # Make sure the source package is compiled and updated
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages,
-    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
-  )
-  install_packages(
-    packages_to_install, lib = libpath,
-    repos = repos, type = "source", force = force
-  )
-
-}
-
-install_rave_osx <- function(libpath, nightly = FALSE, force = FALSE, ...) {
-
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages,
-    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
-  )
-
-  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
-
-  if(length(loaded)) {
-
-    for(nm in loaded) {
-      try(
-        expr = {
-          unload_namespace(nm)
-        },
-        silent = TRUE
-      )
-    }
-  }
-  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
-  if(length(loaded)) {
-    stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
-  }
-
-  repos <- get_mirror(nightly = nightly)
-
-  # binary <- isTRUE(getOption("ravemanager.binary_available", FALSE))
-
-  # type <- ifelse(binary, "binary", "source")
-
-  if(missing(libpath) || !length(libpath)) {
-    libpath <- NULL
-  }
-
-  # Fast install binary deps
-  install_packages(
-    packages_to_install, lib = libpath,
-    repos = repos, type = "binary", force = force
-  )
-
-  # Make sure the source package is compiled and updated for core packages
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages,
-    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
-  )
-  install_packages(
-    packages_to_install, lib = libpath,
-    repos = repos, type = "source",  force = force
-  )
-
-}
-
-install_rave_linux <- function(libpath, nightly = FALSE, force = FALSE, ...) {
-
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages,
-    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
-  )
-
-  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
-
-  if(length(loaded)) {
-
-    for(nm in loaded) {
-      try(
-        expr = {
-          unload_namespace(nm)
-        },
-        silent = TRUE
-      )
-    }
-  }
-
-  loaded <- packages_to_install[packages_to_install %in% loadedNamespaces()]
-  if(length(loaded)) {
-    stop("The following packages are found that cannot be unloaded. Please make sure you CLOSE ALL running R & RStudio before installing/upgrading RAVE. The packages unable to unload:\n  ", paste(shQuote(loaded), collapse = ", "))
-  }
-
-  # install the CRAN dependencies with dev repos
-  repos <- get_mirror(nightly = nightly)
-  if(missing(libpath) || !length(libpath)) {
-    libpath <- NULL
-  }
-
-  packages_to_install <- c(
-    rave_depends, "rave", rave_packages,
-    rave_suggests[!vapply(rave_suggests, is_installed, FALSE)]
-  )
-
-  install_packages(
-    packages_to_install, lib = libpath, repos = repos, force = force
-  )
-
 }

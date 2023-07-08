@@ -45,13 +45,37 @@ detach_namespace <- function (package) {
 
 
 
-unload_namespace <- function(name) {
+unload_namespace <- function(name, use_pkgload = TRUE) {
+
   if(!length(name)) { return() }
+
+  use_pkgload <- use_pkgload && system.file("pkgload") != ''
+  avoids <- NULL
+  if(use_pkgload) {
+    try(silent = TRUE, {
+      pkgload_desc <- read.dcf(system.file(package = "pkgload", "DESCRIPTION"))
+      pkgload_desc <- as.list(as.data.frame(pkgload_desc))
+      avoids <- c(pkgload_desc$Imports, pkgload_desc$Suggests, pkgload_desc$Depends, "pkgload")
+      avoids <- unlist(strsplit(avoids, "[ ,\n]"))
+    })
+  }
+  if(any(name %in% avoids)) {
+    use_pkgload <- FALSE
+  }
+
 
   if(length(name) > 1) {
     for(nm in name) {
-      unload_namespace(nm)
+      unload_namespace(nm, use_pkgload = use_pkgload)
     }
+  }
+  unloaded <- FALSE
+  if(!identical(name, "pkgload")) {
+    try({
+      pkgload <- asNamespace("pkgload")
+      pkgload$unload(package = name)
+      unloaded <- TRUE
+    }, silent = TRUE)
   }
 
   detach_namespace(name)
