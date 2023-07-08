@@ -223,14 +223,14 @@ finalize_installation <- function(
         args$async <- async
       }
 
-      message("Finalizing installation: ", pkg)
+      message("Finalizing installation: ", pkg, "\r", appendLF = FALSE)
       do.call(fun, args)
 
       if(async) {
         message(sprintf(
-          "[%s] Scheduled finalizing installation in the background.",
+          "[%s] finalizing installation in the background.\r",
           pkg
-        ))
+        ), appendLF = FALSE)
       }
 
   }, error = function(e) {
@@ -398,6 +398,7 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
 
 
   # Fast install binary deps
+  message("Installing RAVE... This might take a while...")
   install_packages(
     packages_to_install, lib = lib_path,
     repos = repos, type = "binary", force = force
@@ -430,9 +431,12 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
                              ravemanager$rave_packages,
                              ravemanager$rave_suggests)
 
-    ravemanager$finalize_installation(
-      packages = packages_to_install,
-      upgrade = 'config-only', async = FALSE)
+    suppressWarnings({
+      ravemanager$finalize_installation(
+        packages = packages_to_install,
+        upgrade = 'config-only', async = FALSE)
+    })
+
   } else {
     message("Done installing/updating RAVE! Please close all your R/RStudio sessions and restart. If you want to update package add-ons, please run `ravemanager::finalize_installation()` after restart.")
   }
