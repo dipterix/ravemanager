@@ -167,6 +167,9 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
     if(length(conda_bin) == 1 && !is.na(conda_bin) && file.exists(conda_bin)) {
       standalone <- FALSE
     }
+
+    # Increase timeout to 30min
+    options("timeout" = 60*30)
     tryCatch({
       rpymat$configure_conda(python_ver = python_ver, force = TRUE, standalone = standalone)
     }, error = function(e) {
