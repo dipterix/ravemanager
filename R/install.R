@@ -426,7 +426,8 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
   )
   install_packages(
     packages_to_install, lib = lib_path,
-    repos = repos, type = "source",  force = force
+    repos = repos, type = "source",  force = force,
+    use_pak = FALSE
   )
 
   # Configure python
