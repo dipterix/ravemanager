@@ -14,7 +14,7 @@ configuration files."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     
     <a class="navbar-brand me-2" href="../index.html">ravemanager</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.26</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.28</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,6 +64,7 @@ configuration files.</p>
 <span>  upgrade_manager <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  finalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  python <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -72,10 +73,11 @@ configuration files.</p>
 <span>  upgrade_manager <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  finalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  python <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">upgrade_installer</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">upgrade_installer</span><span class="op">(</span>reload <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -113,6 +115,17 @@ before updating other packages</p></dd>
 <dt>force</dt>
 <dd><p>whether to force updating packages even the installed have
 the latest versions</p></dd>
+
+
+<dt>python</dt>
+<dd><p>whether to install python; default is false</p></dd>
+
+
+<dt>reload</dt>
+<dd><p>whether to reload <code>ravemanager</code> after installation;
+default is true. This tries to load the upgraded <code>ravemanager</code>
+without restarting the R session; however, this solution not always
+works. In such case, restarting R session is always the solution.</p></dd>
 
 </dl></div>
     <div class="section level2">
