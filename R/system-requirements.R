@@ -53,12 +53,9 @@
 #'
 #'
 #' @export
-system_requirements <- function(os, os_release = NULL, curl = Sys.which("curl"), sudo = FALSE, ...) {
+system_requirements <- function(os = NULL, os_release = NULL, curl = Sys.which("curl"), sudo = FALSE, ...) {
   if(!is_installed("remotes")) {
     install_packages("remotes")
-  }
-  if(missing(os)) {
-    stop(sprintf("Please specify your operating system. See Examples in %s", sQuote("?ravemanager::system_requirements")))
   }
   remotes <- asNamespace("remotes")
 

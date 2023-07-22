@@ -5,7 +5,7 @@
 \title{Get system requirements for 'RAVE'}
 \usage{
 system_requirements(
-  os,
+  os = NULL,
   os_release = NULL,
   curl = Sys.which("curl"),
   sudo = FALSE,
