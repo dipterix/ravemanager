@@ -55,7 +55,7 @@
 #' @export
 system_requirements <- function(os = NULL, os_release = NULL, curl = Sys.which("curl"), sudo = FALSE, ...) {
   if(!is_installed("remotes")) {
-    install_packages("remotes")
+    install_packages("remotes", use_pak = FALSE)
   }
   remotes <- asNamespace("remotes")
 
@@ -90,7 +90,7 @@ system_requirements <- function(os = NULL, os_release = NULL, curl = Sys.which("
 
       Sys.setenv(RSPM_ROOT = "https://packagemanager.posit.co")
       if(!is_installed("pak")) {
-        install_packages("pak")
+        install_packages("pak", use_pak = FALSE)
       }
       pak <- asNamespace("pak")
       res <- pak$local_system_requirements(

@@ -77,8 +77,8 @@ clear_uninstalled <- function() {
   for(lib in libs) {
     if(dir.exists(lib)) {
       locked <- list.files(lib, all.files = FALSE, full.names = FALSE,
-                       recursive = FALSE, pattern = "^00",
-                       include.dirs = TRUE, no.. = FALSE)
+                           recursive = FALSE, pattern = "^00",
+                           include.dirs = TRUE, no.. = FALSE)
       for(f in locked) {
         absf <- file.path(lib, f)
         if(dir.exists(absf)) {
@@ -97,7 +97,8 @@ clear_uninstalled <- function() {
 
 install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
                              repos = get_mirror(), type = getOption("pkgType"),
-                             ..., INSTALL_opts = '--no-lock', force = TRUE, verbose = TRUE) {
+                             ..., INSTALL_opts = '--no-lock', force = TRUE,
+                             verbose = TRUE, use_pak = TRUE) {
 
   if(!force) {
     pkgs <- pkgs[sapply(pkgs, function(pkg) {
@@ -119,7 +120,7 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
   pkgs2 <- pkgs
   installed <- FALSE
   tryCatch({
-    if(system.file(package = "pak") != "") {
+    if(use_pak && system.file(package = "pak") != "") {
       pak <- asNamespace("pak")
       current_repos <- pak$repo_get(bioc = FALSE)
       repos[current_repos$name] <- current_repos$url
@@ -166,9 +167,9 @@ install_packages <- function(pkgs, lib = get_libpaths(check = TRUE),
 #' @rdname RAVE-install
 #' @export
 finalize_installation <- function(
-  packages = NULL,
-  upgrade = c('config-only', 'ask', 'always', 'never', 'data-only'),
-  async = FALSE, ...
+    packages = NULL,
+    upgrade = c('config-only', 'ask', 'always', 'never', 'data-only'),
+    async = FALSE, ...
 ) {
   upgrade <- match.arg(upgrade)
 
@@ -246,9 +247,9 @@ finalize_installation <- function(
         ), appendLF = FALSE)
       }
 
-  }, error = function(e) {
-    warning("Unable to finalize the installation of package ", shQuote(pkg),
-            ". Skipping. Reason: \n", e$message)
+    }, error = function(e) {
+      warning("Unable to finalize the installation of package ", shQuote(pkg),
+              ". Skipping. Reason: \n", e$message)
     })
 
   })
@@ -308,9 +309,12 @@ try_setup_pak <- function(lib_path = get_libpaths(check = TRUE)) {
 
     # Try to install package `pak`
     if(system.file(package = "pak") == "") {
-      install_packages("pak", lib = lib_path)
+      install_packages("pak", lib = lib_path, use_pak = FALSE)
       pak <- asNamespace("pak")
-      pak$pak_install_extra(upgrade = FALSE)
+      tryCatch({
+        extras <- pak$extra_packages()
+        install_packages(extras, lib = lib_path, use_pak = FALSE)
+      }, error = function(e){})
     }
 
   }, error = function(e) {})
@@ -346,7 +350,7 @@ installer_unload_packages <- function() {
 }
 
 install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
-                    finalize = TRUE, force = FALSE, python = FALSE, ...) {
+                             finalize = TRUE, force = FALSE, python = FALSE, ...) {
 
   if( nightly ) {
     options("ravemanager.nightly" = TRUE)
@@ -458,7 +462,7 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
 #' @rdname RAVE-install
 #' @export
 install <- function(nightly = FALSE, upgrade_manager = FALSE,
-                             finalize = TRUE, force = FALSE, python = FALSE, ...) {
+                    finalize = TRUE, force = FALSE, python = FALSE, ...) {
   tryCatch({
     install_internal(
       nightly = nightly,
