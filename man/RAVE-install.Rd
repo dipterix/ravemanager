@@ -26,6 +26,7 @@ install(
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
+  python = FALSE,
   ...
 )
 
@@ -34,10 +35,11 @@ update_rave(
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
+  python = FALSE,
   ...
 )
 
-upgrade_installer()
+upgrade_installer(reload = TRUE)
 }
 \arguments{
 \item{packages}{packages to run finalizing installation scripts}
@@ -58,6 +60,13 @@ before updating other packages}
 
 \item{force}{whether to force updating packages even the installed have
 the latest versions}
+
+\item{python}{whether to install python; default is false}
+
+\item{reload}{whether to reload \code{ravemanager} after installation;
+default is true. This tries to load the upgraded \code{ravemanager}
+without restarting the R session; however, this solution not always
+works. In such case, restarting R session is always the solution.}
 }
 \value{
 Nothing

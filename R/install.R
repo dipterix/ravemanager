@@ -13,6 +13,11 @@
 #' @param upgrade upgrade type
 #' @param async whether to execute finalizing installation scripts in other
 #' processes
+#' @param python whether to install python; default is false
+#' @param reload whether to reload \code{ravemanager} after installation;
+#' default is true. This tries to load the upgraded \code{ravemanager}
+#' without restarting the R session; however, this solution not always
+#' works. In such case, restarting R session is always the solution.
 #' @param ... passed to internal functions
 #' @return Nothing
 NULL
@@ -224,7 +229,15 @@ finalize_installation <- function(
       }
 
       message("Finalizing installation: ", pkg, "\r", appendLF = FALSE)
-      do.call(fun, args)
+
+      tryCatch({
+        withRestarts({
+          do.call(fun, args)
+        }, abort = function() {})
+      }, error = function(e) {
+        warning(e)
+      })
+
 
       if(async) {
         message(sprintf(

@@ -202,7 +202,22 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
   }
 
   # install pip-only packages
-  pkgs <- c("antspynet", "antspyx", "nipy", "mne", "pynwb", "nibabel")
+  pkgs <- c("mne", "pynwb", "nibabel")
+  pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
+  if(length(pkgs)) {
+    for(pkg in get_python_package_name(pkgs)) {
+      if( pkg %in% pkgs ) {
+        try({
+          rpymat$add_packages(packages = pkg, pip = TRUE)
+        })
+        installed_pkgs_tbl <- rpymat$list_pkgs()
+        pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
+      }
+    }
+  }
+
+  # Make sure antspy is installed
+  pkgs <- c("antspynet", "antspyx")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if(length(pkgs)) {
     for(pkg in get_python_package_name(pkgs)) {
