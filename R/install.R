@@ -192,6 +192,11 @@ finalize_installation <- function(
   }
   packages <- unique(allpackages[sel])
 
+  # Make sure critical packages have higher priority
+  critical_packages <- c("threeBrain", "raveio")
+  critical_packages <- critical_packages[critical_packages %in% packages]
+  packages <- unique(c(critical_packages, packages))
+
   lapply(packages, function(pkg) {
     tryCatch({
 
