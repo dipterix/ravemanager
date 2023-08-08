@@ -27,8 +27,7 @@ get_python_package_name <- function(lib) {
 #'
 #' In this isolated environment, the following packages will be installed:
 #' \code{numpy}, \code{scipy}, \code{pandas}, \code{h5py}, \code{jupyterlab},
-#' \code{pynwb}, \code{nipype}, \code{dipy}, \code{nibabel}, \code{nipy},
-#' \code{nitime}, \code{nilearn}, \code{mne}, \code{niwidgets}. You can always
+#' \code{pynwb}, \code{mat73}, \code{mne}. You can always
 #' add more \code{conda} packages via \code{rpymat::add_packages(...)} or
 #' \code{pip} packages via \code{rpymat::add_packages(..., pip = TRUE)}.
 #'
@@ -119,11 +118,19 @@ validate_python <- function(verbose = TRUE) {
     })
 
     package_missing <- NULL
-    for(package in c("numpy", "h5py", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants")) {
+    for(package in c("numpy", "h5py", "mat73", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants")) {
       tryCatch({
         verb({ message(sprintf("  %s: ", package), appendLF = FALSE) })
         module <- reticulate$import(package)
-        verb({ message("  ", package, ": ", module$`__version__`) })
+        switch(
+          package,
+          mat73 = {
+            verb({ message("  ", package, ": ", module$core$`__version__`) })
+          }, {
+            verb({ message("  ", package, ": ", module$`__version__`) })
+          }
+        )
+
       }, error = function(e) {
         verb({ message("  ", package, ": N/A") })
         package_missing <<- c(package_missing, package)
@@ -187,7 +194,7 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
   installed_pkgs_tbl <- rpymat$list_pkgs()
 
   # install necessary libraries
-  pkgs <- c("h5py", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake")
+  pkgs <- c("h5py", "mat73", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
     rpymat$add_packages(get_python_package_name(pkgs))
   }
