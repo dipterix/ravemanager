@@ -194,16 +194,16 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
   installed_pkgs_tbl <- rpymat$list_pkgs()
 
   # install necessary libraries
-  pkgs <- c("h5py", "mat73", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake")
+  pkgs <- c("h5py", "mat73", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake", "dcm2niix")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
     rpymat$add_packages(get_python_package_name(pkgs))
   }
 
   # install jupyter lab to the conda environment
-  pkgs <- c("jupyter", "jupyterlab")
+  pkgs <- c("notebook", "jupyterlab")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
     try({
-      rpymat$add_packages(packages = get_python_package_name(c("jupyter", "numpy", "h5py", "matplotlib", "pandas", "jupyterlab")))
+      rpymat$add_packages(packages = get_python_package_name(c("notebook", "numpy", "h5py", "matplotlib", "pandas", "jupyterlab")))
       rpymat$jupyter_register_R()
     })
   }
