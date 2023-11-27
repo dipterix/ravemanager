@@ -419,10 +419,15 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
 
   # Fast install binary deps
   message("Installing RAVE... This might take a while...")
-  install_packages(
-    packages_to_install, lib = lib_path,
-    repos = repos, type = "binary", force = force
-  )
+  tryCatch({
+    install_packages(
+      packages_to_install, lib = lib_path,
+      repos = repos, type = "binary", force = force
+    )
+  }, error = function(e) {
+    message("Unable to install compiled packages. Trying to build from source (will take a while)...")
+  })
+
 
   # Make sure the source package is compiled and updated for core packages
   packages_to_install <- c(
