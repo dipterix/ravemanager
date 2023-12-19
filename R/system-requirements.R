@@ -84,6 +84,25 @@ system_requirements <- function(os = NULL, os_release = NULL, curl = Sys.which("
 
   }
 
+  if(length(res) == 1L && isTRUE(is.na(res)) && is_installed("pak")) {
+
+    try(silent = TRUE, {
+
+      pak <- asNamespace("pak")
+      sysreqs_platform <- sprintf("%s%s", os, ifelse(length(os_release) == 1, paste0("-", os_release, collapse = ""), ""))
+      if(length(sysreqs_platform) != 1) {
+        sysreqs_platform <- NULL
+      }
+      if(isTRUE(pak$sysreqs_is_supported(sysreqs_platform))) {
+        res <- pak$pkg_sysreqs(
+          pkg = system.file("apps/raveplaceholder", package = "ravemanager"),
+          sysreqs_platform = sysreqs_platform
+        )$install_scripts
+      }
+    })
+
+  }
+
   if(length(res) == 1L && isTRUE(is.na(res))) {
     res <- character()
     warning("Cannot get system libraries from Posit (Rstudio) package manager website. Please contact RAVE team if you cannot install.")

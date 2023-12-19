@@ -517,14 +517,14 @@ install <- function(nightly = FALSE, upgrade_manager = FALSE,
           msg_troubleshoot <- c(msg_troubleshoot, sprintf("The following **system packages** are missing. RAVE does not install system packages. You need to install them by yourself since they may require admin/sudo account privilege. If you have Homebrew installed, copy-paste-run the following terminal commands to install these libraries:\n\n  brew install %s\n\n", paste(brew_packages, collapse = " ")))
         }
       } else if( os == "linux" ){
-        suppressWarnings({
-          missing_pkg <- system_requirements(sudo = TRUE)
-          if(length(missing_pkg)) {
-
-            msg_troubleshoot <- c(msg_troubleshoot, sprintf("You are using Linux operating system. It is most likely that some system packages are missing. RAVE does not install system packages. You need to install them by yourself since they usually require sudo account privilege. Please consider installing the following libraries first:\n\n%s\n\n", paste("  ", missing_pkg, collapse = "\n")))
-
-          }
-        })
+        # suppressWarnings({
+        #   missing_pkg <- system_requirements(sudo = TRUE)
+        #   if(length(missing_pkg)) {
+        #
+        #     msg_troubleshoot <- c(msg_troubleshoot, sprintf("You are using Linux operating system. It is most likely that some system packages are missing. RAVE does not install system packages. You need to install them by yourself since they usually require sudo account privilege. Please consider installing the following libraries first:\n\n%s\n\n", paste("  ", missing_pkg, collapse = "\n")))
+        #
+        #   }
+        # })
       }
     }, error = function(e){})
 
