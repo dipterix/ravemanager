@@ -64,4 +64,4 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           chmod a+x ./inst/installer.sh
-          ./inst/installer.sh
+          ./inst/installer.sh -c 1

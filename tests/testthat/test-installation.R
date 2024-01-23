@@ -32,12 +32,13 @@ get_os <- function ()
 
 test_that("Installation works", {
   if(detect_gh_ci() && get_os() == "windows") {
-    ravemanager::install()
+    ravemanager::install(python = TRUE, allow_cache = FALSE)
     libpath <- .libPaths()[[1]]
     expect_true(nzchar(system.file(package = "ravebuiltins", lib.loc = libpath)))
     expect_true(nzchar(system.file(package = "rpyANTs", lib.loc = libpath)))
     rpyANTs <- asNamespace("rpyANTs")
     rpymat <- asNamespace("rpymat")
+    rpymat$load_ants()
 
     on.exit({
       remove_conda()
