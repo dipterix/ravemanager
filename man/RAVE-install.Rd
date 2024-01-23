@@ -22,7 +22,7 @@ finalize_installation(
 clear_cache()
 
 install(
-  allow_cache = TRUE,
+  allow_cache = FALSE,
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
@@ -31,7 +31,7 @@ install(
 )
 
 update_rave(
-  allow_cache = TRUE,
+  allow_cache = FALSE,
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,

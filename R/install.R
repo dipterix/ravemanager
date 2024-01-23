@@ -491,7 +491,7 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
 
 #' @rdname RAVE-install
 #' @export
-install <- function(allow_cache = TRUE, upgrade_manager = FALSE,
+install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, python = FALSE, ...) {
 
   if(!allow_cache) {
