@@ -14,7 +14,7 @@ configuration files."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     
     <a class="navbar-brand me-2" href="../index.html">ravemanager</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.35</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.36</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ configuration files.</p>
 <span><span class="fu">clear_cache</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">install</span><span class="op">(</span></span>
-<span>  nightly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  allow_cache <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  upgrade_manager <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  finalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -69,7 +69,7 @@ configuration files.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">update_rave</span><span class="op">(</span></span>
-<span>  nightly <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  allow_cache <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  upgrade_manager <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  finalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -99,8 +99,8 @@ processes</p></dd>
 <dd><p>passed to internal functions</p></dd>
 
 
-<dt>nightly</dt>
-<dd><p>whether to install the nightly build</p></dd>
+<dt>allow_cache</dt>
+<dd><p>whether to allow cache; default is true</p></dd>
 
 
 <dt>upgrade_manager</dt>
