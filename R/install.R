@@ -3,7 +3,7 @@
 #' @description Installs the newest version of 'RAVE' and its dependence
 #' packages; executes the scripts to finalize installation to update
 #' configuration files.
-#' @param nightly whether to install the nightly build
+#' @param allow_cache whether to allow cache; default is true
 #' @param upgrade_manager whether to upgrade the installer (\code{ravemanager})
 #' before updating other packages
 #' @param force whether to force updating packages even the installed have
@@ -306,11 +306,25 @@ assert_r_version <- function(min = "4.0.0") {
   return(TRUE)
 }
 
+pak_cache_dir <- function() {
+  tools <- asNamespace("tools")
+  tools$R_user_dir("ravemanager", which = "cache")
+}
+
+pak_cache_remove <- function() {
+  cache_path <- pak_cache_dir()
+  if(file.exists(cache_path)) {
+    message("Removing package cache...")
+    unlink(cache_path, recursive = TRUE)
+  }
+  invisible()
+}
+
 try_setup_pak <- function(lib_path = get_libpaths(check = TRUE)) {
   cdir <- NULL
   tryCatch({
-    tools <- asNamespace("tools")
-    cdir <- dir_create2(tools$R_user_dir("ravemanager", which = "cache"))
+
+    cdir <- dir_create2(pak_cache_dir())
 
     # Try to install package `pak`
     if(system.file(package = "pak") == "") {
@@ -356,6 +370,11 @@ installer_unload_packages <- function() {
 
 install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
                              finalize = TRUE, force = FALSE, python = FALSE, ...) {
+
+  # DIPSAUS DEBUG START
+  # list2env(list(nightly = FALSE, upgrade_manager = FALSE,
+  #               finalize = TRUE, force = FALSE, python = FALSE), envir=.GlobalEnv)
+
 
   if( nightly ) {
     options("ravemanager.nightly" = TRUE)
@@ -472,8 +491,15 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
 
 #' @rdname RAVE-install
 #' @export
-install <- function(nightly = FALSE, upgrade_manager = FALSE,
+install <- function(allow_cache = TRUE, upgrade_manager = FALSE,
                     finalize = TRUE, force = FALSE, python = FALSE, ...) {
+
+  if(!allow_cache) {
+    pak_cache_remove()
+  }
+
+
+  nightly <- FALSE
   tryCatch({
     install_internal(
       nightly = nightly,
@@ -596,4 +622,111 @@ upgrade_installer <- function(reload = TRUE) {
     }
   }
   return(invisible(FALSE))
+}
+
+#' Uninstall RAVE components
+#' @description
+#' Remove cache, python, and/or all settings. Please be aware that
+#' R, 'RStudio', and already installed R packages will not be uninstalled.
+#' Please carefully read printed messages.
+#' @param components which component to remove, see example for choices.
+#' @examples
+#'
+#' if( FALSE ) {
+#'
+#'   # remove cache only
+#'   ravemanager::uninstall("cache")
+#'
+#'   # remove python environment
+#'   ravemanager::uninstall("python")
+#'
+#'   # remove all sample data, settings files
+#'   ravemanager::uninstall("all")
+#'
+#' }
+#'
+#'
+#' @export
+uninstall <- function(components = c("cache", "python", "all")) {
+  components <- match.arg(components)
+  remove_cache <- components %in% c("cache", "all")
+  remove_python <- components %in% c("python", "all")
+  remove_all <- components %in% c("all")
+
+  if( remove_all ) {
+    ans <- utils::askYesNo("You are uninstalling RAVE. Please enter Y or yes to confirm: ")
+    if(!isTRUE(ans)) {
+      return(invisible())
+    }
+  }
+
+  tools <- asNamespace("tools")
+  R_user_dir <- tools$R_user_dir
+
+  remove_files <- function(paths) {
+    lapply(paths, function(path) {
+      if(!file.exists(path)) { return() }
+      if(dir.exists(path)) {
+        unlink(path, recursive = TRUE)
+      } else {
+        unlink(path)
+      }
+      return()
+    })
+  }
+  if( remove_cache ) {
+    message("Removing cache...")
+
+    # ravemanager
+    pak_cache_remove()
+
+    # raveio
+    d <- R_user_dir(package = "raveio", which = "data")
+    fs <- list.files(d, pattern = "^(dipterix|rave-ieeg)-rave-pipelines", include.dirs = TRUE, full.names = TRUE, recursive = FALSE)
+    remove_files(fs)
+    if(is_installed("raveio")) {
+      raveio <- asNamespace("raveio")
+      raveio$clear_cached_files()
+    }
+  }
+
+  if( remove_python ) {
+    message("Removing python...")
+    remove_conda(ask = FALSE)
+
+    # rpymat
+    d <- R_user_dir(package = "rpymat", which = "config")
+    remove_files(file.path(d, "jupyter-configurations"))
+  }
+
+  if( remove_all ) {
+    message("Uninstalling RAVE (we are sorry to say goodbye)...")
+
+    # remove ~/rave_modules
+    remove_files("~/rave_modules")
+
+    remove_files( R_user_dir("raveio", "data") )
+    remove_files( R_user_dir("rpyANTs", "data") )
+    remove_files( R_user_dir("threeBrain", "data") )
+
+    remove_files( R_user_dir("raveio", "config") )
+    remove_files( R_user_dir("ravemanager", "config") )
+    remove_files( R_user_dir("rpymat", "config") )
+
+    remove_files( R_user_dir("dipsaus", "cache") )
+    remove_files( R_user_dir("ravemanager", "cache") )
+    remove_files( R_user_dir("readNSx", "cache") )
+
+    message("R and RStudio are not managed by RAVE. Please uninstall them by yourself if necessary.")
+    msg <- paste(
+      c(
+        "There are some files that may contain your data or used other packages. ",
+        "Please check them manually:\n",
+        .libPaths(),
+        normalizePath("~/rave_data", mustWork = FALSE)
+      ),
+      collapse = "\n"
+    )
+    message(msg)
+  }
 }

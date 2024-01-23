@@ -59,3 +59,9 @@ jobs:
         with:
           args: 'c("--no-manual")'
           upload-snapshots: false
+
+      - name: Check installation
+        if: runner.os != 'Windows'
+        run: |
+          chmod a+x ./inst/installer.sh
+          ./inst/installer.sh

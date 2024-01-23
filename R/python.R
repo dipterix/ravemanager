@@ -159,12 +159,11 @@ system_pkgpath <- function(package, ..., alternative = TRUE) {
 
 #' @rdname configure-python
 #' @export
-configure_python <- function(python_ver = "3.9", verbose = TRUE) {
+configure_python <- function(python_ver = "auto", verbose = TRUE) {
 
   if(!is_installed("rpymat")) {
     install_packages("rpymat")
   }
-
   rpymat <- asNamespace("rpymat")
 
   # Install conda and create a conda environment

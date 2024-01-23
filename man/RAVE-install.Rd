@@ -22,7 +22,7 @@ finalize_installation(
 clear_cache()
 
 install(
-  nightly = FALSE,
+  allow_cache = TRUE,
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
@@ -31,7 +31,7 @@ install(
 )
 
 update_rave(
-  nightly = FALSE,
+  allow_cache = TRUE,
   upgrade_manager = FALSE,
   finalize = TRUE,
   force = FALSE,
@@ -51,7 +51,7 @@ processes}
 
 \item{...}{passed to internal functions}
 
-\item{nightly}{whether to install the nightly build}
+\item{allow_cache}{whether to allow cache; default is true}
 
 \item{upgrade_manager}{whether to upgrade the installer (\code{ravemanager})
 before updating other packages}

@@ -10,7 +10,7 @@
 \usage{
 validate_python(verbose = TRUE)
 
-configure_python(python_ver = "3.9", verbose = TRUE)
+configure_python(python_ver = "auto", verbose = TRUE)
 
 remove_conda(ask = TRUE)
 
@@ -36,8 +36,7 @@ safe and it will not affect any existing configurations on the computer.
 
 In this isolated environment, the following packages will be installed:
 \code{numpy}, \code{scipy}, \code{pandas}, \code{h5py}, \code{jupyterlab},
-\code{pynwb}, \code{nipype}, \code{dipy}, \code{nibabel}, \code{nipy},
-\code{nitime}, \code{nilearn}, \code{mne}, \code{niwidgets}. You can always
+\code{pynwb}, \code{mat73}, \code{mne}. You can always
 add more \code{conda} packages via \code{rpymat::add_packages(...)} or
 \code{pip} packages via \code{rpymat::add_packages(..., pip = TRUE)}.
 

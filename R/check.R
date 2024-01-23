@@ -6,17 +6,10 @@ is_installed <- function(pkg) {
 }
 
 #' Print out 'RAVE' version information
-#' @param nightly whether to check 'nightly' build which contains the newest
-#' experimental features. However, 'nightly' builds are not stable. This
-#' option is only recommended for zero-day bug fixes.
 #' @param vanilla whether to use vanilla packages in this function
 #' @export
-version_info <- function(nightly = FALSE, vanilla = FALSE) {
-  if( nightly ) {
-    options("ravemanager.nightly" = TRUE)
-  } else {
-    options("ravemanager.nightly" = FALSE)
-  }
+version_info <- function(vanilla = FALSE) {
+  options("ravemanager.nightly" = FALSE)
 
   versions <- new.env()
   versions$ravemanager <- list(
@@ -102,10 +95,10 @@ version_info <- function(nightly = FALSE, vanilla = FALSE) {
         # message('    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))')
         # message('    loadNamespace("ravemanager", lib.loc = lib_path)')
         cli$cli_text(cli$col_cyan(sprintf('loadNamespace("ravemanager", lib.loc = "%s")', get_libpaths(first = TRUE, check = TRUE))))
-        if( nightly ) {
-          cli$cli_text(cli$col_cyan('ravemanager::update_rave(nightly = TRUE)'))
-        } else {
+        if( isFALSE(ravemanager_needsUpdate) ) {
           cli$cli_text(cli$col_cyan('ravemanager::update_rave()'))
+        } else {
+          cli$cli_text(cli$col_cyan('ravemanager::update_rave(allow_cache = FALSE)'))
         }
         cat("\n")
       }
@@ -136,9 +129,9 @@ version_info <- function(nightly = FALSE, vanilla = FALSE) {
           '    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))',
           '    loadNamespace("ravemanager", lib.loc = lib_path)',
           ifelse(
-            nightly,
-            '    ravemanager::update_rave(nightly = TRUE)',
-            '    ravemanager::update_rave()'
+            isFALSE(ravemanager_needsUpdate),
+            '    ravemanager::update_rave()',
+            '    ravemanager::update_rave(allow_cache = FALSE)'
           ),
           sep = "\n"
         ),
