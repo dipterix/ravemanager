@@ -2,10 +2,10 @@
 
 set -u
 
-SCRIPT_DIR=$(dirname "$0")
-
-# Load installer commons
-. "${SCRIPT_DIR}/installer-common.sh"
+# SCRIPT_DIR=$(dirname "$0")
+#
+# # Load installer commons
+# . "${SCRIPT_DIR}/installer-common.sh"
 
 ohai "Checking sudo access (may require your password): "
 have_sudo_access true

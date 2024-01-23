@@ -1,29 +1,47 @@
 #!/bin/bash
 
-set -e
 set -u
 
 SCRIPT_DIR=$(dirname "$0")
-R_CMD=$(which Rscript || echo $1)
 OS_TYPE=$(/usr/bin/uname)
+R_CMD=$(/usr/bin/which Rscript)
+SYSREQ="1"
 
-if [ "$2" == "--skip-sysreq" ]; then
-  echo "Skipping system requisites"
-elif [ "$OS_TYPE" == "Darwin" ]; then
-    echo "Operating System: macOS"
-    . "${SCRIPT_DIR}/shell/installer-prerequisites-osx.sh"
-elif [ "$OS_TYPE" == "Linux" ]; then
-    echo "Operating System: Linux"
-    # . "${SCRIPT_DIR}/shell/installer-prerequisites-linux.sh"
-fi
-
+while getopts ":s:r:" opt; do
+  case $opt in
+    s)
+      SYSREQ="$OPTARG"
+      ;;
+    r)
+      R_CMD="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
 
 # Load installer commons
 . "${SCRIPT_DIR}/shell/installer-common.sh"
-
-
 ohai "Operating System: ${OS_TYPE}"
 ohai "R binary path: ${R_CMD}"
+
+if [ "${SYSREQ}" == "1" ]; then
+  if [ "$OS_TYPE" == "Darwin" ]; then
+      ohai "Operating System: macOS"
+      . "${SCRIPT_DIR}/shell/installer-prerequisites-osx.sh"
+  elif [ "$OS_TYPE" == "Linux" ]; then
+      ohai "Operating System: Linux"
+      # . "${SCRIPT_DIR}/shell/installer-prerequisites-linux.sh"
+  fi
+else
+  ohai "Skipping system requisites"
+fi
 
 
 # Create a temporary directory
