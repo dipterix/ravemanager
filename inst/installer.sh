@@ -4,7 +4,9 @@ set -u
 
 SCRIPT_DIR=$(dirname "$0")
 OS_TYPE=$(/usr/bin/uname)
-R_CMD=$(/usr/bin/which Rscript)
+R_CMD=$(/usr/bin/which Rscript || echo "Rscript")
+
+# 0 no install; 1 assuming no sudo access; 2 have sudo
 SYSREQ="1"
 
 while getopts ":s:r:" opt; do
@@ -34,10 +36,10 @@ ohai "R binary path: ${R_CMD}"
 if [ "${SYSREQ}" == "1" ]; then
   if [ "$OS_TYPE" == "Darwin" ]; then
       ohai "Operating System: macOS"
-      . "${SCRIPT_DIR}/shell/installer-prerequisites-osx.sh"
+      . "${SCRIPT_DIR}/shell/installer-prerequisites-osx.sh" -s "${SYSREQ}"
   elif [ "$OS_TYPE" == "Linux" ]; then
       ohai "Operating System: Linux"
-      # . "${SCRIPT_DIR}/shell/installer-prerequisites-linux.sh"
+      # . "${SCRIPT_DIR}/shell/installer-prerequisites-linux.sh" -s "${SYSREQ}"
   fi
 else
   ohai "Skipping system requisites"
@@ -64,10 +66,12 @@ if( system.file(package = 'ravemanager', lib.loc = lib_path) == '' ) {
   install.packages('ravemanager', repos = 'https://rave-ieeg.r-universe.dev', lib = lib_path)
 }
 loadNamespace('ravemanager', lib.loc = lib_path)
-ravemanager::install(allow_cache = FALSE)
+ravemanager::install(allow_cache = FALSE, python = TRUE)
 "
 ohai "Running R command: ${cmd_str}"
 ${R_CMD} --no-save --no-restore -e "${cmd_str}"
 
+ohai "Check python loading"
 
+execute ${R_CMD} --no-save --no-restore -e "rpyANTs::load_ants()"
 

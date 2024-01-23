@@ -2,13 +2,27 @@
 
 set -u
 
+SYSREQ="1"
+while getopts ":s:" opt; do
+  case $opt in
+    s)
+      SYSREQ="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
 # SCRIPT_DIR=$(dirname "$0")
 #
 # # Load installer commons
 # . "${SCRIPT_DIR}/installer-common.sh"
-
-ohai "Checking sudo access (may require your password): "
-have_sudo_access true
 
 UNAME_MACHINE="$(/usr/bin/uname -m)"
 if [[ "$UNAME_MACHINE" == "arm64" ]]; then
@@ -21,8 +35,15 @@ else
   HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}/Homebrew"
 fi
 
-# Install brew
-execute_sudo echo | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if [ "${SYSREQ}" == "2" ]; then
+  ohai "Checking sudo access (may require your password): "
+  have_sudo_access true
+
+  # Install brew
+  execute_sudo echo | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+
 
 
 # Add brew to zsh (z-shell), bash, and sh
