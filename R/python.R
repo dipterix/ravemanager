@@ -223,7 +223,8 @@ configure_python <- function(python_ver = "auto", verbose = TRUE) {
   }
 
   # Make sure antspy is installed
-  pkgs <- c("antspynet", "antspyx")
+  # pkgs <- c("antspynet", "antspyx")
+  pkgs <- c("antspyx")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if(length(pkgs)) {
     for(pkg in get_python_package_name(pkgs)) {

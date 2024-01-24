@@ -40,9 +40,7 @@ test_that("Installation works", {
     rpymat <- asNamespace("rpymat")
     rpymat$load_ants()
 
-    on.exit({
-      remove_conda()
-    })
+    unlink(rpymat$install_root(), recursive = TRUE, force = TRUE)
 
     # remove_conda()
     # ravemanager::configure_python()
