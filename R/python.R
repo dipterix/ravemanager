@@ -265,3 +265,4 @@ ensure_rpymat <- function() {
   rpymat <- asNamespace("rpymat")
   rpymat$ensure_rpymat()
 }
+
