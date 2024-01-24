@@ -81,7 +81,10 @@ mkdir -p "$lib_path"
 cmd_str="
 lib_path <- '$lib_path'
 if( system.file(package = 'ravemanager', lib.loc = lib_path) == '' ) {
-  install.packages('ravemanager', repos = 'https://rave-ieeg.r-universe.dev', lib = lib_path)
+  if( system.file(package = 'remotes') == '' ) {
+    install.packages('remotes', repos = 'https://cloud.r-project.org/', lib = lib_path)
+  }
+  remotes::install_github('dipterix/ravemanager', dependencies = FALSE, upgrade = 'never', force = TRUE, lib.loc = lib_path)
 }
 loadNamespace('ravemanager', lib.loc = lib_path)
 ravemanager::install(allow_cache = FALSE, python = TRUE)

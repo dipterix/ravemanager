@@ -159,7 +159,7 @@ system_pkgpath <- function(package, ..., alternative = TRUE) {
 
 #' @rdname configure-python
 #' @export
-configure_python <- function(python_ver = "auto", verbose = TRUE) {
+configure_python <- function(python_ver = "3.9", verbose = TRUE) {
 
   if(!is_installed("rpymat")) {
     install_packages("rpymat")
@@ -172,6 +172,13 @@ configure_python <- function(python_ver = "auto", verbose = TRUE) {
     standalone <- TRUE
     if(length(conda_bin) == 1 && !is.na(conda_bin) && file.exists(conda_bin)) {
       standalone <- FALSE
+    }
+
+    # fix issue on intel max
+    if( python_ver %in% c("3.9", "auto") &&
+        identical(get_os(), "darwin") &&
+        isTRUE(startsWith(R.version$arch, "x86")) ) {
+      python_ver <- "3.10"
     }
 
     # Increase timeout to 30min
