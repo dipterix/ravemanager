@@ -38,7 +38,7 @@ test_that("Installation works", {
     expect_true(nzchar(system.file(package = "rpyANTs", lib.loc = libpath)))
     rpyANTs <- asNamespace("rpyANTs")
     rpymat <- asNamespace("rpymat")
-    rpymat$load_ants()
+    rpyANTs$load_ants()
 
     unlink(rpymat$install_root(), recursive = TRUE, force = TRUE)
 
