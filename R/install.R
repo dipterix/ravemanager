@@ -506,7 +506,7 @@ install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
     pak_cache_remove()
   }
   if(length(lib_path) == 1L && !is.na(lib_path) && is.character(lib_path)) {
-    lib_path <- normalizePath(lib_path, mustWork = FALSE)
+    lib_path <- normalizePath(lib_path, mustWork = FALSE, winslash = "/")
     Sys.setenv("RAVE_LIB_PATH" = lib_path)
   }
 
