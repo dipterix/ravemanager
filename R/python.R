@@ -167,6 +167,8 @@ configure_python <- function(python_ver = "3.9", verbose = TRUE) {
   rpymat <- asNamespace("rpymat")
 
   # Install conda and create a conda environment
+  # current_env <- Sys.getenv("R_RPYMAT_CONDA_PREFIX", unset = "")
+  # conda_exe <- Sys.getenv("R_RPYMAT_CONDA_EXE", unset = "")
   if(!dir.exists(rpymat$env_path())) {
     conda_bin <- rpymat$conda_bin()
     standalone <- TRUE

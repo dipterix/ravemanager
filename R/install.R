@@ -13,6 +13,12 @@
 #' @param upgrade upgrade type
 #' @param async whether to execute finalizing installation scripts in other
 #' processes
+#' @param migrate_packages whether to migrate (copy) packages installed in
+#' the system path to the user library; used as alternative option when
+#' there are existing packages installed in the system library path that could
+#' be hard to resolve or out-dated; default is \code{FALSE}
+#' @param lib_path library path where 'RAVE' should be installed; default is
+#' automatically determined.
 #' @param python whether to install python; default is false
 #' @param reload whether to reload \code{ravemanager} after installation;
 #' default is true. This tries to load the upgraded \code{ravemanager}
@@ -492,12 +498,49 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
 #' @rdname RAVE-install
 #' @export
 install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
-                    finalize = TRUE, force = FALSE, python = FALSE, ...) {
+                    finalize = TRUE, force = FALSE, python = FALSE,
+                    migrate_packages = FALSE, lib_path = NA,
+                    ...) {
 
   if(!allow_cache) {
     pak_cache_remove()
   }
+  if(length(lib_path) == 1L && !is.na(lib_path) && is.character(lib_path)) {
+    lib_path <- normalizePath(lib_path, mustWork = FALSE)
+    Sys.setenv("RAVE_LIB_PATH" = lib_path)
+  }
 
+  if(migrate_packages) {
+    # copy packages from system library path to user lib
+    libpaths <- get_libpaths(first = FALSE, check = TRUE)
+    if( length(libpaths) > 1 ) {
+      target_path <- libpaths[[1]]
+      syslib_paths <- libpaths[-1]
+
+      current_pkgs <- as.data.frame(utils::installed.packages(lib.loc = target_path))
+      current_pkgs <- current_pkgs$Package
+
+      lapply(syslib_paths, function(syslib_path) {
+        # syslib_path <- syslib_paths[[1]]
+        pkgs <- as.data.frame(utils::installed.packages(lib.loc = syslib_path, priority = NA_character_))
+        pkgs <- pkgs$Package[!pkgs$Package %in% current_pkgs]
+        if( length(pkgs) ) {
+          file.copy(
+            from = file.path(syslib_path, pkgs),
+            to = target_path,
+            recursive = TRUE,
+            overwrite = FALSE,
+            copy.mode = FALSE,
+            copy.date = TRUE
+          )
+
+          current_pkgs <<- c(current_pkgs, pkgs)
+        }
+        return()
+
+      })
+    }
+  }
 
   nightly <- FALSE
   tryCatch({

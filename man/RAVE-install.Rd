@@ -27,6 +27,8 @@ install(
   finalize = TRUE,
   force = FALSE,
   python = FALSE,
+  migrate_packages = FALSE,
+  lib_path = NA,
   ...
 )
 
@@ -36,6 +38,8 @@ update_rave(
   finalize = TRUE,
   force = FALSE,
   python = FALSE,
+  migrate_packages = FALSE,
+  lib_path = NA,
   ...
 )
 
@@ -62,6 +66,14 @@ before updating other packages}
 the latest versions}
 
 \item{python}{whether to install python; default is false}
+
+\item{migrate_packages}{whether to migrate (copy) packages installed in
+the system path to the user library; used as alternative option when
+there are existing packages installed in the system library path that could
+be hard to resolve or out-dated; default is \code{FALSE}}
+
+\item{lib_path}{library path where 'RAVE' should be installed; default is
+automatically determined.}
 
 \item{reload}{whether to reload \code{ravemanager} after installation;
 default is true. This tries to load the upgraded \code{ravemanager}
