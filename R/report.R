@@ -135,7 +135,15 @@ debug_info <- function(max_lines) {
   }
   if( has_reprex ) {
     reprex <- asNamespace("reprex")
-    reprex$reprex(x = asNamespace("ravemanager")$export_logs(), advertise = FALSE)
+    tempdir(check = TRUE)
+    f <- tempfile(pattern = "rave-debug-")
+    file.copy(
+      from = system.file("debug.R", package = "ravemanager"),
+      to = f,
+      overwrite = TRUE
+    )
+    reprex$reprex(input = f, advertise = FALSE)
+    message("The debugging information is on your clipboard. Please include the report :)")
 
   } else {
     cat("\014")
@@ -143,9 +151,11 @@ debug_info <- function(max_lines) {
     message("---- Start: RAVE Debug Info ----------------------------------------")
     export_logs()
     message("---- End: RAVE Debug Info ------------------------------------------")
+
+    message("Please Copy the above debugging information in your issue report :)")
   }
 
-  message("Please Copy the above debugging information in your issue report :)")
+
 
   invisible()
 }
