@@ -135,15 +135,27 @@ debug_info <- function(max_lines) {
   }
   if( has_reprex ) {
     reprex <- asNamespace("reprex")
+
+    default_read <- function(e) {
+      message("Using builtin debugging method                     \r", appendLF = FALSE)
+      readLines(system.file("debug.R", package = "ravemanager"))
+    }
+
+    debug_script <- tryCatch(
+      {
+        message("Trying to use the latest debugging script...\r", appendLF = FALSE)
+        readLines("https://raw.githubusercontent.com/dipterix/ravemanager/main/inst/debug.R")
+      },
+      error = default_read,
+      warning = default_read
+    )
+    message("", appendLF = TRUE)
+
     tempdir(check = TRUE)
     f <- tempfile(pattern = "rave-debug-")
-    file.copy(
-      from = system.file("debug.R", package = "ravemanager"),
-      to = f,
-      overwrite = TRUE
-    )
+    writeLines(debug_script, con = f)
     reprex$reprex(input = f, advertise = FALSE)
-    message("The debugging information is on your clipboard. Please include the report :)")
+    message("The debugging information is on your clipboard. Please include in the report :)")
 
   } else {
     cat("\014")
