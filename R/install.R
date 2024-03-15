@@ -773,3 +773,66 @@ uninstall <- function(components = c("cache", "python", "all")) {
     message(msg)
   }
 }
+
+#' @name install_packages
+#' @title Install/Update R or Python packages to RAVE environment
+#' @param pkg name of the package
+#' @param method whether to use \code{'pip'} or \code{'conda'}; default is
+#' \code{'pip'}
+#' @param repos,lib,type,INSTALL_opts,... internally used
+#' @returns Nothing
+#'
+#' @examples
+#' \dontrun{
+#'
+#'
+#' # ---- R --------------------------------------------------------
+#' # Install R packages (CRAN, BioC, or RAVE's repository)
+#' add_r_package("ravebuiltins")
+#' add_r_package("rhdf5")
+#'
+#' # Install from Github (github.com/dipterix/threeBrain)
+#' add_r_package("dipterix/threeBrain")
+#'
+#' # Install Github branch
+#' add_r_package("dipterix/threeBrain@custom-electrode-geom")
+#'
+#' # ---- Python ----------------------------------------------------
+#'
+#' # Normal pypi packages
+#' add_py_package("threebrainpy")
+#'
+#' # Add through conda
+#' add_py_package("fftw", method = "conda")
+#'
+#'
+#' }
+#'
+#'
+#' @export
+add_r_package <- function(pkg, lib = get_libpaths(check = TRUE),
+                          repos = get_mirror(), type = getOption("pkgType"),
+                          ..., INSTALL_opts = '--no-lock') {
+  if( system.file(package = "pak") == "" ) {
+    utils::install.packages("pak", repos = repos, lib = lib, type = type, INSTALL_opts = INSTALL_opts)
+  }
+  pak <- asNamespace("pak")
+  current_repos <- pak$repo_get(bioc = FALSE)
+  repos[current_repos$name] <- current_repos$url
+  options(repos = repos)
+  pak$pkg_install(pkg = pkg, lib = lib, upgrade = TRUE, ask = FALSE, dependencies = NA)
+  return(invisible())
+}
+
+#' @rdname install_packages
+#' @export
+add_py_package <- function(pkg, method = c("pip", "conda")) {
+  method <- match.arg(method)
+  rpymat <- asNamespace("rpymat")
+  if( method == 'pip' ) {
+    rpymat$add_packages(pkg, pip = TRUE)
+  } else {
+    rpymat$add_packages(pkg)
+  }
+  return(invisible())
+}
