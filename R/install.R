@@ -836,3 +836,74 @@ add_py_package <- function(pkg, method = c("pip", "conda")) {
   }
   return(invisible())
 }
+
+#' Find packages with empty files
+#' @description
+#' Check whether packages are installed correctly. In rare cases (possibly
+#' network issues), packages downloaded contain empty files. This function
+#' provides a method to check empty files in packages.
+#' @param lib library path where packages are installed; default is set to
+#' user library path.
+#' @returns A list of packages (and files) containing empty files.
+#' @examples
+#'
+#' find_packages_with_empty_files()
+#'
+#' @export
+find_packages_with_empty_files <- function(lib = get_libpaths(check = TRUE)) {
+  packages <- list.dirs(path = lib, full.names = FALSE, recursive = FALSE)
+  packages <- packages[!startsWith(packages, ".")]
+  re <- lapply(packages, function(pkg) {
+    path <- system.file(package = pkg, lib.loc = lib)
+    if(!dir.exists(path)) { return(NULL) }
+    fs <- list.files(path, recursive = TRUE, all.files = FALSE, full.names = TRUE, include.dirs = FALSE)
+    zero_size <- file.size(fs) == 0
+    if(!length(zero_size) || !any(zero_size)) { return(NULL) }
+    structure(
+      class = "package_empty_file_item",
+      list(
+        package = pkg,
+        total = length(zero_size),
+        zero_length = sum(zero_size),
+        percentage = mean(zero_size),
+        files = fs[zero_size]
+      )
+    )
+  })
+  if(!length(re)) {
+    re <- structure(list(), class = "package_empty_file_list")
+    return(re)
+  }
+  names(re) <- packages
+  re <- re[!vapply(re, is.null, FALSE)]
+  # sort
+  perc <- sapply(re, "[[", "percentage")
+  re <- re[order(perc, decreasing = TRUE)]
+  class(re) <- "package_empty_file_list"
+  return(re)
+}
+
+#' @export
+print.package_empty_file_list <- function(x, ...) {
+  if(!length(x)) {
+    cat("None of the packages have empty files. Hooray!\n")
+    return(invisible(x))
+  }
+  cat("The following packages have empty files: \n")
+  lapply(x, print, details = FALSE)
+  cat("\nIf you suspect that any package was installed incorrectly, please use\n\travemanager::add_r_package('<pkg_name>')\nto re-install.")
+  return(invisible(x))
+}
+
+#' @export
+print.package_empty_file_item <- function(x, details = TRUE, ...) {
+  n <- nchar(x$package)
+  r <- max(16 - n, 0)
+  cat(sprintf("%s%s- [%.0f%%] %d empty of %d files\n", x$package, paste(rep(" ", r), collapse = ""),
+              x$percentage * 100, x$zero_length, x$total))
+  if(details) {
+    cat(sprintf("  - %s", x$files), sep = "\n")
+    cat("\n")
+  }
+  invisible(x)
+}
