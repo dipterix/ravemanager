@@ -1,54 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>http://dipterix.org/ravemanager/404.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/authors.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/index.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/RAVE-install.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/configure-python.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/debug_info.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/export_logs.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/find_packages_with_empty_files.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/install_packages.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/ravemanager_version.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/run_tutorials.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/system_requirements.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/uninstall.html</loc>
-  </url>
-  <url>
-    <loc>http://dipterix.org/ravemanager/reference/version_info.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>http://dipterix.org/ravemanager/404.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/LICENSE-text.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/LICENSE.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/authors.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/index.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/RAVE-install.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/configure-python.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/debug_info.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/export_logs.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/find_packages_with_empty_files.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/index.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/install_packages.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/ravemanager_version.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/run_tutorials.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/system_requirements.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/uninstall.html</loc></url>
+<url><loc>http://dipterix.org/ravemanager/reference/version_info.html</loc></url>
 </urlset>
+
