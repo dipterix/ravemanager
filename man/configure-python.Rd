@@ -10,7 +10,7 @@
 \usage{
 validate_python(verbose = TRUE)
 
-configure_python(python_ver = "3.9", verbose = TRUE)
+configure_python(python_ver = "3.11", verbose = TRUE)
 
 remove_conda(ask = TRUE)
 
