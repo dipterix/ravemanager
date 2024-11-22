@@ -1,5 +1,5 @@
 PYTHON_PACKAGES <- list(
-  "nibabel" = "nibabel==4.0.2",
+  # "nibabel" = "nibabel==4.0.2",
   "ants" = "antspyx"
 )
 
