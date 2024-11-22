@@ -207,6 +207,14 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
     rpymat$add_packages(get_python_package_name(pkgs))
   }
 
+  # secondary library
+  pkgs <- c("mne", "pynwb", "nibabel")
+  if(!all(pkgs %in% installed_pkgs_tbl$package)) {
+    try({
+      rpymat$add_packages(get_python_package_name(pkgs))
+    })
+  }
+
   # install jupyter lab to the conda environment
   pkgs <- c("notebook", "jupyterlab")
   if(!all(pkgs %in% installed_pkgs_tbl$package)) {
@@ -216,7 +224,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
     })
   }
 
-  # install pip-only packages
+  # install pip-only packages if conda fails
   pkgs <- c("mne", "pynwb", "nibabel")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if(length(pkgs)) {
