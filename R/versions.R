@@ -2,10 +2,10 @@
 package_latest_version <- function(pkg, url = NULL) {
   if( length(url) != 1 ) {
     if(getOption("ravemanager.nightly", FALSE)) {
-      url <- "https://dipterix.r-universe.dev/packages"
-      url_backup <- "https://rave-ieeg.r-universe.dev/packages"
+      url <- "https://dipterix.r-universe.dev/api/packages"
+      url_backup <- "https://rave-ieeg.r-universe.dev/api/packages"
     } else {
-      url <- "https://rave-ieeg.r-universe.dev/packages"
+      url <- "https://rave-ieeg.r-universe.dev/api/packages"
       url_backup <- NA
     }
   } else {
@@ -60,9 +60,9 @@ package_current_version <- function(pkg, lib = NULL) {
 package_needs_update <- function(pkg, lib = NULL, url = NULL) {
   if( length(url) != 1 ) {
     if(getOption("ravemanager.nightly", FALSE)) {
-      url <- "https://dipterix.r-universe.dev/packages"
+      url <- "https://dipterix.r-universe.dev/api/packages"
     } else {
-      url <- "https://rave-ieeg.r-universe.dev/packages"
+      url <- "https://rave-ieeg.r-universe.dev/api/packages"
     }
   }
 
@@ -123,7 +123,7 @@ ravemanager_latest_version <- function() {
   }, error = function(e) {
     tryCatch({
       suppressWarnings({
-        versions <- readLines("https://rave-ieeg.r-universe.dev/packages/ravemanager")
+        versions <- readLines("https://rave-ieeg.r-universe.dev/api/packages/ravemanager")
         versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
         versions <- gsub("[^0-9\\.]", "", versions)
         return(versions[[1]])
