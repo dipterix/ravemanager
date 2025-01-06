@@ -4,10 +4,16 @@
 \alias{version_info}
 \title{Print out 'RAVE' version information}
 \usage{
-version_info(vanilla = FALSE)
+version_info(vanilla = FALSE, auto_restart = !get_os() \%in\% "windows", ...)
 }
 \arguments{
 \item{vanilla}{whether to use vanilla packages in this function}
+
+\item{auto_restart}{whether to automatically install \code{ravemanager}
+if an update is available and apply restart; default is true on non-Windows
+machine}
+
+\item{...}{reserved for future use}
 }
 \description{
 Print out 'RAVE' version information

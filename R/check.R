@@ -7,9 +7,18 @@ is_installed <- function(pkg) {
 
 #' Print out 'RAVE' version information
 #' @param vanilla whether to use vanilla packages in this function
+#' @param auto_restart whether to automatically install \code{ravemanager}
+#' if an update is available and apply restart; default is true on non-Windows
+#' machine
+#' @param ... reserved for future use
 #' @export
-version_info <- function(vanilla = FALSE) {
+version_info <- function(vanilla = FALSE, auto_restart = !get_os() %in% "windows", ...) {
   options("ravemanager.nightly" = FALSE)
+
+  if( Sys.getenv("RAVEMANAGER_SUPPRESS_AUTO_RESTART", "") != "" ) {
+    auto_restart <- FALSE
+    Sys.unsetenv("RAVEMANAGER_SUPPRESS_AUTO_RESTART")
+  }
 
   versions <- new.env()
   versions$ravemanager <- list(
@@ -50,6 +59,27 @@ version_info <- function(vanilla = FALSE) {
   names(vinfos) <- core_packages
 
   ravemanager_needsUpdate <- vinfos$ravemanager$needsUpdate
+
+  if( auto_restart && ravemanager_needsUpdate && is_installed("rstudioapi") ) {
+    rstudioapi <- asNamespace('rstudioapi')
+    if( rstudioapi$isAvailable(version_needed = "1.4") ) {
+      # restart RStudio!
+      try({
+        message("Trying to update `ravemanager`: restarting RStudio...")
+        Sys.setenv("RAVEMANAGER_SUPPRESS_AUTO_RESTART" = "TRUE")
+        rstudioapi$restartSession(
+          clean = TRUE,
+          command = sprintf('{
+  install.packages("ravemanager", repos = "https://rave-ieeg.r-universe.dev", lib = "%s")
+  message("Wait a second...")
+  ravemanager::version_info()
+}', get_libpaths(first = TRUE, check = TRUE))
+        )
+      }, silent = TRUE)
+      return(invisible())
+    }
+  }
+
   core_needsUpdate <- any(unlist(lapply(vinfos[-1], '[', "needsUpdate")))
 
   tryCatch({
@@ -82,7 +112,7 @@ version_info <- function(vanilla = FALSE) {
 
         # cat(cli$col_cyan('install.packages("ravemanager", repos = "https://rave-ieeg.r-universe.dev", lib = Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]])))'), "\n")
         cat("\n")
-        cli$cli_bullets(c("i" = "Make sure you restart R after this step."))
+        cli$cli_bullets(c("i" = "Make sure you restart R and run `{.run ravemanager::version_info()}` again after this step."))
         step <- step + 1L
       }
 
@@ -96,7 +126,7 @@ version_info <- function(vanilla = FALSE) {
         # message('    loadNamespace("ravemanager", lib.loc = lib_path)')
         cli$cli_text(cli$col_cyan(sprintf('loadNamespace("ravemanager", lib.loc = "%s")', get_libpaths(first = TRUE, check = TRUE))))
         if( isFALSE(ravemanager_needsUpdate) ) {
-          cli$cli_text(cli$col_cyan('ravemanager::update_rave()'))
+          cli$cli_text(cli$col_cyan('{.run ravemanager::update_rave()}'))
         } else {
           cli$cli_text(cli$col_cyan('ravemanager::update_rave(allow_cache = FALSE)'))
         }
@@ -117,7 +147,7 @@ version_info <- function(vanilla = FALSE) {
           "\n* Please update [ravemanager] using\n",
           '    lib_path <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))',
           '    install.packages("ravemanager", repos = "https://rave-ieeg.r-universe.dev", lib = lib_path)',
-          '\nMake sure you restart R after this step.',
+          '\nMake sure you restart R and run `ravemanager::version_info()` after this step.',
           paste(rep("-", mnchars + 14), collapse = ""),
           sep = "\n"
         )
