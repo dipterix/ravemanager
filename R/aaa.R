@@ -1,7 +1,7 @@
 
 rave_depends <- c(
   "ravetools", "filearray", "shidashi", "rpymat",
-  "dipsaus", "threeBrain", "raveio", "ravedash",
+  "dipsaus", "threeBrain", "ieegio", "raveio", "ravedash",
   "readNSx", "rpyANTs")
 
 rave_packages <- c("rutabaga", "ravebuiltins")
