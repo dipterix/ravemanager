@@ -11,3 +11,4 @@
 \.gif$
 \.docs$
 \.pptx$
+^inst/packaged$
