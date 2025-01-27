@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ravemanager</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.47</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.48</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,16 +75,16 @@ safe and it will not affect any existing configurations on the computer.</p>
 <code>pynwb</code>, <code>mat73</code>, <code>mne</code>. You can always
 add more <code>conda</code> packages via <code>rpymat::add_packages(...)</code> or
 <code>pip</code> packages via <code>rpymat::add_packages(..., pip = TRUE)</code>.</p>
-<p>To use the 'python' environment, please run <code>rpymat::ensure_rpymat()</code>
+<p>To use the 'python' environment, please run <code><a href="http://dipterix.org/rpymat/reference/conda-env.html" class="external-link">rpymat::ensure_rpymat()</a></code>
 to activate in your current session. If you are running via
 <code>'RStudio'</code>, open any 'python' script and use <code>'ctrl/cmd+enter'</code>
 to run line-by-line. To switch from <code>R</code> to <code>python</code> mode,
-using command <code>rpymat::repl_python()</code></p>
+using command <code><a href="http://dipterix.org/rpymat/reference/repl_python.html" class="external-link">rpymat::repl_python()</a></code></p>
 <p>A <code>jupyterlab</code> will be automatically installed during the
 configuration. To launch the <code>jupyterlab</code>, use
-<code>rpymat::jupyter_launch()</code></p>
+<code><a href="http://dipterix.org/rpymat/reference/jupyter.html" class="external-link">rpymat::jupyter_launch()</a></code></p>
 <p>If you want to remove this <code>conda</code> environment, use R command
-<code>rpymat::remove_conda()</code>. This procedure is absolutely safe and
+<code><a href="http://dipterix.org/rpymat/reference/conda-env.html" class="external-link">rpymat::remove_conda()</a></code>. This procedure is absolutely safe and
 will not affect your other installations.</p>
     </div>
 
@@ -97,13 +97,13 @@ will not affect your other installations.</p>
 <span class="r-in"><span><span class="fu">ravemanager</span><span class="fu">::</span><span class="fu">configure_python</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add conda packages</span></span></span>
-<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu">add_packages</span><span class="op">(</span><span class="st">"numpy"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu"><a href="http://dipterix.org/rpymat/reference/conda-env.html" class="external-link">add_packages</a></span><span class="op">(</span><span class="st">"numpy"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add pip packages</span></span></span>
-<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu">add_packages</span><span class="op">(</span><span class="st">"nipy"</span>, pip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu"><a href="http://dipterix.org/rpymat/reference/conda-env.html" class="external-link">add_packages</a></span><span class="op">(</span><span class="st">"nipy"</span>, pip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># -------- Activate RAVE-python environment --------</span></span></span>
-<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu">ensure_rpymat</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu"><a href="http://dipterix.org/rpymat/reference/conda-env.html" class="external-link">ensure_rpymat</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># run script from a temporary file</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".py"</span><span class="op">)</span></span></span>
@@ -111,14 +111,14 @@ will not affect your other installations.</p>
 <span class="r-in"><span>  <span class="st">"import numpy"</span>,</span></span>
 <span class="r-in"><span>  <span class="st">"print(f'numpy installed: {numpy.__version__}')"</span></span></span>
 <span class="r-in"><span><span class="op">)</span>, <span class="va">f</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu">run_script</span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu"><a href="http://dipterix.org/rpymat/reference/run_pyscript.html" class="external-link">run_script</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># run terminal command within the environment</span></span></span>
-<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu">run_command</span><span class="op">(</span><span class="st">"pip list"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu"><a href="http://dipterix.org/rpymat/reference/run_command.html" class="external-link">run_command</a></span><span class="op">(</span><span class="st">"pip list"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># run python interactively, remember to use `exit` to exit</span></span></span>
 <span class="r-in"><span><span class="co"># python mode</span></span></span>
-<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu">repl_python</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rpymat</span><span class="fu">::</span><span class="fu"><a href="http://dipterix.org/rpymat/reference/repl_python.html" class="external-link">repl_python</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
