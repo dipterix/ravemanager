@@ -18,6 +18,8 @@ get_python_package_name <- function(lib) {
 #' @param python_ver python version; default is automatically determined. If
 #' a specific python version is needed, please specify explicitly, for example,
 #' \code{python_ver='3.8'}
+#' @param env_name 'conda' environment to use; set to \code{NA} to verify
+#' the default environment
 #' @param verbose whether to verbose messages
 #' @param ask whether to ask before resetting the 'python' environment
 #' @details Use \code{ravemanager::configure_python()} to install and configure
@@ -81,13 +83,14 @@ get_python_package_name <- function(lib) {
 #' }
 #'
 #' @export
-validate_python <- function(verbose = TRUE) {
+validate_python <- function(verbose = TRUE, env_name = NA) {
   callr <- asNamespace("callr")
 
   f <- function() {}
   body(f) <- bquote({
 
     verbose <- .(verbose)
+    env_name <- .(env_name)
 
     verb <- function(expr) {
       if(verbose) {
@@ -97,20 +100,35 @@ validate_python <- function(verbose = TRUE) {
     verb(message("Initializing python environment: "))
 
     rpymat <- asNamespace("rpymat")
-    rpymat$ensure_rpymat(verbose = verbose)
+    support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
+
+    if( support_custom_env ) {
+      cleaned_env_name <- rpymat$clean_env_name(env_name = env_name)
+      verb({
+        message("==== Environment Name: ", cleaned_env_name, " ================================")
+      })
+      rpymat$ensure_rpymat(verbose = verbose, env_name = cleaned_env_name)
+    } else {
+      env_name <- rpymat$CONDAENV_NAME()
+      verb({
+        message("==== Environment Name: ", env_name, " ================================")
+      })
+      rpymat$ensure_rpymat(verbose = verbose)
+    }
+
 
     reticulate <- asNamespace("reticulate")
 
-    verb({
-      message("Trying to get installed packages...")
-    })
-    tbl <- reticulate$py_list_packages(envname = rpymat$env_path())
-    pkgs <- tbl$package
-    pkgs <- pkgs[grepl("^[a-zA-Z0-9]", pkgs)]
+    # verb({
+    #   message("Trying to get installed packages...")
+    # })
+    # tbl <- reticulate$py_list_packages(envname = rpymat$env_path())
+    # pkgs <- tbl$package
+    # pkgs <- pkgs[grepl("^[a-zA-Z0-9]", pkgs)]
 
-    verb({
-      message("Installed packages: ", paste(pkgs, collapse = ", "), "\n")
-    })
+    # verb({
+    #   message("Installed packages: ", paste(pkgs, collapse = ", "), "\n")
+    # })
 
     # Check environment
     verb({
@@ -118,7 +136,7 @@ validate_python <- function(verbose = TRUE) {
     })
 
     package_missing <- NULL
-    for(package in c("numpy", "h5py", "mat73", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants")) {
+    for(package in c("numpy", "h5py", "mat73", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants", "antspynet")) {
       tryCatch({
         verb({ message(sprintf("  %s: ", package), appendLF = FALSE) })
         module <- reticulate$import(package)
@@ -136,6 +154,10 @@ validate_python <- function(verbose = TRUE) {
         package_missing <<- c(package_missing, package)
       })
     }
+
+    verb({
+      message("========================================================================")
+    })
     package_missing
   })
 
@@ -157,6 +179,30 @@ system_pkgpath <- function(package, ..., alternative = TRUE) {
   return(re)
 }
 
+configure_ants <- function() {
+  # Internal function to configure ANTsPyx, assuming Python is configured
+
+  rpymat <- asNamespace("rpymat")
+  support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
+  if(!support_custom_env) { return(invisible(FALSE)) }
+
+  ants_env_path <- rpymat$env_path(env_name = "rave-ants")
+  if(dir.exists(ants_env_path)) { return(TRUE) }
+
+  tryCatch({
+    reticulate <- asNamespace("reticulate")
+    reticulate$conda_create(ants_env_path, python_version = "3.10")
+    reticulate$conda_install(ants_env_path, packages = 'antspynet', pip = TRUE)
+    return(invisible(TRUE))
+  }, error = function(e) {
+    message(e)
+  })
+
+  return(invisible(FALSE))
+}
+
+
+
 #' @rdname configure-python
 #' @export
 configure_python <- function(python_ver = "3.11", verbose = TRUE) {
@@ -165,6 +211,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
     install_packages("rpymat")
   }
   rpymat <- asNamespace("rpymat")
+
 
   # Install conda and create a conda environment
   # current_env <- Sys.getenv("R_RPYMAT_CONDA_PREFIX", unset = "")
@@ -196,6 +243,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
       rpymat$configure_conda(python_ver = python_ver)
     })
   }
+
   rpymat$ensure_rpymat(verbose = verbose)
 
   reticulate <- asNamespace("reticulate")
@@ -247,6 +295,9 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
     }
   }
 
+
+  ants_configured <- configure_ants()
+
   # Initialize
   if( verbose ) {
     cat("\n\n\n")
@@ -255,9 +306,15 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   }
 
   validate_python(verbose = verbose)
-  if( verbose ) {
-    message("Done. Use `ravemanager::ensure_rpymat()` to activate this environment.")
+  if( ants_configured ) {
+    validate_python(verbose = verbose, env_name = "rave-ants")
   }
+
+  if( verbose ) {
+    message("Done configuring Python for RAVE.")
+  }
+
+
 }
 
 
@@ -270,8 +327,14 @@ remove_conda <- function(ask = TRUE) {
 
 #' @rdname configure-python
 #' @export
-ensure_rpymat <- function() {
+ensure_rpymat <- function(env_name = NA) {
   rpymat <- asNamespace("rpymat")
-  rpymat$ensure_rpymat()
+  support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
+  if( support_custom_env ) {
+    rpymat$ensure_rpymat(env_name = env_name)
+  } else {
+    rpymat$ensure_rpymat()
+  }
+
 }
 

@@ -8,16 +8,19 @@
 \alias{ensure_rpymat}
 \title{Install & Configure 'python' environment for 'RAVE'}
 \usage{
-validate_python(verbose = TRUE)
+validate_python(verbose = TRUE, env_name = NA)
 
 configure_python(python_ver = "3.11", verbose = TRUE)
 
 remove_conda(ask = TRUE)
 
-ensure_rpymat()
+ensure_rpymat(env_name = NA)
 }
 \arguments{
 \item{verbose}{whether to verbose messages}
+
+\item{env_name}{'conda' environment to use; set to \code{NA} to verify
+the default environment}
 
 \item{python_ver}{python version; default is automatically determined. If
 a specific python version is needed, please specify explicitly, for example,
