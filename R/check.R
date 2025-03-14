@@ -17,7 +17,6 @@ version_info <- function(vanilla = FALSE, auto_restart = !get_os() %in% "windows
 
   if( Sys.getenv("RAVEMANAGER_SUPPRESS_AUTO_RESTART", "") != "" ) {
     auto_restart <- FALSE
-    Sys.unsetenv("RAVEMANAGER_SUPPRESS_AUTO_RESTART")
   }
 
   versions <- new.env()
@@ -172,6 +171,8 @@ version_info <- function(vanilla = FALSE, auto_restart = !get_os() %in% "windows
 
     )
   })
+
+  Sys.unsetenv("RAVEMANAGER_SUPPRESS_AUTO_RESTART")
 
   invisible()
 }
