@@ -1,5 +1,6 @@
 
 rave_depends <- c(
+  "bidsr",
   "dipsaus",
   "filearray",
   "ieegio",
