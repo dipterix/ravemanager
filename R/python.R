@@ -179,7 +179,10 @@ system_pkgpath <- function(package, ..., alternative = TRUE) {
   return(re)
 }
 
-configure_ants <- function() {
+
+#' @rdname configure-python
+#' @export
+configure_antspynet <- function() {
   # Internal function to configure ANTsPyx, assuming Python is configured
 
   rpymat <- asNamespace("rpymat")
@@ -296,7 +299,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   }
 
 
-  ants_configured <- configure_ants()
+  # ants_configured <- configure_antspynet()
 
   # Initialize
   if( verbose ) {
@@ -306,9 +309,9 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   }
 
   validate_python(verbose = verbose)
-  if( ants_configured ) {
-    validate_python(verbose = verbose, env_name = "rave-ants")
-  }
+  # if( ants_configured ) {
+  #   validate_python(verbose = verbose, env_name = "rave-ants")
+  # }
 
   if( verbose ) {
     message("Done configuring Python for RAVE.")

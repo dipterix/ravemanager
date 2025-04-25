@@ -3,12 +3,15 @@
 \name{configure-python}
 \alias{configure-python}
 \alias{validate_python}
+\alias{configure_antspynet}
 \alias{configure_python}
 \alias{remove_conda}
 \alias{ensure_rpymat}
 \title{Install & Configure 'python' environment for 'RAVE'}
 \usage{
 validate_python(verbose = TRUE, env_name = NA)
+
+configure_antspynet()
 
 configure_python(python_ver = "3.11", verbose = TRUE)
 
