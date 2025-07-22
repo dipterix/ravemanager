@@ -243,7 +243,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
       reticulate <- asNamespace("reticulate")
       reticulate$install_miniconda(path = rpymat$conda_path(),
                                    update = TRUE, force = TRUE)
-      rpymat$configure_conda(python_ver = python_ver)
+      rpymat$configure_conda(python_ver = python_ver, force = TRUE)
     })
   }
 
