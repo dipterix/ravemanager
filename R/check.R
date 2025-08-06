@@ -59,7 +59,7 @@ version_info <- function(vanilla = FALSE, auto_restart = !get_os() %in% "windows
 
   ravemanager_needsUpdate <- vinfos$ravemanager$needsUpdate
 
-  if( auto_restart && ravemanager_needsUpdate && is_installed("rstudioapi") ) {
+  if( ravemanager_needsUpdate && is_installed("rstudioapi") ) {
     rstudioapi <- asNamespace('rstudioapi')
     if( rstudioapi$isAvailable(version_needed = "1.4") ) {
       # set preference to avoid loading .RData <- why this is something I need to worry
@@ -71,7 +71,9 @@ version_info <- function(vanilla = FALSE, auto_restart = !get_os() %in% "windows
           rstudioapi$writeRStudioPreference("load_workspace", FALSE)
         }
       })
+    }
 
+    if( auto_restart ) {
       # restart RStudio!
       try({
         message("Trying to update `ravemanager`: restarting RStudio...")
