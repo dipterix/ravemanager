@@ -195,7 +195,7 @@ configure_antspynet <- function() {
   tryCatch({
     reticulate <- asNamespace("reticulate")
     reticulate$conda_create(ants_env_path, python_version = "3.10")
-    reticulate$conda_install(ants_env_path, packages = 'antspynet', pip = TRUE)
+    reticulate$conda_install(ants_env_path, packages = 'antspynet==0.2.9', pip = TRUE)
     return(invisible(TRUE))
   }, error = function(e) {
     message(e)
