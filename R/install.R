@@ -25,6 +25,7 @@
 #' without restarting the R session; however, this solution not always
 #' works. In such case, restarting R session is always the solution.
 #' @param ... passed to internal functions
+#' @param branch_name for 'RAVE' developers, development branch to install
 #' @return Nothing
 NULL
 
@@ -619,6 +620,68 @@ install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
     error_verbosed <- TRUE
 
   })
+}
+
+#' @rdname RAVE-install
+#' @export
+install_dev <- function(branch_name) {
+  if(missing(branch_name)) {
+    stop("Please specify the development branch (`branch_name`)")
+  }
+
+  if(system.file(package = "rave") == "") {
+    stop("You must install normal version of RAVE first - `ravemanager::install()`")
+  }
+
+  message("This is for RAVE developers to install development branches. Please use `ravemanager::install()` if you are normal users.")
+
+  message("Did you restart R and run `install_dev` with a clean environment?")
+  ans <- utils::askYesNo("", default = FALSE)
+
+  if(!isTRUE(ans)) {
+    stop("Please restart R session fist!")
+  }
+
+
+  gh_repos <- c(
+    "dipterix/bidsr",
+    "dipterix/dipsaus",
+    "dipterix/filearray",
+    "dipterix/ieegio",
+    "dipterix/ravedash",
+    "beauchamplab/raveio",
+    "dipterix/ravepipeline",
+    "dipterix/ravetools",
+    "dipterix/readNSx",
+    "dipterix/rpyANTs",
+    "dipterix/rpymat",
+    "dipterix/shidashi",
+    "dipterix/threeBrain",
+    "beauchamplab/rutabaga",
+    "beauchamplab/ravebuiltins"
+  )
+  gh_branches <- sprintf("%s@%s", gh_repos, branch_name)
+
+  lapply(gh_branches, function(pkg) {
+    tryCatch({
+      add_r_package(pkg)
+    }, error = function(e) {
+      message("Unable to fetch package: ", pkg)
+    })
+  })
+
+  pipeline_branch <- sprintf("rave-ieeg/rave-pipeline@%s", branch_name)
+  tryCatch({
+    ravepipeline <- asNamespace("ravepipeline")
+    ravepipeline$pipeline_install_github(pipeline_branch)
+    try({
+      asNamespace("ravecore")$clear_cached_files()
+    }, silent = TRUE)
+  }, error = function(e) {
+    message("Unable to fetch rave-pipelines: ", pipeline_branch)
+  })
+
+  invisible()
 }
 
 #' @rdname RAVE-install

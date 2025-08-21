@@ -6,6 +6,7 @@
 \alias{finalize_installation}
 \alias{clear_cache}
 \alias{install}
+\alias{install_dev}
 \alias{update_rave}
 \alias{upgrade_installer}
 \title{Install or upgrade 'RAVE'}
@@ -31,6 +32,8 @@ install(
   lib_path = NA,
   ...
 )
+
+install_dev(branch_name)
 
 update_rave(
   allow_cache = FALSE,
@@ -74,6 +77,8 @@ be hard to resolve or out-dated; default is \code{FALSE}}
 
 \item{lib_path}{library path where 'RAVE' should be installed; default is
 automatically determined.}
+
+\item{branch_name}{for 'RAVE' developers, development branch to install}
 
 \item{reload}{whether to reload \code{ravemanager} after installation;
 default is true. This tries to load the upgraded \code{ravemanager}
