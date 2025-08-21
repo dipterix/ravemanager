@@ -651,6 +651,7 @@ install_dev <- function(branch_name) {
     "dipterix/ravedash",
     "beauchamplab/raveio",
     "dipterix/ravepipeline",
+    "rave-ieeg/ravecore",
     "dipterix/ravetools",
     "dipterix/readNSx",
     "dipterix/rpyANTs",
