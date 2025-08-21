@@ -679,7 +679,7 @@ install_dev <- function(branch_name) {
   })
 
   if(nzchar(branch_name)) {
-    pipeline_branch <- sprintf("rave-ieeg/rave-pipeline@%s", branch_name)
+    pipeline_branch <- sprintf("rave-ieeg/rave-pipelines@%s", branch_name)
     tryCatch({
       ravepipeline <- asNamespace("ravepipeline")
       ravepipeline$pipeline_install_github(pipeline_branch)
