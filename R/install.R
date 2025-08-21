@@ -660,7 +660,15 @@ install_dev <- function(branch_name) {
     "beauchamplab/rutabaga",
     "beauchamplab/ravebuiltins"
   )
-  gh_branches <- sprintf("%s@%s", gh_repos, branch_name)
+
+  if(nzchar(branch_name)) {
+    sel <- basename(gh_repos) == branch_name
+    gh_branches <- sprintf("%s@%s", gh_repos, branch_name)
+    gh_branches[sel] <- gh_repos[sel]
+  } else {
+    gh_branches <- gh_repos
+  }
+
 
   lapply(gh_branches, function(pkg) {
     tryCatch({
@@ -670,16 +678,20 @@ install_dev <- function(branch_name) {
     })
   })
 
-  pipeline_branch <- sprintf("rave-ieeg/rave-pipeline@%s", branch_name)
-  tryCatch({
-    ravepipeline <- asNamespace("ravepipeline")
-    ravepipeline$pipeline_install_github(pipeline_branch)
-    try({
-      asNamespace("ravecore")$clear_cached_files()
-    }, silent = TRUE)
-  }, error = function(e) {
-    message("Unable to fetch rave-pipelines: ", pipeline_branch)
-  })
+  if(nzchar(branch_name)) {
+    pipeline_branch <- sprintf("rave-ieeg/rave-pipeline@%s", branch_name)
+    tryCatch({
+      ravepipeline <- asNamespace("ravepipeline")
+      ravepipeline$pipeline_install_github(pipeline_branch)
+      try({
+        asNamespace("ravecore")$clear_cached_files()
+      }, silent = TRUE)
+    }, error = function(e) {
+      message("Unable to fetch rave-pipelines: ", pipeline_branch)
+    })
+  }
+
+  cat('Done.\n')
 
   invisible()
 }
