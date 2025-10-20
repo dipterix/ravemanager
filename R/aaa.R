@@ -4,6 +4,7 @@ rave_depends <- c(
   "dipsaus",
   "filearray",
   "ieegio",
+  "ravecore",
   "ravedash",
   "raveio",
   "ravepipeline",
