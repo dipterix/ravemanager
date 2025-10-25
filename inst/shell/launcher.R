@@ -11,8 +11,8 @@ Options:
   -h --help       Show this screen.
   --version       Show version.
   --port=<n>      Port number (1024-65535) [default: 8788].
-  --host=<addr>   Host address [default: 127.0.0.1].
-  --no-browser    Do not launch browser [default: FALSE]
+  --host=<addr>   Host address [default: 0.0.0.0].
+  --no-browser    Do not launch browser [default: TRUE]
   --new-session   Start a brand new session [default: FALSE]
 '
 

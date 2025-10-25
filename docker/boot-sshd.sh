@@ -52,23 +52,31 @@ fi
 # optional: follow sshd log in background for debugging (won't block)
 # [ -f /var/log/sshd.log ] && ( tail -n +1 -F /var/log/sshd.log 2>/dev/null & )
 
-echo "=========================================================================="
-echo "                   Welcome to RAVE docker. You can"
-echo ""
-echo "  1. type in 'rave start' to launch RAVE"
-echo "     or 'rave -h' to see the usage"
-echo ""
-echo "  2. use ssh to connect to the container; the password is:"
-echo "     ${pw}"
-echo ""
-echo "=========================================================================="
-echo ""
-
-# drop to the default user for interactive shell.
-if [ "$(id -u)" -eq 0 ]; then
-  # use the DEFAULT_USER env var (set earlier in Dockerfile)
-  exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash
+if [ -t 0 ]; then
+  # interactive shell
+  echo "=========================================================================="
+  echo "                   Welcome to RAVE docker. You can"
+  echo ""
+  echo "  1. type in 'rave start' to launch RAVE"
+  echo "     or 'rave -h' to see the usage"
+  echo ""
+  echo "  2. use ssh to connect to the container; the password is:"
+  echo "     ${pw}"
+  echo ""
+  echo "=========================================================================="
+  echo ""
+  # drop to the default user for interactive shell.
+  if [ "$(id -u)" -eq 0 ]; then
+    # use the DEFAULT_USER env var (set earlier in Dockerfile)
+    exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash
+  else
+    exec /bin/bash --login
+  fi
 else
-  exec /bin/bash --login
+  if [ "$(id -u)" -eq 0 ]; then
+    # use the DEFAULT_USER env var (set earlier in Dockerfile)
+    exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash -c rave start
+  else
+    /bin/bash -c rave start
+  fi
 fi
-
