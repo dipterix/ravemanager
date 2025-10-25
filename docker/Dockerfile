@@ -55,8 +55,9 @@ USER root
 
 # boot script: sets password from env (or generates), then starts sshd
 COPY --chmod=755 docker/boot-sshd.sh /usr/local/bin/boot-sshd.sh
+COPY --chmod=755 inst/shell/launcher.R /usr/local/bin/rave
 CMD ["/usr/local/bin/boot-sshd.sh"]
 
 # DOCKER_BUILDKIT=1 docker build --no-cache -t rave-local:dev -f docker/Dockerfile .
-
-# docker run --rm -ti -p 2222:22 rave-local:dev bash
+# docker run --rm -ti -p 2222:22 rave-local:dev
+# docker run --rm -ti -p 2222:22 ghcr.io/dipterix/ravemanager:arm64-main bash
