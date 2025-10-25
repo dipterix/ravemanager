@@ -1,14 +1,14 @@
-version: "3.9"
-
 services:
   rave:
     image: ghcr.io/dipterix/ravemanager:main
     container_name: rave
     ports:
-      - "127.0.0.1:2222:22"
-      - "127.0.0.1:8788:8788"
+      - "127.0.0.1:2222:22"      # You can ssh -p 2222 raveuser@127.0.0.1 to login to the container
+      - "127.0.0.1:8788:8788"    # For RAVE application
     volumes:
+      # /Folder/to/your/rave_data:/opt/shared/rave/data
+      # do NOT change the path after ":"
       - $HOME/rave_data:/opt/shared/rave/data
-    tty: false        # optional: for interactive sessions
-    stdin_open: false # optional: keep STDIN open if attaching later
+    tty: false
+    stdin_open: false
     restart: unless-stopped

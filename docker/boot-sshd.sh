@@ -76,7 +76,7 @@ else
   echo ""
   echo "  You have launched this container in non-interactive mode"
   echo "      RAVE will be launched as: ${DEFAULT_USER:-raveuser}"
-  echo "      Default internal port is: 8788"
+  echo "      Default address is      : http://127.0.0.1:8788"
   echo ""
   echo "  You can also ssh to the container; the password is:"
   echo "      ${pw}"
