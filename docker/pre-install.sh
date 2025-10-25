@@ -97,5 +97,7 @@ chown -R ${DEFAULT_USER}:${DEFAULT_GROUP} /opt/shared/rave/lib
 # Clean up
 R -q -e "pak::cache_clean(); ravemanager:::pak_cache_remove()"
 rm -rf /var/lib/apt/lists/*
+# rm -rf /var/cache/apt/*
+# rm -rf /root/.cache/R
 rm -rf /opt/shared/rave/etc/*
 rm -rf /tmp/*

@@ -32,7 +32,9 @@ COPY docker/Rprofile.site /usr/local/lib/R/etc/RAVE.site
 COPY --chmod=755 docker/pre-install.sh /usr/local/bin/pre-install.sh
 COPY --chmod=600 docker/ssh_host_keys/ssh_host_* /etc/ssh/
 
-RUN /usr/local/bin/pre-install.sh
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt \
+    --mount=type=cache,id=r-cache,target=/root/.cache/R \
+    /usr/local/bin/pre-install.sh
 
 # Ensure sshd uses these specific keys
 RUN echo "HostKey /etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config && \
