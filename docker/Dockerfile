@@ -60,4 +60,4 @@ CMD ["/usr/local/bin/boot-sshd.sh"]
 
 # DOCKER_BUILDKIT=1 docker build --no-cache -t rave-local:dev -f docker/Dockerfile .
 # docker run --rm -ti -p 2222:22 rave-local:dev
-# docker run -p 127.0.0.1:2222:22 -p 127.0.0.1:8788:8788 -v ~/rave_data:/opt/shared/rave/data ghcr.io/dipterix/ravemanager:arm64-main
+# docker run -p 127.0.0.1:2222:22 -p 127.0.0.1:8788:8788 -v ~/rave_data:/opt/shared/rave/data ghcr.io/dipterix/ravemanager:arm64-main su - "${DEFAULT_USER:-raveuser}" -s /bin/bash -c "rave start"

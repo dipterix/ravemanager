@@ -53,7 +53,6 @@ fi
 # [ -f /var/log/sshd.log ] && ( tail -n +1 -F /var/log/sshd.log 2>/dev/null & )
 
 if [ -t 0 ]; then
-  # interactive shell
   echo "=========================================================================="
   echo "                   Welcome to RAVE docker. You can"
   echo ""
@@ -65,18 +64,17 @@ if [ -t 0 ]; then
   echo ""
   echo "=========================================================================="
   echo ""
-  # drop to the default user for interactive shell.
+
   if [ "$(id -u)" -eq 0 ]; then
-    # use the DEFAULT_USER env var (set earlier in Dockerfile)
     exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash
   else
     exec /bin/bash --login
   fi
 else
+  echo "Non-interactive mode: starting RAVE as ${DEFAULT_USER:-raveuser}"
   if [ "$(id -u)" -eq 0 ]; then
-    # use the DEFAULT_USER env var (set earlier in Dockerfile)
-    exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash -c rave start
+    exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash -c "rave start"
   else
-    /bin/bash -c rave start
+    exec /bin/bash -c "rave start"
   fi
 fi
