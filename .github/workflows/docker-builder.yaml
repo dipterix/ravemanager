@@ -45,17 +45,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=sha
-          # optional: auto-mark main branch tag as :main
-          flavor: |
-            latest=false
-            # add :main pointing to main branch
-            suffix=-{{branch}},on=branch=main|false
-            # add :latest when pushing a version tag
-            suffix=-{{tag}},on=tag=true|false
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
