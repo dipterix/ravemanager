@@ -1,0 +1,7 @@
+RAVE_LIB_PATH=/opt/shared/rave/lib/R
+R_LIBS=/opt/shared/rave/lib/R:/usr/local/lib/R/library
+R_RPYMAT_CONDA_EXE=/opt/shared/rave/lib/conda/condabin/conda
+R_RPYMAT_CONDA_PREFIX=/opt/shared/rave/lib/conda-envs
+R_USER_DATA_DIR=/opt/shared/rave/shared
+R_USER_CONFIG_DIR=/opt/shared/rave/etc/${USER}/config
+R_USER_CACHE_DIR=/opt/shared/rave/etc/${USER}/cache

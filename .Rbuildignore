@@ -12,3 +12,4 @@
 \.docs$
 \.pptx$
 ^inst/packaged$
+^docker/
