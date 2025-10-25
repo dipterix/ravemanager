@@ -2,13 +2,13 @@ version: "3.9"
 
 services:
   rave:
-    image: ghcr.io/dipterix/ravemanager:latest
+    image: ghcr.io/dipterix/ravemanager:main
     container_name: rave
     ports:
       - "127.0.0.1:2222:22"
       - "127.0.0.1:8788:8788"
     volumes:
       - $HOME/rave_data:/opt/shared/rave/data
-    tty: true        # optional: for interactive sessions
-    stdin_open: true # optional: keep STDIN open if attaching later
+    tty: false        # optional: for interactive sessions
+    stdin_open: false # optional: keep STDIN open if attaching later
     restart: unless-stopped

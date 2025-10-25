@@ -71,7 +71,19 @@ if [ -t 0 ]; then
     exec /bin/bash --login
   fi
 else
-  echo "Non-interactive mode: starting RAVE as ${DEFAULT_USER:-raveuser}"
+  echo "=========================================================================="
+  echo "                   Welcome to RAVE docker !"
+  echo ""
+  echo "  You have launched this container in non-interactive mode"
+  echo "      RAVE will be launched as: ${DEFAULT_USER:-raveuser}"
+  echo "      Default internal port is: 8788"
+  echo ""
+  echo "  You can also ssh to the container; the password is:"
+  echo "      ${pw}"
+  echo ""
+  echo "=========================================================================="
+  echo ""
+
   if [ "$(id -u)" -eq 0 ]; then
     exec su - "${DEFAULT_USER:-raveuser}" -s /bin/bash -c "rave start"
   else
