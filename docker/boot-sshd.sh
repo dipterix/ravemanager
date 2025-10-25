@@ -9,6 +9,7 @@ set -e
 # uses DEFAULT_USER from the image (you already define it)
 
 : "${DEFAULT_USER:=raveuser}"
+: "${SSH_PASSWORD_GENERATE:=1}"
 
 # pick password source
 pw="${SSH_PASSWORD:-}"

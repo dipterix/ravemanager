@@ -32,9 +32,7 @@ COPY docker/Rprofile.site /usr/local/lib/R/etc/RAVE.site
 COPY --chmod=755 docker/pre-install.sh /usr/local/bin/pre-install.sh
 COPY --chmod=600 docker/ssh_host_keys/ssh_host_* /etc/ssh/
 
-RUN --mount=type=cache,id=apt-cache-${TARGETARCH},target=/var/cache/apt \
-    --mount=type=cache,id=r-cache-${TARGETARCH},target=/root/.cache/R \
-    /usr/local/bin/pre-install.sh
+RUN /usr/local/bin/pre-install.sh
 
 # Ensure sshd uses these specific keys
 RUN echo "HostKey /etc/ssh/ssh_host_ed25519_key" >> /etc/ssh/sshd_config && \
@@ -55,7 +53,6 @@ USER root
 
 # boot script: sets password from env (or generates), then starts sshd
 COPY --chmod=755 docker/boot-sshd.sh /usr/local/bin/boot-sshd.sh
-ENV SSH_PASSWORD_GENERATE=1
 CMD ["/usr/local/bin/boot-sshd.sh"]
 
 # DOCKER_BUILDKIT=1 docker build --no-cache -t rave-local:dev -f docker/Dockerfile .
