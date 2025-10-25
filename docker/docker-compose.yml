@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   rave:
-    image: ghcr.io/dipterix/ravemanager:arm64-main
+    image: ghcr.io/dipterix/ravemanager:latest
     container_name: rave
     ports:
       - "127.0.0.1:2222:22"
