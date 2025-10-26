@@ -147,9 +147,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Mirror per-arch images to Docker Hub and create manifests
+      - name: Mirror multi-arch tags from GHCR to Docker Hub
         run: |
           set -euo pipefail
+          GH_IMAGE="ghcr.io/${{ github.repository }}"
+          HUB_IMAGE="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}"
+
+          # Tags to mirror: branch name and sha always; add main on main; add latest on version tags
           TAGS="${{ github.ref_name }} ${{ github.sha }}"
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             TAGS="$TAGS main"
@@ -157,12 +161,9 @@ jobs:
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             TAGS="$TAGS latest"
           fi
+
+          # For each tag, copy the GHCR multi-arch manifest to Docker Hub
           for TAG in $TAGS; do
-            for ARCH in amd64 arm64; do
-              docker pull "$GH_IMAGE:$ARCH-$TAG"
-              docker tag  "$GH_IMAGE:$ARCH-$TAG" "$HUB_IMAGE:$ARCH-$TAG"
-              docker push "$HUB_IMAGE:$ARCH-$TAG"
-            done
-            docker buildx imagetools create -t "$HUB_IMAGE:$TAG" \
-              "$HUB_IMAGE:amd64-$TAG" "$HUB_IMAGE:arm64-$TAG"
+            echo "Mirroring $GH_IMAGE:$TAG -> $HUB_IMAGE:$TAG"
+            docker buildx imagetools create -t "$HUB_IMAGE:$TAG" "$GH_IMAGE:$TAG"
           done
