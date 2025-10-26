@@ -1,4 +1,5 @@
-
+# Update RAVE first
+ravemanager::update_rave(upgrade_manager = FALSE, finalize = FALSE, python = FALSE)
 
 dir_create2 <- function (x, showWarnings = FALSE, recursive = TRUE, check = TRUE, ...) {
   if (!dir.exists(x)) {
@@ -87,12 +88,11 @@ setup_rave <- function(config) {
 
 setup_rave(config)
 
-# R -q -e "ravemanager::configure_python()"
-# /opt/shared/rave/lib/conda/condabin/conda clean --all --yes
-
 ravemanager::finalize_installation()
 ravemanager:::pak_cache_remove()
 pak::cache_clean()
+
+ravecore::clear_cached_files()
 
 
 # echo "source('/opt/shared/rave/etc/rave_profile.r')" >> $HOME/.Rprofile

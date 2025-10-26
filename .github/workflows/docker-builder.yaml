@@ -64,8 +64,10 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
-          platforms: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            CACHE_BUSTER=${{ github.run_id }}
           tags: |
             ${{ env.IMAGE }}:${{ matrix.arch }}-${{ github.ref_name }}
             ${{ env.IMAGE }}:${{ matrix.arch }}-${{ github.sha }}

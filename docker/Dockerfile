@@ -45,11 +45,14 @@ USER ${DEFAULT_USER}
 COPY --chmod=755 docker/install.sh /usr/local/bin/rave-install.sh
 RUN /usr/local/bin/rave-install.sh
 
+# No cache after this
+ARG CACHE_BUSTER=1
+
 # Post install might be subject to change
 COPY --chown=${DEFAULT_USER} --chmod=665 docker/configure.r /opt/shared/rave/etc/configure.r
 COPY --chown=${DEFAULT_USER} --chmod=665 docker/startup.r /opt/shared/rave/etc/rave_profile.r
 COPY --chmod=755 docker/post-install.sh /usr/local/bin/post-install.sh
-RUN /usr/local/bin/post-install.sh
+RUN echo "Cache bust: $CACHE_BUSTER" && /usr/local/bin/post-install.sh
 
 USER root
 
