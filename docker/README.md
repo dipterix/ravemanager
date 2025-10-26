@@ -31,6 +31,74 @@ Open terminal, `cd` to the folder where `docker-compose.yml` is stored, and run
 docker compose up
 ```
 
+Now go to http://127.0.0.1:8788, you will see RAVE service.
+
+If you encounter issues, post questions at our help forum: https://github.com/orgs/rave-ieeg/discussions
+
+
+### Update
+
+```sh
+# cd to docker-compose.yml
+
+docker compose pull
+docker compose up
+```
+
+### Connect via SSH
+
+Some RAVE functions are only available in code mode. To use the command-line tools or run R/Python within RAVE, the docker image offers SSH access. 
+
+When the docker container is up, you will see the message from the terminal similar to this:
+
+```
+rave  | ======================================================================
+rave  |                    Welcome to RAVE docker !
+rave  | 
+rave  |   You have launched this container in non-interactive mode
+rave  |       RAVE will be launched as: raveuser
+rave  |       Default address is      : http://127.0.0.1:8788
+rave  | 
+rave  |   You can also ssh to the container; the password is:
+rave  |       8KdRle2wxITzkVY9dvNy
+rave  | 
+rave  | ======================================================================
+```
+
+RAVE docker container will generate a password (`8KdRle2wxITzkVY9dvNy` in this example). This password changes every time when the container is restarted. You can open another terminal, or use vscode to ssh to the container. Here is an example:
+
+```sh
+$ ssh -p 2222 raveuser@127.0.0.1`
+
+#> The authenticity of host '[127.0.0.1]:2222 ([127.0.0.1]:2222)' can't be established.
+#> ED25519 key fingerprint is SHA256:23n83Y9GAIDYD+baadtqtEN/yx20m/zgW1s/121X.
+#> This key is not known by any other names.
+#> Are you sure you want to continue connecting (yes/no/[fingerprint])? 
+```
+
+This question only happens when you first SSH to the container. Enter `yes` and return, then you will be asked to enter the password
+
+```sh
+(raveuser@127.0.0.1) Password: 
+```
+
+Copy-paste the password above (in the welcome message) and hit return key. You will see:
+
+```sh
+#> Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.10.14-linuxkit aarch64)
+#> ...
+
+raveuser@2dd2803f6de0:~$ 
+```
+
+The last line should start with `raveuser@` and end with `~$`. This means you are now inside of the RAVE container. Now you can enter linux/RAVE commands. From inside of the container, the RAVE data is ALWAYS stored at `/opt/shared/rave/data/` (your local data directory is mapped here):
+
+```sh
+raveuser@2dd2803f6de0:~$ cd /opt/shared/rave/data/
+raveuser@2dd2803f6de0:/opt/shared/rave/data$ ls
+#> bids_dir  cache_dir  data_dir  raw_dir
+```
+
 ### Customization
 
 You may customize the `docker-compose.yml` file based on your settings. Here is a list of line-by-line explanations:
@@ -41,14 +109,6 @@ You may customize the `docker-compose.yml` file based on your settings. Here is 
 * Localhost address `127.0.0.1:8788` is for RAVE web server. By default RAVE will launch at `http://127.0.0.1:8788`. Only the host machine may access the service.
 * `$HOME/rave_data:/opt/shared/rave/data` mounts the RAVE data located at your home directory to the RAVE data repository inside of the container. If the RAVE data is stored at some other places, replace `$HOME/rave_data` with that path. For paths containing spaces, please make sure the path is properly quoted (e.g. `"/Volumes/My SSD/RAVE/rave_data":/opt/shared/rave/data`). Do NOT change the path after `:`.
 
-### Update
-
-```sh
-# cd to docker-compose.yml
-
-docker compose pull ghcr.io/dipterix/ravemanager:main
-docker compose up -d
-```
 
 ### Limitations & Workaround
 
@@ -89,3 +149,4 @@ Here is an example directory tree:
     CT_RAW.nii.gz
     postToPre.mat
 ```
+

@@ -53,7 +53,7 @@ fi
 # [ -f /var/log/sshd.log ] && ( tail -n +1 -F /var/log/sshd.log 2>/dev/null & )
 
 if [ -t 0 ]; then
-  echo "=========================================================================="
+  echo "======================================================================"
   echo "                   Welcome to RAVE docker. You can"
   echo ""
   echo "  1. type in 'rave start' to launch RAVE"
@@ -62,7 +62,7 @@ if [ -t 0 ]; then
   echo "  2. use ssh to connect to the container; the password is:"
   echo "     ${pw}"
   echo ""
-  echo "=========================================================================="
+  echo "======================================================================"
   echo ""
 
   if [ "$(id -u)" -eq 0 ]; then
@@ -71,7 +71,7 @@ if [ -t 0 ]; then
     exec /bin/bash --login
   fi
 else
-  echo "=========================================================================="
+  echo "======================================================================"
   echo "                   Welcome to RAVE docker !"
   echo ""
   echo "  You have launched this container in non-interactive mode"
@@ -81,7 +81,7 @@ else
   echo "  You can also ssh to the container; the password is:"
   echo "      ${pw}"
   echo ""
-  echo "=========================================================================="
+  echo "======================================================================"
   echo ""
 
   if [ "$(id -u)" -eq 0 ]; then
