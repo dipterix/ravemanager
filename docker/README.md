@@ -68,7 +68,7 @@ rave  | ======================================================================
 RAVE docker container will generate a password (`8KdRle2wxITzkVY9dvNy` in this example). This password changes every time when the container is restarted. You can open another terminal, or use vscode to ssh to the container. Here is an example:
 
 ```sh
-$ ssh -p 2222 raveuser@127.0.0.1`
+$ ssh -p 2222 raveuser@127.0.0.1
 
 #> The authenticity of host '[127.0.0.1]:2222 ([127.0.0.1]:2222)' can't be established.
 #> ED25519 key fingerprint is SHA256:23n83Y9GAIDYD+baadtqtEN/yx20m/zgW1s/121X.
