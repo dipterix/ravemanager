@@ -1,0 +1,113 @@
+# Install or upgrade 'RAVE'
+
+Installs the newest version of 'RAVE' and its dependence packages;
+executes the scripts to finalize installation to update configuration
+files.
+
+## Usage
+
+``` r
+add_shortcuts()
+
+finalize_installation(
+  packages = NULL,
+  upgrade = c("config-only", "ask", "always", "never", "data-only"),
+  async = FALSE,
+  ...
+)
+
+clear_cache()
+
+install(
+  allow_cache = FALSE,
+  upgrade_manager = FALSE,
+  finalize = TRUE,
+  force = FALSE,
+  python = FALSE,
+  migrate_packages = FALSE,
+  lib_path = NA,
+  ...
+)
+
+install_dev(branch_name)
+
+update_rave(
+  allow_cache = FALSE,
+  upgrade_manager = FALSE,
+  finalize = TRUE,
+  force = FALSE,
+  python = FALSE,
+  migrate_packages = FALSE,
+  lib_path = NA,
+  ...
+)
+
+upgrade_installer(reload = TRUE)
+```
+
+## Arguments
+
+- packages:
+
+  packages to run finalizing installation scripts
+
+- upgrade:
+
+  upgrade type
+
+- async:
+
+  whether to execute finalizing installation scripts in other processes
+
+- ...:
+
+  passed to internal functions
+
+- allow_cache:
+
+  whether to allow cache; default is true
+
+- upgrade_manager:
+
+  whether to upgrade the installer (`ravemanager`) before updating other
+  packages
+
+- finalize:
+
+  whether to run finalizing installation scripts
+
+- force:
+
+  whether to force updating packages even the installed have the latest
+  versions
+
+- python:
+
+  whether to install python; default is false
+
+- migrate_packages:
+
+  whether to migrate (copy) packages installed in the system path to the
+  user library; used as alternative option when there are existing
+  packages installed in the system library path that could be hard to
+  resolve or out-dated; default is `FALSE`
+
+- lib_path:
+
+  library path where 'RAVE' should be installed; default is
+  automatically determined.
+
+- branch_name:
+
+  for 'RAVE' developers, development branch to install
+
+- reload:
+
+  whether to reload `ravemanager` after installation; default is true.
+  This tries to load the upgraded `ravemanager` without restarting the R
+  session; however, this solution not always works. In such case,
+  restarting R session is always the solution.
+
+## Value
+
+Nothing
