@@ -59,6 +59,12 @@ Please cite the following paper for publication use:
   [`add_py_package()`](http://dipterix.org/ravemanager/reference/install_packages.md)
   : Install/Update R or Python packages to RAVE environment
 
+- [`make_profile()`](http://dipterix.org/ravemanager/reference/rave-profile.md)
+  [`use_profile()`](http://dipterix.org/ravemanager/reference/rave-profile.md)
+  :
+
+  Make a profile allowing portable `RAVE` configurations
+
 - [`ravemanager_version()`](http://dipterix.org/ravemanager/reference/ravemanager_version.md)
   : Get current 'RAVE' installer's version
 
