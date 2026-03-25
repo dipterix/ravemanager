@@ -445,6 +445,18 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
 
   # Fast install binary deps
   message("Installing RAVE... This might take a while...")
+
+  # raveio might take long to resolve
+  if (!is_installed("raveio")) {
+    tryCatch({
+      install_packages(
+        "raveio", lib = lib_path,
+        repos = repos, type = "binary", force = force
+      )
+    }, error = function(e) {
+    })
+  }
+
   tryCatch({
     install_packages(
       packages_to_install, lib = lib_path,

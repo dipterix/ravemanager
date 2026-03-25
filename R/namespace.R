@@ -9,7 +9,7 @@ guess_libpath <- function(if_not_found = .libPaths()[[1]]) {
     lib_path <- strsplit(lib_path, ":")[[1]]
   }
 
-  if(length(lib_path)) {
+  if(length(lib_path) == 1 && nzchar(lib_path)) {
     return(lib_path[[1]])
   }
 

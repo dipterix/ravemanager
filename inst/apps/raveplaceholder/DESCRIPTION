@@ -53,6 +53,7 @@ Imports:
   R6 (>= 2.2.2), 
   ravedash,
   ravecore,
+  ravepipeline,
   ravetools (>= 0.0.3), 
   reshape2,
   reticulate,
@@ -73,6 +74,7 @@ Imports:
   startup (>= 0.12.0), 
   stringr (>= 1.2.0), 
   ravebuiltins,
+  shidashi,
   yaml
 Author: Zhengjia Wang [cph, aut, cre],
   John Magnotti [aut],
