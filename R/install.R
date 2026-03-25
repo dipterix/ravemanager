@@ -447,24 +447,31 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
   message("Installing RAVE... This might take a while...")
 
   # raveio might take long to resolve
+  use_pak <- TRUE
   if (!is_installed("raveio")) {
+    message("Installing `raveio`")
     tryCatch({
       install_packages(
         "raveio", lib = lib_path,
         repos = repos, type = "binary", force = force
       )
     }, error = function(e) {
+      use_pak <<- FALSE
+      message("Unable to install compiled packages. Trying to build from source (will take a while)...")
     })
   }
 
-  tryCatch({
-    install_packages(
-      packages_to_install, lib = lib_path,
-      repos = repos, type = "binary", force = force
-    )
-  }, error = function(e) {
-    message("Unable to install compiled packages. Trying to build from source (will take a while)...")
-  })
+  if (use_pak) {
+    tryCatch({
+      message("Installing pipelines")
+      install_packages(
+        packages_to_install, lib = lib_path,
+        repos = repos, type = "binary", force = force
+      )
+    }, error = function(e) {
+      message("Unable to install compiled packages. Trying to build from source (will take a while)...")
+    })
+  }
 
 
   # Make sure the source package is compiled and updated for core packages
@@ -479,7 +486,7 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
   )
 
   # Configure python
-  if( python ) {
+  if ( python ) {
     try({
       message("Configuring python...")
       install_packages("rpymat", lib = lib_path,
@@ -488,7 +495,7 @@ install_internal <- function(nightly = FALSE, upgrade_manager = FALSE,
     })
   }
 
-  if(finalize) {
+  if (finalize) {
     message("Packages have been installed. Finalizing settings.")
 
     packages_to_install <- c(ravemanager$rave_depends, "rave",

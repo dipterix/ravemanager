@@ -32,7 +32,7 @@ default_config_home <- function() {
   normalize_path(path, mustWork = FALSE)
 }
 
-shared_profile <- function(python = "3.11", share_root = NA) {
+shared_profile <- function(python = "", share_root = NA) {
 
   if (is_installed("rpymat")) {
     conda_bin <- asNamespace("rpymat")$conda_bin()
@@ -47,21 +47,30 @@ shared_profile <- function(python = "3.11", share_root = NA) {
   }
 
   if (is.na(share_root)) {
-    if (is_installed("ravepipeline")) {
-      share_root <- dirname(asNamespace("ravepipeline")$raveio_getopt("data_dir"))
-    } else {
-      share_root <- "~/rave_data/"
-    }
+    share_root <- switch(
+      get_os(),
+      "darwin" = "/Users/Shared/RAVE",
+      "windows" = {
+        file_path(Sys.getenv("PUBLIC", "C:/Users/Public"), "RAVE")
+      },
+      {
+        if (is_installed("ravepipeline")) {
+          share_root <- dirname(asNamespace("ravepipeline")$raveio_getopt("data_dir"))
+        } else {
+          share_root <- "~/rave_data/"
+        }
+      }
+    )
   }
 
   config <- list(
     paths = list(
       profile_root = profile_root(),
       share_root = file_path(share_root),
-      runtime_root = file_path(share_root, "cache_dir"),
-      data = file_path(share_root, "data_dir"),
-      raw = file_path(share_root, "raw_dir"),
-      bids = file_path(share_root, "bids_dir"),
+      runtime_root = file_path(share_root, "data", "cache_dir"),
+      data = file_path(share_root, "data", "data_dir"),
+      raw = file_path(share_root, "data", "raw_dir"),
+      bids = file_path(share_root, "data", "bids_dir"),
 
       conda = file_path(conda_bin),
       quarto = file_path(quarto_bin)
@@ -157,7 +166,33 @@ validate_profile <- function(config) {
   is_pathish(config$paths$share_root)
 
   if (!dir.exists(config$paths$share_root)) {
-    stop("Path `", config$paths$share_root, "` is missing. Please create this folder first")
+    if (get_os() != 'linux') {
+      stop(paste(
+        c(
+          "Path `", config$paths$share_root,
+          "` is missing. Please create this folder first. ",
+          "Make sure the folder has proper permissions. "
+        ),
+        collapse = ""
+      ))
+    } else {
+      stop(paste(
+        c(
+          "Path `", config$paths$share_root,
+          "` is missing. Please create this folder first. ",
+          "Make sure the folder has proper permissions. ",
+          "On Unix, you may achieve this via `chmod`, for example: \n\n",
+          sprintf("  sudo mkdir %s\n", shQuote(config$paths$share_root)),
+          "  sudo groupadd raveusers\n",
+          sprintf("  sudo chown root:raveusers %s\n", shQuote(config$paths$share_root)),
+          sprintf("  sudo chmod 2775 %s\n", shQuote(config$paths$share_root)),
+          "\nAlso remember to add users to user group `raveusers`\n",
+          "  sudo usermod -aG shared alice         # add users to the group\n",
+          "  sudo usermod -aG shared bob"
+        ),
+        collapse = ""
+      ))
+    }
   }
 
   is_pathish(config$paths$runtime_root)
@@ -276,7 +311,18 @@ use_profile <- function(profile_name = "default", auto_install = TRUE) {
       # add_r_package("ravepipeline")
       # add_r_package("ravecore")
       install()
-      configure_python(python_ver = config$conda$python)
+      if (length(config$conda$python) == 1 && nzchar(config$conda$python)) {
+        tryCatch({
+          configure_python(python_ver = config$conda$python)
+        }, error = function(e) {
+        })
+      } else {
+        tryCatch({
+          configure_python()
+        }, error = function(e) {
+        })
+      }
+
     } else {
       warning("RAVE is not installed. Please run `ravemanager::install()`")
       return()
@@ -343,12 +389,23 @@ use_profile <- function(profile_name = "default", auto_install = TRUE) {
     add_r_package("rpymat")
   }
   rpymat <- asNamespace("rpymat")
-  if (!dir.exists(rpymat$env_path())) {
-    tryCatch({
-      configure_python(python_ver = config$conda$python)
-    }, error = function(e) {})
+
+  if (auto_install) {
+    if (!dir.exists(rpymat$env_path())) {
+      if (length(config$conda$python) == 1 && nzchar(config$conda$python)) {
+        tryCatch({
+          configure_python(python_ver = config$conda$python)
+        }, error = function(e) {
+        })
+      } else {
+        tryCatch({
+          configure_python()
+        }, error = function(e) {
+        })
+      }
+    }
+    rpymat$ensure_rpymat(verbose = FALSE)
   }
-  rpymat$ensure_rpymat(verbose = FALSE)
 
   Sys.setenv(RAVE_INITIALIZED = "TRUE")
 

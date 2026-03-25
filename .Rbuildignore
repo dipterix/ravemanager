@@ -13,3 +13,4 @@
 \.pptx$
 ^inst/packaged$
 ^docker/
+^NULL$
