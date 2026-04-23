@@ -19,7 +19,7 @@ uninstall(components = c("cache", "python", "all"))
 ## Examples
 
 ``` r
-if( FALSE ) {
+if ( FALSE ) {
 
   # remove cache only
   ravemanager::uninstall("cache")
