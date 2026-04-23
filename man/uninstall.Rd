@@ -16,7 +16,7 @@ Please carefully read printed messages.
 }
 \examples{
 
-if( FALSE ) {
+if ( FALSE ) {
 
   # remove cache only
   ravemanager::uninstall("cache")

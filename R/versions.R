@@ -1,7 +1,7 @@
 
 package_latest_version <- function(pkg, url = NULL) {
-  if( length(url) != 1 ) {
-    if(getOption("ravemanager.nightly", FALSE)) {
+  if ( length(url) != 1 ) {
+    if (getOption("ravemanager.nightly", FALSE)) {
       url <- "https://dipterix.r-universe.dev/api/packages"
       url_backup <- "https://rave-ieeg.r-universe.dev/api/packages"
     } else {
@@ -12,21 +12,21 @@ package_latest_version <- function(pkg, url = NULL) {
     url_backup <- NA
   }
 
-  if(length(pkg) != 1) {
+  if (length(pkg) != 1) {
     stop("package_needs_update: `pkg` must be length of 1")
   }
 
   # get r-universe
   available_version <- tryCatch({
     suppressWarnings({
-      pkg_url <- gsub("[/]+$", '', url)
+      pkg_url <- gsub("[/]+$", "", url)
       pkg_url <- paste0(pkg_url, "/", pkg)
       versions <- readLines(pkg_url)
       versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
       versions <- gsub("[^0-9\\.]", "", versions)
       max_ver <- versions[[1]]
-      for(v in versions) {
-        if( utils::compareVersion(max_ver, v) < 0 ) {
+      for (v in versions) {
+        if ( utils::compareVersion(max_ver, v) < 0 ) {
           max_ver <- v
         }
       }
@@ -36,15 +36,15 @@ package_latest_version <- function(pkg, url = NULL) {
     NULL
   })
 
-  if(is.null(available_version)) {
-    if(is.na(url_backup)) { return(NA) }
+  if (is.null(available_version)) {
+    if (is.na(url_backup)) { return(NA) }
     return( Recall(pkg, url = url_backup) )
   }
   return(available_version)
 }
 
 package_current_version <- function(pkg, lib = NULL) {
-  if(!pkg %in% loadedNamespaces() && is.null(lib)) {
+  if (!pkg %in% loadedNamespaces() && is.null(lib)) {
     lib <- get_libpaths(first = FALSE)
   }
   current_version <- tryCatch({
@@ -53,23 +53,23 @@ package_current_version <- function(pkg, lib = NULL) {
     NULL
   })
 
-  if(is.null(current_version)) { return(NA) }
+  if (is.null(current_version)) { return(NA) }
   return( current_version )
 }
 
 package_needs_update <- function(pkg, lib = NULL, url = NULL) {
-  if( length(url) != 1 ) {
-    if(getOption("ravemanager.nightly", FALSE)) {
+  if ( length(url) != 1 ) {
+    if (getOption("ravemanager.nightly", FALSE)) {
       url <- "https://dipterix.r-universe.dev/api/packages"
     } else {
       url <- "https://rave-ieeg.r-universe.dev/api/packages"
     }
   }
 
-  if(length(pkg) != 1) {
+  if (length(pkg) != 1) {
     stop("package_needs_update: `pkg` must be length of 1")
   }
-  if(!pkg %in% loadedNamespaces() && is.null(lib)) {
+  if (!pkg %in% loadedNamespaces() && is.null(lib)) {
     lib <- get_libpaths(first = FALSE)
   }
   current_version <- tryCatch({
@@ -78,19 +78,19 @@ package_needs_update <- function(pkg, lib = NULL, url = NULL) {
     NULL
   })
 
-  if(is.null(current_version)) { return(TRUE) }
+  if (is.null(current_version)) { return(TRUE) }
 
   # get r-universe
   available_version <- tryCatch({
     suppressWarnings({
-      pkg_url <- gsub("[/]+$", '', url)
+      pkg_url <- gsub("[/]+$", "", url)
       pkg_url <- paste0(pkg_url, "/", pkg)
       versions <- readLines(pkg_url)
       versions <- versions[grepl('^[ ]{0, }"Version":[ ]{0,}"[0-9\\.]+"[, ]{0,}$', versions)]
       versions <- gsub("[^0-9\\.]", "", versions)
       max_ver <- versions[[1]]
-      for(v in versions) {
-        if( utils::compareVersion(max_ver, v) < 0 ) {
+      for (v in versions) {
+        if ( utils::compareVersion(max_ver, v) < 0 ) {
           max_ver <- v
         }
       }
@@ -100,7 +100,7 @@ package_needs_update <- function(pkg, lib = NULL, url = NULL) {
     NULL
   })
 
-  if(is.null(available_version)) {
+  if (is.null(available_version)) {
     return(NA)
   }
 
@@ -128,7 +128,7 @@ ravemanager_latest_version <- function() {
         versions <- gsub("[^0-9\\.]", "", versions)
         return(versions[[1]])
       })
-    }, error = function(e){
+    }, error = function(e) {
       NULL
     })
   })
@@ -172,7 +172,7 @@ get_latest_R_version <- function(url = "https://cran.rstudio.com/bin/windows/bas
   current_R_version <- as.character(getRversion())
   there_is_a_newer_version <- utils::compareVersion(current_R_version, latest_R_version) == -1
 
-  if( there_is_a_newer_version ) {
+  if ( there_is_a_newer_version ) {
     message_text <- paste(
       "There is a newer version of R for you to download!\n\n",
       "You are using R version:    \t", gsub("R version", "", R.version$version.string), "\n",
@@ -192,4 +192,61 @@ get_latest_R_version <- function(url = "https://cran.rstudio.com/bin/windows/bas
   )
 
 
+}
+
+
+set_timestamp <- function(key, value = Sys.time()) {
+
+  key <- gsub("[^a-zA-Z0-9_]", "_", key)
+
+  if (is.na(key) || !nzchar(key)) {
+    stop("Invalid key: cannot be empty nor NA")
+  }
+
+  record_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "cache"), "timestamps", key)
+
+  dir_create2(dirname(record_path))
+
+  saveRDS(value, record_path)
+  invisible(value)
+}
+
+get_timestamp <- function(key, default = NULL) {
+
+  key <- gsub("[^a-zA-Z0-9_]", "_", key)
+
+  if (is.na(key) || !nzchar(key)) {
+    stop("Invalid key: cannot be empty nor NA")
+  }
+
+  record_path <- file.path(tools::R_user_dir(package = "ravemanager", which = "cache"), "timestamps", key)
+
+  re <- default
+  tryCatch(
+    {
+      if (file.exists(record_path)) {
+        re <- readRDS(file = record_path)
+      }
+    }, error = function(e) {
+    }
+  )
+
+  re
+
+}
+
+
+compare_timestamp <- function(key1, key2) {
+  "
+  key1 < key2 or key1 is NULL but key2 is valid: -1
+  key1 > key2 or key1 is valid but key2 is NULL: 1
+  0 otherwise
+  "
+  t1 <- get_timestamp(key1)
+  t2 <- get_timestamp(key2)
+  if (is.null(t1) && is.null(t2)) { return(0L) }
+  if (is.null(t1)) { return(-1L) }
+  if (is.null(t2)) { return(1L) }
+  if (t1 < t2) { return(-1L) }
+  return(1L)
 }

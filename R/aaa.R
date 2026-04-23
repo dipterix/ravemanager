@@ -58,12 +58,12 @@ get_mirror <- function(nightly = FALSE) {
 
   if (nightly) {
     mirrors <- c(
-      raveieeg = 'https://rave-ieeg.r-universe.dev',
-      dipterix = 'https://dipterix.r-universe.dev'
+      raveieeg = "https://rave-ieeg.r-universe.dev",
+      dipterix = "https://dipterix.r-universe.dev"
     )
   } else {
     mirrors <- c(
-      raveieeg = 'https://rave-ieeg.r-universe.dev'
+      raveieeg = "https://rave-ieeg.r-universe.dev"
     )
   }
 
@@ -94,7 +94,7 @@ get_mirror <- function(nightly = FALSE) {
       }
     }
   )
-  mirrors[["CRAN"]] <- 'https://cloud.r-project.org'
+  mirrors[["CRAN"]] <- "https://cloud.r-project.org"
   mirrors
 }
 

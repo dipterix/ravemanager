@@ -69,18 +69,18 @@ setup_rave <- function(config) {
   config$threeBrain$ensure_templates <- unique(c(
     "cvs_avg35_inMNI152", config$threeBrain$ensure_templates))
 
-  for(subj in config$threeBrain$ensure_templates) {
+  for (subj in config$threeBrain$ensure_templates) {
     template_subjpath <- file.path(rave_viewerdir, subj)
-    if(!dir.exists(template_subjpath)) {
+    if (!dir.exists(template_subjpath)) {
       asNamespace('threeBrain')$download_template_subject(subject_code = subj, template_dir = rave_viewerdir)
     }
   }
 
   # YAEL
-  for(subj in config$rpyANTs$ensure_templates) {
+  for (subj in config$rpyANTs$ensure_templates) {
     template_path <- file.path(tools::R_user_dir(package = "rpyANTs",
                                                  which = "data"), "templates", subj)
-    if(!dir.exists(template_path)) {
+    if (!dir.exists(template_path)) {
       asNamespace("rpyANTs")$ensure_template(subj)
     }
   }

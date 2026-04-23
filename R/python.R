@@ -6,7 +6,7 @@ PYTHON_PACKAGES <- list(
 get_python_package_name <- function(lib) {
   unlist(lapply(unlist(lib), function(x) {
     re <- PYTHON_PACKAGES[[x]]
-    if(is.null(re)) { re <- x }
+    if (is.null(re)) { re <- x }
     re
   }))
 }
@@ -93,7 +93,7 @@ validate_python <- function(verbose = TRUE, env_name = NA) {
     env_name <- .(env_name)
 
     verb <- function(expr) {
-      if(verbose) {
+      if (verbose) {
         force( expr )
       }
     }
@@ -102,7 +102,7 @@ validate_python <- function(verbose = TRUE, env_name = NA) {
     rpymat <- asNamespace("rpymat")
     support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
 
-    if( support_custom_env ) {
+    if ( support_custom_env ) {
       cleaned_env_name <- rpymat$clean_env_name(env_name = env_name)
       verb({
         message("==== Environment Name: ", cleaned_env_name, " ================================")
@@ -136,7 +136,7 @@ validate_python <- function(verbose = TRUE, env_name = NA) {
     })
 
     package_missing <- NULL
-    for(package in c("numpy", "h5py", "mat73", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants", "antspynet")) {
+    for (package in c("numpy", "h5py", "mat73", "cython", "pandas", "scipy", "jupyterlab", "pynwb", "mne", "nibabel", "nipy", "ants", "antspynet")) {
       tryCatch({
         verb({ message(sprintf("  %s: ", package), appendLF = FALSE) })
         module <- reticulate$import(package)
@@ -173,7 +173,7 @@ validate_python <- function(verbose = TRUE, env_name = NA) {
 system_pkgpath <- function(package, ..., alternative = TRUE) {
   libpath <- get_libpaths(first = TRUE)
   re <- system.file(package = package, lib.loc = libpath)
-  if(re == "" && alternative) {
+  if (re == "" && alternative) {
     re <- system.file(package = package)
   }
   return(re)
@@ -187,15 +187,15 @@ configure_antspynet <- function() {
 
   rpymat <- asNamespace("rpymat")
   support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
-  if(!support_custom_env) { return(invisible(FALSE)) }
+  if (!support_custom_env) { return(invisible(FALSE)) }
 
   ants_env_path <- rpymat$env_path(env_name = "rave-ants")
-  if(dir.exists(ants_env_path)) { return(TRUE) }
+  if (dir.exists(ants_env_path)) { return(TRUE) }
 
   tryCatch({
     reticulate <- asNamespace("reticulate")
     reticulate$conda_create(ants_env_path, python_version = "3.10")
-    reticulate$conda_install(ants_env_path, packages = 'antspynet==0.2.9', pip = TRUE)
+    reticulate$conda_install(ants_env_path, packages = "antspynet==0.2.9", pip = TRUE)
     return(invisible(TRUE))
   }, error = function(e) {
     message(e)
@@ -210,7 +210,7 @@ configure_antspynet <- function() {
 #' @export
 configure_python <- function(python_ver = "3.11", verbose = TRUE) {
 
-  if(!is_installed("rpymat")) {
+  if (!is_installed("rpymat")) {
     install_packages("rpymat")
   }
   rpymat <- asNamespace("rpymat")
@@ -219,10 +219,10 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   # Install conda and create a conda environment
   # current_env <- Sys.getenv("R_RPYMAT_CONDA_PREFIX", unset = "")
   # conda_exe <- Sys.getenv("R_RPYMAT_CONDA_EXE", unset = "")
-  if(!dir.exists(rpymat$env_path())) {
+  if (!dir.exists(rpymat$env_path())) {
     conda_bin <- rpymat$conda_bin()
     standalone <- TRUE
-    if(length(conda_bin) == 1 && !is.na(conda_bin) && file.exists(conda_bin)) {
+    if (length(conda_bin) == 1 && !is.na(conda_bin) && file.exists(conda_bin)) {
       standalone <- FALSE
     }
 
@@ -234,7 +234,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
     # }
 
     # Increase timeout to 30min
-    options("timeout" = 60*30)
+    options("timeout" = 60 * 30)
     tryCatch({
       rpymat$configure_conda(python_ver = python_ver, force = TRUE, standalone = standalone)
     }, error = function(e) {
@@ -254,13 +254,13 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
 
   # install necessary libraries
   pkgs <- c("h5py", "mat73", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake", "dcm2niix")
-  if(!all(pkgs %in% installed_pkgs_tbl$package)) {
+  if (!all(pkgs %in% installed_pkgs_tbl$package)) {
     rpymat$add_packages(get_python_package_name(pkgs))
   }
 
   # install jupyter lab to the conda environment
   pkgs <- c("notebook", "jupyterlab")
-  if(!all(pkgs %in% installed_pkgs_tbl$package)) {
+  if (!all(pkgs %in% installed_pkgs_tbl$package)) {
     try({
       rpymat$add_packages(packages = get_python_package_name(c("notebook", "numpy", "h5py", "matplotlib", "pandas", "jupyterlab")))
       rpymat$jupyter_register_R()
@@ -270,9 +270,9 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   # install pip-only packages if conda fails
   pkgs <- c("mne", "pynwb", "nibabel")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
-  if(length(pkgs)) {
-    for(pkg in get_python_package_name(pkgs)) {
-      if( pkg %in% pkgs ) {
+  if (length(pkgs)) {
+    for (pkg in get_python_package_name(pkgs)) {
+      if ( pkg %in% pkgs ) {
         try({
           rpymat$add_packages(packages = pkg, pip = TRUE)
         })
@@ -286,9 +286,9 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   # pkgs <- c("antspynet", "antspyx")
   pkgs <- c("antspyx")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
-  if(length(pkgs)) {
-    for(pkg in get_python_package_name(pkgs)) {
-      if( pkg %in% pkgs ) {
+  if (length(pkgs)) {
+    for (pkg in get_python_package_name(pkgs)) {
+      if ( pkg %in% pkgs ) {
         try({
           rpymat$add_packages(packages = pkg, pip = TRUE)
         })
@@ -302,7 +302,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   # ants_configured <- configure_antspynet()
 
   # Initialize
-  if( verbose ) {
+  if ( verbose ) {
     cat("\n\n\n")
     cat("\014")
     message("\014")
@@ -313,9 +313,11 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   #   validate_python(verbose = verbose, env_name = "rave-ants")
   # }
 
-  if( verbose ) {
+  if ( verbose ) {
     message("Done configuring Python for RAVE.")
   }
+
+  set_timestamp("ravemanager_install_python", Sys.time())
 
 
 }
@@ -333,7 +335,7 @@ remove_conda <- function(ask = TRUE) {
 ensure_rpymat <- function(env_name = NA) {
   rpymat <- asNamespace("rpymat")
   support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
-  if( support_custom_env ) {
+  if ( support_custom_env ) {
     rpymat$ensure_rpymat(env_name = env_name)
   } else {
     rpymat$ensure_rpymat()

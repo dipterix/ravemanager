@@ -166,7 +166,7 @@ validate_profile <- function(config) {
   is_pathish(config$paths$share_root)
 
   if (!dir.exists(config$paths$share_root)) {
-    if (get_os() != 'linux') {
+    if (get_os() != "linux") {
       stop(paste(
         c(
           "Path `", config$paths$share_root,
@@ -223,7 +223,7 @@ use_profile <- function(profile_name = "default", auto_install = TRUE) {
   profile_path <- normalize_path(profile_path, mustWork = TRUE)
 
   if (!is_installed("yaml")) {
-    add_r_package('yaml')
+    add_r_package("yaml")
   }
 
   yaml <- asNamespace("yaml")
@@ -351,14 +351,14 @@ use_profile <- function(profile_name = "default", auto_install = TRUE) {
   # set 3D viewer
   rave_viewerdir <- tools::R_user_dir("threeBrain", "data")
   if (!dir.exists(rave_viewerdir)) { dir_create2(rave_viewerdir) }
-  options('threeBrain.template_dir' = normalizePath(rave_viewerdir, winslash = "/"))
+  options("threeBrain.template_dir" = normalizePath(rave_viewerdir, winslash = "/"))
 
   if (auto_install) {
     for (subj in config$threeBrain$ensure_templates) {
       template_subjpath <- file.path(rave_viewerdir, subj)
       if (!dir.exists(template_subjpath)) {
         tryCatch({
-          asNamespace('threeBrain')$download_template_subject(subject_code = subj, template_dir = rave_viewerdir)
+          asNamespace("threeBrain")$download_template_subject(subject_code = subj, template_dir = rave_viewerdir)
         }, error = function(e) {})
       }
     }

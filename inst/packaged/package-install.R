@@ -40,7 +40,7 @@ CRANLocal <- sprintf("file://%s", repos_path)
 
 # Make sure the pipeline dependencies are installed
 pipeline_deps <- ravemanager:::rave_suggests
-pipeline_deps <- pipeline_deps[!pipeline_deps %in% utils::installed.packages()[,1]]
+pipeline_deps <- pipeline_deps[!pipeline_deps %in% utils::installed.packages()[, 1]]
 pkgs_to_install <- unique(c(
   "ravemanager",
   ravemanager:::rave_depends,

@@ -20,10 +20,10 @@ webr_view <- function(widget) {
     html_text <- readLines(temp_file)
 
     # convert <script src=*> to <script>js file contents</script>
-    js_lines <- which(grepl(x = html_text, pattern = '(src=.*js)'))
+    js_lines <- which(grepl(x = html_text, pattern = "(src=.*js)"))
 
     # convert link[rel=stylesheet] to <style>css file contents</style>
-    css_lines <- which(grepl(x = html_text, pattern = '(href=.*css)'))
+    css_lines <- which(grepl(x = html_text, pattern = "(href=.*css)"))
 
     # perform self-contained conversion/replacement of JS
     if (length(js_lines) > 0) {

@@ -9,8 +9,7 @@ remove_conda <- function() {
   })
 }
 
-get_os <- function ()
-{
+get_os <- function() {
   if ("windows" %in% tolower(.Platform$OS.type)) {
     return("windows")
   }
@@ -31,7 +30,7 @@ get_os <- function ()
 }
 
 test_that("Installation works", {
-  if(detect_gh_ci() && get_os() == "windows") {
+  if (detect_gh_ci() && get_os() == "windows") {
     ravemanager::install(python = TRUE, allow_cache = FALSE)
     libpath <- .libPaths()[[1]]
     expect_true(nzchar(system.file(package = "ravebuiltins", lib.loc = libpath)))

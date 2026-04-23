@@ -6,7 +6,7 @@ packaged_dir <- "inst/packaged"
 repos_dir <- file.path(packaged_dir, "repository")
 
 platforms <- c(
-  'source'
+  "source"
   # 'x86_64-apple-darwin17.0',
   # "aarch64-apple-darwin20",
   # "x86_64-w64-mingw32",
@@ -26,7 +26,7 @@ pak::pkg_download(
     ravemanager:::rave_suggests),
   dest_dir = repos_dir,
   dependencies = TRUE,
-  platforms = 'source'
+  platforms = "source"
 )
 
 # ignore the warnings
@@ -44,10 +44,10 @@ utils::download.file(
 
 # threeBrain templates (N27, cvs)
 threeBrain_template_path <- threeBrain::default_template_directory()
-for(template in c("N27", "fsaverage", "cvs_avg35_inMNI152")) {
+for (template in c("N27", "fsaverage", "cvs_avg35_inMNI152")) {
   template_zipname <- sprintf("%s_fs.zip", template)
   template_zip <- file.path(threeBrain_template_path, template_zipname)
-  if(!file.exists(template_zip)) {
+  if (!file.exists(template_zip)) {
     threeBrain::download_template_subject(template)
   }
   file.copy(template_zip, file.path(packaged_dir, template_zipname), overwrite = TRUE)

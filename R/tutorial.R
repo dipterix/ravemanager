@@ -10,27 +10,27 @@
 #' }
 #' @export
 run_tutorials <- function(topic = NULL, ...) {
-  if(system.file(package = "ravedash") == "") {
+  if (system.file(package = "ravedash") == "") {
     message("Cannot find RAVE. Installing RAVE...")
     ravemanager::install()
   }
 
-  if(system.file(package = "learnr") == "") {
+  if (system.file(package = "learnr") == "") {
     install_packages("learnr")
   }
 
   topics <- learnr::available_tutorials(package = "ravemanager")
-  if(length(topic)) {
+  if (length(topic)) {
     topic <- topic[[1]]
-    if(is.integer(topic) && topic %in% seq_along(topics$name)) {
+    if (is.integer(topic) && topic %in% seq_along(topics$name)) {
       topic <- topics$name[topic]
     }
-    if(!isTRUE(topic %in% topics$name)) {
+    if (!isTRUE(topic %in% topics$name)) {
       topic <- NULL
     }
   }
 
-  if(!length(topic)) {
+  if (!length(topic)) {
 
     titles <- sprintf("  %d. %s", seq_along(topics$title), topics$title)
     dipsaus <- asNamespace("dipsaus")
@@ -40,7 +40,7 @@ run_tutorials <- function(topic = NULL, ...) {
       default = ""
     )
     ans <- as.integer(ans)
-    if(!length(ans) || is.na(ans) || ans > length(topics$name) || ans <= 0) {
+    if (!length(ans) || is.na(ans) || ans > length(topics$name) || ans <= 0) {
       stop("Please enter a number indicating which topic you want to start.")
     }
     topic <- topics$name[ans]

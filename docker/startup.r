@@ -31,7 +31,7 @@ local({
 
   options(timeout = 3600)
   whoami <- Sys.info()[["user"]]
-  if(!length(whoami) || !nzchar(whoami)) {
+  if (!length(whoami) || !nzchar(whoami)) {
     whoami <- "shared"
   }
 
@@ -61,7 +61,7 @@ local({
 
   initialize_impl <- function() {
     initialized <- Sys.getenv("RAVE_INITIALIZED", unset = "")
-    if( identical(initialized, "TRUE") ) { return() }
+    if ( identical(initialized, "TRUE") ) { return() }
 
     # source("renv/activate.R")
     Sys.setenv(RAVE_INITIALIZED = "TRUE")

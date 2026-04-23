@@ -1,13 +1,13 @@
 cmd_homebrew <- function(error_on_missing = TRUE, unset = NA) {
 
-  if(identical(Sys.info()[['machine']], "arm64")) {
+  if (identical(Sys.info()[["machine"]], "arm64")) {
     path <- "/opt/homebrew/bin/brew"
   } else {
     path <- "/usr/local/bin/brew"
   }
 
-  if( length(path) != 1 || is.na(path) || !isTRUE(file.exists(path)) ) {
-    if( error_on_missing ) {
+  if ( length(path) != 1 || is.na(path) || !isTRUE(file.exists(path)) ) {
+    if ( error_on_missing ) {
       stop("Cannot find binary command `brew`. ",
            "Please open terminal and run the following shell command:\n\n",
            '  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"\n\n',
@@ -23,7 +23,7 @@ cmd_homebrew <- function(error_on_missing = TRUE, unset = NA) {
 }
 
 brew_installed <- function(pkgs) {
-  if(missing(pkgs)) {
+  if (missing(pkgs)) {
     brew <- cmd_homebrew(error_on_missing = FALSE)
     return(!is.na(brew) && file.exists(brew))
   }

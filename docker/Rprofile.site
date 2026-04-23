@@ -3,7 +3,7 @@
 ## We set the cloud mirror, which is 'network-close' to everybody, as default
 local({
   r <- getOption("repos")
-  if(is.null(r["CRAN"])) {
+  if (is.null(r["CRAN"])) {
     r["CRAN"] <- "https://cloud.r-project.org"
   }
   r["raveieeg"] <- "https://rave-ieeg.r-universe.dev"
@@ -22,15 +22,15 @@ local({
 
 local({
   whoami <- Sys.info()[["user"]]
-  if(!length(whoami) || !nzchar(whoami)) {
+  if (!length(whoami) || !nzchar(whoami)) {
     whoami <- "shared"
   }
   config_dir <- Sys.getenv("R_USER_CONFIG_DIR", unset = "")
-  if(nzchar(config_dir) && !dir.exists(config_dir)) {
+  if (nzchar(config_dir) && !dir.exists(config_dir)) {
     dir.create(file.path(config_dir, "R"), recursive = TRUE, showWarnings = FALSE)
   }
   cache_dir <- Sys.getenv("R_USER_CACHE_DIR", unset = "")
-  if(nzchar(cache_dir) && !dir.exists(cache_dir)) {
+  if (nzchar(cache_dir) && !dir.exists(cache_dir)) {
     dir.create(file.path(cache_dir, "R"), recursive = TRUE, showWarnings = FALSE)
   }
 })
