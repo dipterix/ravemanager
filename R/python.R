@@ -190,16 +190,33 @@ configure_antspynet <- function() {
   if (!support_custom_env) { return(invisible(FALSE)) }
 
   ants_env_path <- rpymat$env_path(env_name = "rave-ants")
-  if (dir.exists(ants_env_path)) { return(TRUE) }
+  configured <- FALSE
+  if (dir.exists(ants_env_path)) {
+    configured <- TRUE
+  }
 
-  tryCatch({
-    reticulate <- asNamespace("reticulate")
-    reticulate$conda_create(ants_env_path, python_version = "3.10")
-    reticulate$conda_install(ants_env_path, packages = "antspynet==0.2.9", pip = TRUE)
-    return(invisible(TRUE))
-  }, error = function(e) {
-    message(e)
-  })
+  if (!configured) {
+    rpymat$configure_conda(python_ver = "3.10", env_name = "rave-ants")
+  }
+
+  installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
+
+  # install necessary libraries
+  pkgs <- c("pip")
+  if (!all(pkgs %in% installed_pkgs_tbl$package)) {
+    rpymat$add_packages(get_python_package_name(pkgs), env_name = "rave-ants")
+    installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
+  }
+
+
+  if (!"antspynet" %in% installed_pkgs_tbl$package) {
+    configured <- FALSE
+    rpymat$add_packages(packages = "antspynet==0.2.9",
+                        env_name = "rave-ants",
+                        pip = TRUE)
+  }
+
+  invisible(configured)
 
   return(invisible(FALSE))
 }
@@ -253,7 +270,7 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   installed_pkgs_tbl <- rpymat$list_pkgs()
 
   # install necessary libraries
-  pkgs <- c("h5py", "mat73", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake", "dcm2niix")
+  pkgs <- c("pip", "h5py", "mat73", "numpy", "scipy", "pandas", "cython", "pkg-config", "fftw", "cmake", "dcm2niix")
   if (!all(pkgs %in% installed_pkgs_tbl$package)) {
     rpymat$add_packages(get_python_package_name(pkgs))
   }
