@@ -24,11 +24,12 @@ A list of packages (and files) containing empty files.
 ## Examples
 
 ``` r
+
 find_packages_with_empty_files()
 #> The following packages have empty files: 
-#> renv            - [1%] 1 empty of 75 files
-#> pkgdown         - [1%] 2 empty of 163 files
-#> Rcpp            - [0%] 1 empty of 636 files
+#> renv            - [1%] 1 empty of 77 files
+#> pkgdown         - [1%] 2 empty of 165 files
+#> Rcpp            - [0%] 1 empty of 638 files
 #> 
 #> If you suspect that any package was installed incorrectly, please use
 #>  ravemanager::add_r_package('<pkg_name>')

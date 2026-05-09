@@ -19,6 +19,7 @@ uninstall(components = c("cache", "python", "all"))
 ## Examples
 
 ``` r
+
 if ( FALSE ) {
 
   # remove cache only

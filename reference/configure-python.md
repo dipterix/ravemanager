@@ -66,6 +66,7 @@ affect your other installations.
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 
 # -------- Install & Configure python environment for RAVE --------
