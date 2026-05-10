@@ -185,6 +185,10 @@ system_pkgpath <- function(package, ..., alternative = TRUE) {
 configure_antspynet <- function() {
   # Internal function to configure ANTsPyx, assuming Python is configured
 
+  if (!is_installed("rpyANTs")) {
+    stop("Please install RAVE first")
+  }
+
   rpymat <- asNamespace("rpymat")
   support_custom_env <- tryCatch({ isTRUE(rpymat$custom_env_support()) }, error = { FALSE })
   if (!support_custom_env) { return(invisible(FALSE)) }
@@ -202,15 +206,41 @@ configure_antspynet <- function() {
     reticulate$conda_create(ants_env_path, python_version = "3.10")
   }
 
-  installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
+  ravepipeline <- asNamespace("ravepipeline")
+  ants_cache_root <- file.path(
+    tools::R_user_dir(package = "rpyANTs", which = "data"),
+    "keras", "ANTsXNet")
+
+  envvars <- list(
+    RAVE_LIB_PATH = Sys.getenv("RAVE_LIB_PATH", unset = ""),
+    R_RPYMAT_CONDA_PREFIX = Sys.getenv("R_RPYMAT_CONDA_EXE", unset = ""),
+    R_RPYMAT_CONDA_EXE = Sys.getenv("R_RPYMAT_CONDA_EXE", unset = "")
+  )
+  envvars <- envvars[vapply(envvars, function(x) {
+    x != ""
+  }, FALSE)]
+
+  job <- ravepipeline$start_job(
+    name = "Checking conda",
+    ensure_init = TRUE,
+    fun = function() {
+      # install antspynet
+      rpymat <- asNamespace("rpymat")
+      rpymat$ensure_rpymat(env_name = "rave-ants")
+
+      installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
+      return(installed_pkgs_tbl)
+    },
+    envvars = envvars
+  )
+  installed_pkgs_tbl <- ravepipeline$resolve_job(job)
 
   # install necessary libraries
   pkgs <- c("pip")
   if (!all(pkgs %in% installed_pkgs_tbl$package)) {
-    rpymat$add_packages(get_python_package_name(pkgs), env_name = "rave-ants")
-    installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
+    rpymat$add_packages(ravemanager$get_python_package_name(pkgs),
+                        env_name = "rave-ants")
   }
-
 
   if (!"antspynet" %in% installed_pkgs_tbl$package) {
     configured <- FALSE
@@ -227,87 +257,82 @@ configure_antspynet <- function() {
                         pip = TRUE)
   }
 
-  if (is_installed("rpyANTs")) {
-    # Make sure the caches are there
-    ants_cache_root <- file.path(
-      tools::R_user_dir(package = "rpyANTs", which = "data"),
-      "keras", "ANTsXNet")
+  job <- ravepipeline$start_job(
+    name = "Checking ANTs data",
+    ensure_init = TRUE,
+    fun = function(ants_cache_root) {
+      # install antspynet
+      rpymat <- asNamespace("rpymat")
+      rpyANTs <- asNamespace("rpyANTs")
+      rpymat$ensure_rpymat(env_name = "rave-ants")
 
-    ravepipeline <- asNamespace("ravepipeline")
+      antspynet <- rpyANTs$load_antspynet()
+      inspect <- rpymat$import("inspect", convert = TRUE)
+      regexp <- "['\"]([a-zA-Z0-9]+)['\"][ ]{0,}:[ ]{0,}['\"](http[s]{0,1}://.*figshare\\.com/[^'\"]*)['\"]"
 
-    job <- ravepipeline$start_job(
-      name = "Checking ANTs data",
-      ensure_init = TRUE,
-      fun = function(ants_cache_root) {
-        rpymat <- asNamespace("rpymat")
-        rpyANTs <- asNamespace("rpyANTs")
-        rpymat$ensure_rpymat(env_name = "rave-ants")
+      sources <- inspect$getsource(antspynet$utilities$get_pretrained_network)
+      sources <- strsplit(paste(sources, collapse = "\n"), "\n")[[1]]
+      sources <- sources[grepl(regexp, sources, ignore.case = TRUE)]
+      m <- gregexec(regexp, text = sources, ignore.case = TRUE)
+      urls <- sapply(regmatches(sources, m), function(x) {
+        c(x[[2]], x[[3]])
+      })
+      pretrained <- data.frame(
+        fileid = urls[1, ],
+        filename = sprintf("%s.h5", urls[1, ]),
+        url = urls[2, ]
+      )
+      sel <- pretrained$fileid %in% c("brainExtractionRobustT1", "dktInner", "dktOuter", "dktOuterWithSpatialPriors", "sixTissueOctantBrainSegmentationWithPriors1")
+      pretrained <- pretrained[sel, ]
 
-        antspynet <- rpyANTs$load_antspynet()
-        inspect <- rpymat$import("inspect", convert = TRUE)
-        regexp <- "['\"]([a-zA-Z0-9]+)['\"][ ]{0,}:[ ]{0,}['\"](http[s]{0,1}://.*figshare\\.com/[^'\"]*)['\"]"
+      sources <- inspect$getsource(antspynet$utilities$get_antsxnet_data)
+      sources <- strsplit(paste(sources, collapse = "\n"), "\n")[[1]]
+      sources <- sources[grepl(regexp, sources, ignore.case = TRUE)]
+      m <- gregexec(regexp, text = sources, ignore.case = TRUE)
+      urls <- sapply(regmatches(sources, m), function(x) {
+        c(x[[2]], x[[3]])
+      })
 
-        sources <- inspect$getsource(antspynet$utilities$get_pretrained_network)
-        sources <- strsplit(paste(sources, collapse = "\n"), "\n")[[1]]
-        sources <- sources[grepl(regexp, sources, ignore.case = TRUE)]
-        m <- gregexec(regexp, text = sources, ignore.case = TRUE)
-        urls <- sapply(regmatches(sources, m), function(x) {
-          c(x[[2]], x[[3]])
-        })
-        pretrained <- data.frame(
-          fileid = urls[1, ],
-          filename = sprintf("%s.h5", urls[1, ]),
-          url = urls[2, ]
-        )
-        sel <- pretrained$fileid %in% c("brainExtractionRobustT1", "dktInner", "dktOuter", "dktOuterWithSpatialPriors", "sixTissueOctantBrainSegmentationWithPriors1")
-        pretrained <- pretrained[sel, ]
+      ext <- ifelse(
+        urls[1, ] %in% c("magetCerebellumxTemplate0GenericAffine"),
+        ".mat", ".nii.gz"
+      )
 
-        sources <- inspect$getsource(antspynet$utilities$get_antsxnet_data)
-        sources <- strsplit(paste(sources, collapse = "\n"), "\n")[[1]]
-        sources <- sources[grepl(regexp, sources, ignore.case = TRUE)]
-        m <- gregexec(regexp, text = sources, ignore.case = TRUE)
-        urls <- sapply(regmatches(sources, m), function(x) {
-          c(x[[2]], x[[3]])
-        })
+      sample_data <- data.frame(
+        fileid = urls[1, ],
+        filename = sprintf("%s%s", urls[1, ], ext),
+        url = urls[2, ]
+      )
 
-        ext <- ifelse(
-          urls[1, ] %in% c("magetCerebellumxTemplate0GenericAffine"),
-          ".mat", ".nii.gz"
-        )
+      sel <- sample_data$fileid %in% c("croppedMni152", "croppedMni152Priors", "priorDktLabels", "S_template3")
+      sample_data <- sample_data[sel, ]
 
-        sample_data <- data.frame(
-          fileid = urls[1, ],
-          filename = sprintf("%s%s", urls[1, ], ext),
-          url = urls[2, ]
-        )
+      missing_data <- rbind(pretrained, sample_data)
+      sel <- !file.exists(file.path(ants_cache_root, missing_data$filename))
+      missing_data <- missing_data[sel, ]
 
-        sel <- sample_data$fileid %in% c("croppedMni152", "croppedMni152Priors", "priorDktLabels", "S_template3")
-        sample_data <- sample_data[sel, ]
+      return(missing_data)
+    },
+    fun_args = list(ants_cache_root = ants_cache_root),
+    envvars = envvars
+  )
 
-        missing_data <- rbind(pretrained, sample_data)
-        sel <- !file.exists(file.path(ants_cache_root, missing_data$filename))
-        missing_data <- missing_data[sel, ]
+  missing_data <- ravepipeline$resolve_job(job)
 
-        return(missing_data)
-      },
-      fun_args = list(ants_cache_root = ants_cache_root)
-    )
-
-    missing_data <- ravepipeline$resolve_job(job)
-
-    if (length(missing_data)) {
-      dir.create(ants_cache_root, showWarnings = FALSE, recursive = TRUE)
-      for (ii in seq_len(nrow(missing_data))) {
-        row <- missing_data[ii, ]
-        cat("Getting ", sQuote(row$filename), "\n", sep = "")
-        utils::download.file(row$url, destfile = file.path(ants_cache_root, row$filename))
-      }
+  if (length(missing_data)) {
+    dir.create(ants_cache_root, showWarnings = FALSE, recursive = TRUE)
+    for (ii in seq_len(nrow(missing_data))) {
+      row <- missing_data[ii, ]
+      cat("Getting ", sQuote(row$filename), "\n", sep = "")
+      utils::download.file(row$url, destfile = file.path(ants_cache_root, row$filename))
     }
-
-    rpyANTs <- asNamespace("rpyANTs")
-    rpyANTs$ensure_template("mni_icbm152_nlin_asym_09a")
-    rpyANTs$ensure_template("mni_icbm152_nlin_asym_09b")
   }
+
+  rpyANTs <- asNamespace("rpyANTs")
+  rpyANTs$ensure_template("mni_icbm152_nlin_asym_09a")
+  rpyANTs$ensure_template("mni_icbm152_nlin_asym_09b")
+
+  message("Done configuring ANTsPyNet")
 
   return(invisible(configured))
 }
