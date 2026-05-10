@@ -226,7 +226,7 @@ configure_antspynet <- function() {
     fun = function() {
       # install antspynet
       rpymat <- asNamespace("rpymat")
-      rpymat$ensure_rpymat(env_name = "rave-ants")
+      rpymat$ensure_rpymat(env_name = "rave-ants", verbose = FALSE)
 
       installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
       return(installed_pkgs_tbl)
@@ -238,7 +238,7 @@ configure_antspynet <- function() {
   # install necessary libraries
   pkgs <- c("pip")
   if (!all(pkgs %in% installed_pkgs_tbl$package)) {
-    rpymat$add_packages(ravemanager$get_python_package_name(pkgs),
+    rpymat$add_packages(get_python_package_name(pkgs),
                         env_name = "rave-ants")
   }
 
