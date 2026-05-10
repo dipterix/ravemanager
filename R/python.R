@@ -196,7 +196,10 @@ configure_antspynet <- function() {
   }
 
   if (!configured) {
-    rpymat$configure_conda(python_ver = "3.10", env_name = "rave-ants")
+    # rpymat will reinstall conda... so not a good fit
+    # rpymat$configure_conda(python_ver = "3.10", env_name = "rave-ants")
+    reticulate <- asNamespace("reticulate")
+    reticulate$conda_create(ants_env_path, python_version = "3.10")
   }
 
   installed_pkgs_tbl <- rpymat$list_pkgs(env_name = "rave-ants")
@@ -211,14 +214,102 @@ configure_antspynet <- function() {
 
   if (!"antspynet" %in% installed_pkgs_tbl$package) {
     configured <- FALSE
-    rpymat$add_packages(packages = "antspynet==0.2.9",
+  } else {
+    version <- installed_pkgs_tbl$version[installed_pkgs_tbl$package == "antspynet"][[1]]
+    if (utils::compareVersion(as.character(version), "0.3.2") < 0) {
+      configured <- FALSE
+    }
+  }
+
+  if (!configured) {
+    rpymat$add_packages(packages = "antspynet==0.3.2",
                         env_name = "rave-ants",
                         pip = TRUE)
   }
 
-  invisible(configured)
+  if (is_installed("rpyANTs")) {
+    # Make sure the caches are there
+    ants_cache_root <- file.path(
+      tools::R_user_dir(package = "rpyANTs", which = "data"),
+      "keras", "ANTsXNet")
 
-  return(invisible(FALSE))
+    ravepipeline <- asNamespace("ravepipeline")
+
+    job <- ravepipeline$start_job(
+      name = "Checking ANTs data",
+      ensure_init = TRUE,
+      fun = function(ants_cache_root) {
+        rpymat <- asNamespace("rpymat")
+        rpyANTs <- asNamespace("rpyANTs")
+        rpymat$ensure_rpymat(env_name = "rave-ants")
+
+        antspynet <- rpyANTs$load_antspynet()
+        inspect <- rpymat$import("inspect", convert = TRUE)
+        regexp <- "['\"]([a-zA-Z0-9]+)['\"][ ]{0,}:[ ]{0,}['\"](http[s]{0,1}://.*figshare\\.com/[^'\"]*)['\"]"
+
+        sources <- inspect$getsource(antspynet$utilities$get_pretrained_network)
+        sources <- strsplit(paste(sources, collapse = "\n"), "\n")[[1]]
+        sources <- sources[grepl(regexp, sources, ignore.case = TRUE)]
+        m <- gregexec(regexp, text = sources, ignore.case = TRUE)
+        urls <- sapply(regmatches(sources, m), function(x) {
+          c(x[[2]], x[[3]])
+        })
+        pretrained <- data.frame(
+          fileid = urls[1, ],
+          filename = sprintf("%s.h5", urls[1, ]),
+          url = urls[2, ]
+        )
+        sel <- pretrained$fileid %in% c("brainExtractionRobustT1", "dktInner", "dktOuter", "dktOuterWithSpatialPriors", "sixTissueOctantBrainSegmentationWithPriors1")
+        pretrained <- pretrained[sel, ]
+
+        sources <- inspect$getsource(antspynet$utilities$get_antsxnet_data)
+        sources <- strsplit(paste(sources, collapse = "\n"), "\n")[[1]]
+        sources <- sources[grepl(regexp, sources, ignore.case = TRUE)]
+        m <- gregexec(regexp, text = sources, ignore.case = TRUE)
+        urls <- sapply(regmatches(sources, m), function(x) {
+          c(x[[2]], x[[3]])
+        })
+
+        ext <- ifelse(
+          urls[1, ] %in% c("magetCerebellumxTemplate0GenericAffine"),
+          ".mat", ".nii.gz"
+        )
+
+        sample_data <- data.frame(
+          fileid = urls[1, ],
+          filename = sprintf("%s%s", urls[1, ], ext),
+          url = urls[2, ]
+        )
+
+        sel <- sample_data$fileid %in% c("croppedMni152", "croppedMni152Priors", "priorDktLabels", "S_template3")
+        sample_data <- sample_data[sel, ]
+
+        missing_data <- rbind(pretrained, sample_data)
+        sel <- !file.exists(file.path(ants_cache_root, missing_data$filename))
+        missing_data <- missing_data[sel, ]
+
+        return(missing_data)
+      },
+      fun_args = list(ants_cache_root = ants_cache_root)
+    )
+
+    missing_data <- ravepipeline$resolve_job(job)
+
+    if (length(missing_data)) {
+      dir.create(ants_cache_root, showWarnings = FALSE, recursive = TRUE)
+      for (ii in seq_len(nrow(missing_data))) {
+        row <- missing_data[ii, ]
+        cat("Getting ", sQuote(row$filename), "\n", sep = "")
+        utils::download.file(row$url, destfile = file.path(ants_cache_root, row$filename))
+      }
+    }
+
+    rpyANTs <- asNamespace("rpyANTs")
+    rpyANTs$ensure_template("mni_icbm152_nlin_asym_09a")
+    rpyANTs$ensure_template("mni_icbm152_nlin_asym_09b")
+  }
+
+  return(invisible(configured))
 }
 
 
