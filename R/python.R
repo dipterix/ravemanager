@@ -199,6 +199,8 @@ configure_antspynet <- function() {
     configured <- TRUE
   }
 
+  options("timeout" = 60 * 30)
+
   if (!configured) {
     # rpymat will reinstall conda... so not a good fit
     # rpymat$configure_conda(python_ver = "3.10", env_name = "rave-ants")
