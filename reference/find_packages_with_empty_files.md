@@ -27,8 +27,13 @@ A list of packages (and files) containing empty files.
 
 find_packages_with_empty_files()
 #> The following packages have empty files: 
+#> rpyANTs         - [2%] 1 empty of 43 files
+#> ravecore        - [2%] 1 empty of 50 files
+#> reticulate      - [2%] 1 empty of 62 files
+#> rave            - [1%] 1 empty of 76 files
 #> renv            - [1%] 1 empty of 77 files
 #> pkgdown         - [1%] 2 empty of 165 files
+#> plotly          - [0%] 1 empty of 212 files
 #> Rcpp            - [0%] 1 empty of 646 files
 #> 
 #> If you suspect that any package was installed incorrectly, please use

@@ -7,12 +7,12 @@
 ## Citation
 
 Wang Z (2026). *ravemanager: Manage 'RAVE' Packages*. R package version
-1.0.67, <https://dipterix.org/ravemanager/>.
+1.0.68, <https://dipterix.org/ravemanager/>.
 
     @Manual{,
       title = {ravemanager: Manage 'RAVE' Packages},
       author = {Zhengjia Wang},
       year = {2026},
-      note = {R package version 1.0.67},
+      note = {R package version 1.0.68},
       url = {https://dipterix.org/ravemanager/},
     }

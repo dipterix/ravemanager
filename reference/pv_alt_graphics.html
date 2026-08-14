@@ -27,7 +27,7 @@ else are left untouched."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ravemanager</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.67</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.68</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,8 +82,8 @@ else are left untouched.</p>
 
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>passed to the internal handlers; <code>pv_init</code> accepts <code>hooks</code>, a
-character vector of new-page hook names to watch, and <code>watch</code>, see
-'Details'</p></dd>
+character vector of new-page hook names to watch, plus <code>watch</code> and <code>format</code>,
+see 'Details'</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -117,9 +117,18 @@ step aside: new devices are opened with the original device and plots are
 not captured, so <code>shiny</code> renders as usual. Normal behavior resumes once the
 application stops. The viewer's own application does not count, as it runs
 in a separate process.</p>
-<p>The viewer runs in a background <span style="R">R</span> process and reports its own width and
-height back to the main session, so plots are re-drawn at the size of the
-viewer pane. Only the 20 most recent pages are kept on disk.</p>
+<p>The viewer runs in a background <span style="R">R</span> process and reports its own width, height,
+and device pixel ratio back to the main session, so plots are re-drawn at the
+size of the viewer pane and stay sharp on high-density displays. Only the 20
+most recent pages are kept on disk.</p>
+<p>Pages are written as <code>PNG</code> using <code>ragg</code> when it is installed, falling back to
+<code><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">grDevices::png()</a></code> with the <code>cairo</code> back end and then to whatever <code><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png()</a></code>
+offers. <code>PNG</code> keeps the cost of a render bounded: <code>SVG</code> is faster for simple
+line art, but a scatter plot of 100000 points or a raster image takes several
+times longer to write and produces a file in the tens of megabytes, which the
+browser then has to parse. Pass <code>format = "svg"</code> to <code>pv_init</code> for vector
+output instead, which additionally requires <code>svglite</code>. The raster output is
+re-rendered whenever the viewer changes size, so it is never scaled up.</p>
 <p>The history holds one entry per page: <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and friends start a new one,
 while incremental drawing, a refresh, and a resize re-render the current
 entry in place instead of appending a copy of it. Three buttons in the
