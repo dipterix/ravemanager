@@ -715,7 +715,9 @@ shinyApp(ui, server)
 #'
 #' @export
 pv_init <- function(...) {
-  alt_graphics$register(...)
+  suppressWarnings({
+    alt_graphics$register(...)
+  })
 }
 
 #' @rdname pv_alt_graphics
