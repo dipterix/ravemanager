@@ -18,8 +18,8 @@ pv_dims(...)
 }
 \arguments{
 \item{...}{passed to the internal handlers; \code{pv_init} accepts \code{hooks}, a
-character vector of new-page hook names to watch, and \code{watch}, see
-'Details'}
+character vector of new-page hook names to watch, plus \code{watch} and \code{format},
+see 'Details'}
 }
 \value{
 \code{pv_init}, \code{pv_off}, and \code{pv_show} invisibly return a logical value
@@ -68,9 +68,19 @@ not captured, so \code{shiny} renders as usual. Normal behavior resumes once the
 application stops. The viewer's own application does not count, as it runs
 in a separate process.
 
-The viewer runs in a background \R process and reports its own width and
-height back to the main session, so plots are re-drawn at the size of the
-viewer pane. Only the 20 most recent pages are kept on disk.
+The viewer runs in a background \R process and reports its own width, height,
+and device pixel ratio back to the main session, so plots are re-drawn at the
+size of the viewer pane and stay sharp on high-density displays. Only the 20
+most recent pages are kept on disk.
+
+Pages are written as \code{PNG} using \code{ragg} when it is installed, falling back to
+\code{grDevices::png()} with the \code{cairo} back end and then to whatever \code{png()}
+offers. \code{PNG} keeps the cost of a render bounded: \code{SVG} is faster for simple
+line art, but a scatter plot of 100000 points or a raster image takes several
+times longer to write and produces a file in the tens of megabytes, which the
+browser then has to parse. Pass \code{format = "svg"} to \code{pv_init} for vector
+output instead, which additionally requires \code{svglite}. The raster output is
+re-rendered whenever the viewer changes size, so it is never scaled up.
 
 The history holds one entry per page: \code{plot()} and friends start a new one,
 while incremental drawing, a refresh, and a resize re-render the current

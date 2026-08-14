@@ -25,7 +25,8 @@ ui <- fillPage(
      #pvctl:hover{opacity:1}
      #pvctl .btn{margin-left:2px}"),
   tags$head(tags$script(HTML(
-    \'function pvSend(){Shiny.setInputValue("dim",[innerWidth,innerHeight],{priority:"event"})}
+    \'function pvSend(){Shiny.setInputValue("dim",
+       [innerWidth,innerHeight,window.devicePixelRatio||1],{priority:"event"})}
      var t, deb=function(){clearTimeout(t); t=setTimeout(pvSend,200)};
      $(document).on("shiny:connected", pvSend);
      $(document).on("shiny:sessioninitialized", pvSend);
@@ -47,14 +48,17 @@ server <- function(input, output, session) {
   init <- read_cfg()
   d0 <- suppressWarnings(as.integer(init[1:2]))
   if (length(d0) != 2L || anyNA(d0) || any(d0 < 50L)) d0 <- c(1000L, 700L)
+  r0 <- suppressWarnings(as.numeric(init[4]))
+  if (length(r0) != 1L || is.na(r0) || r0 < 1) r0 <- 1
   state <- reactiveValues(
     dim = d0,
-    token = if (length(init) >= 3L) init[[3]] else "")
+    token = if (length(init) >= 3L) init[[3]] else "",
+    dpr = r0)
 
   write_cfg <- function() {
     d <- state$dim
     if (length(d) != 2L) return(invisible())
-    atomic(c(d, state$token), cfg_path)
+    atomic(c(d, state$token, state$dpr), cfg_path)
   }
   request_refresh <- function() {
     state$token <- format(as.numeric(Sys.time()), digits = 17)
@@ -62,9 +66,12 @@ server <- function(input, output, session) {
   }
 
   observeEvent(input$dim, {
-    d <- as.integer(input$dim)
+    v <- as.numeric(input$dim)
+    d <- as.integer(v[1:2])
     if (length(d) == 2L && all(is.finite(d)) && all(d > 50L)) {
       state$dim <- d
+      r <- v[3]
+      if (length(r) == 1L && is.finite(r) && r >= 1) state$dpr <- r
       write_cfg()
     }
   })
@@ -77,7 +84,7 @@ server <- function(input, output, session) {
     if (!file.exists(state_path)) return(character(0))
     tryCatch(readLines(state_path, warn = FALSE), error = function(e) character(0))
   }
-  hist_state <- reactivePoll(300, session,
+  hist_state <- reactivePoll(100, session,
     checkFunc = function() paste(read_state(), collapse = "|"),
     valueFunc = function() {
       x <- suppressWarnings(as.integer(read_state()))
@@ -167,10 +174,12 @@ shinyApp(ui, server)
     dirty <<- TRUE
   }
 
+  # "png" (default) or "svg"; `svglite` is only needed for the latter
+  out_format <- "png"
+
   # These are optional: this package neither imports nor suggests them, so
   # they are resolved at run time instead of with `pkg::fun`
-  required_pkgs <- c("svglite", "rstudioapi", "callr", "httpuv", "shiny",
-                     "later")
+  required_pkgs <- c("rstudioapi", "callr", "httpuv", "shiny", "later")
 
   missing_pkgs <- function() {
     required_pkgs[!vapply(required_pkgs, is_installed, FALSE)]
@@ -208,6 +217,28 @@ shinyApp(ui, server)
       return(NULL)
     }
     get0(name, envir = ns, mode = "function")
+  }
+
+  # Open the output device. `ragg` is much faster than `svglite` on point-heavy
+  # and raster plots and writes a fraction of the bytes, but it is optional, so
+  # fall back to cairo and then to whatever `png()` offers. The size is given in
+  # pixels while the recording device is sized in inches; `res` keeps the two in
+  # step, so the layout is identical and only the pixel density changes.
+  open_png <- function(f, w, h, dpr) {
+    px <- c(max(1L, round(w * dpr)), max(1L, round(h * dpr)))
+    res <- 96 * dpr
+    agg_png <- ns_get("ragg", "agg_png")
+    if (is.function(agg_png)) {
+      agg_png(f, width = px[[1]], height = px[[2]], res = res,
+              background = "white")
+      return(TRUE)
+    }
+    args <- list(f, width = px[[1]], height = px[[2]], res = res, bg = "white")
+    if (isTRUE(unname(capabilities("cairo")))) {
+      args$type <- "cairo"
+    }
+    do.call(grDevices::png, args)
+    TRUE
   }
 
   # TRUE when a shiny app is running in *this* session (the viewer app itself
@@ -262,7 +293,12 @@ shinyApp(ui, server)
       d <- c(1000L, 700L)
     }
     token <- if (length(x) >= 3L && !is.na(x[[3]])) x[[3]] else ""
-    list(dim = d, token = token)
+    # a 3x display would quadruple the work for no visible gain
+    dpr <- suppressWarnings(as.numeric(x[4]))
+    if (length(dpr) != 1L || is.na(dpr) || dpr < 1) {
+      dpr <- 1
+    }
+    list(dim = d, token = token, dpr = min(dpr, 2))
   }
 
   dims <- function() {
@@ -350,18 +386,27 @@ shinyApp(ui, server)
   # A history entry is a *page*: `new_page` appends one, anything else (drawing
   # onto the current page, a refresh, a resize) updates the last entry in place
   render <- function(cur, new_page = isTRUE(dirty)) {
-    svglite <- ns_get("svglite", "svglite")
-    if (!is.function(svglite)) {
-      return(report_missing("svglite"))
+    svglite <- if (identical(out_format, "svg")) {
+      f <- ns_get("svglite", "svglite")
+      if (!is.function(f)) {
+        return(report_missing("svglite"))
+      }
+      f
     }
     if (!ensure()) {
       return(invisible(FALSE))
     }
-    d <- dims()
+    cfg <- read_cfg()
+    d <- cfg$dim
     fileno <<- fileno + 1L
 
-    f <- file.path(dir, "plots", sprintf("p%d.svg", fileno))
-    svglite(f, width = d[1] / 96, height = d[2] / 96, bg = "white")
+    f <- file.path(dir, "plots",
+                   sprintf("p%d.%s", fileno, if (is.null(svglite)) "png" else "svg"))
+    if (is.null(svglite)) {
+      open_png(f, d[[1]], d[[2]], cfg$dpr)
+    } else {
+      svglite(f, width = d[1] / 96, height = d[2] / 96, bg = "white")
+    }
     tryCatch(grDevices::replayPlot(cur), finally = grDevices::dev.off())
 
     if (new_page || !length(img_list)) {
@@ -414,7 +459,9 @@ shinyApp(ui, server)
       last_cfg <<- cfg
       return(invisible(FALSE))
     }
-    if (identical(cfg$token, last_cfg$token) && identical(cfg$dim, last_cfg$dim)) {
+    if (identical(cfg$token, last_cfg$token) &&
+        identical(cfg$dim, last_cfg$dim) &&
+        identical(cfg$dpr, last_cfg$dpr)) {
       return(invisible(FALSE))
     }
     last_cfg <<- cfg
@@ -496,17 +543,20 @@ shinyApp(ui, server)
     invisible(TRUE)
   }
 
-  register <- function(hooks, watch = TRUE) {
+  register <- function(hooks, watch = TRUE, format = c("png", "svg")) {
     if (!interactive() || !nzchar(Sys.getenv("RSTUDIO"))) {
       return(invisible(FALSE))
     }
-    if (length(missing_pkgs())) {
-      message(install_hint())
+    format <- match.arg(format)
+    need <- c(required_pkgs, if (identical(format, "svg")) "svglite")
+    if (length(miss <- need[!vapply(need, is_installed, FALSE)])) {
+      message(install_hint(miss))
       return(invisible(FALSE))
     }
     unregister()
 
     watch_dl <<- isTRUE(watch)
+    out_format <<- format
     dir.create(file.path(dir, "plots"), recursive = TRUE, showWarnings = FALSE)
     writeLines(app_src, file.path(dir, "app.R"))
     unlink(file.path(dir, c("img_paths", "img_index")))
@@ -640,8 +690,8 @@ shinyApp(ui, server)
 #' else are left untouched.
 #'
 #' @param ... passed to the internal handlers; `pv_init` accepts `hooks`, a
-#' character vector of new-page hook names to watch, and `watch`, see
-#' 'Details'
+#' character vector of new-page hook names to watch, plus `watch` and `format`,
+#' see 'Details'
 #'
 #' @details
 #' `pv_init` only takes effect in interactive `RStudio` sessions, and requires
@@ -669,9 +719,19 @@ shinyApp(ui, server)
 #' application stops. The viewer's own application does not count, as it runs
 #' in a separate process.
 #'
-#' The viewer runs in a background \R process and reports its own width and
-#' height back to the main session, so plots are re-drawn at the size of the
-#' viewer pane. Only the 20 most recent pages are kept on disk.
+#' The viewer runs in a background \R process and reports its own width, height,
+#' and device pixel ratio back to the main session, so plots are re-drawn at the
+#' size of the viewer pane and stay sharp on high-density displays. Only the 20
+#' most recent pages are kept on disk.
+#'
+#' Pages are written as `PNG` using `ragg` when it is installed, falling back to
+#' `grDevices::png()` with the `cairo` back end and then to whatever `png()`
+#' offers. `PNG` keeps the cost of a render bounded: `SVG` is faster for simple
+#' line art, but a scatter plot of 100000 points or a raster image takes several
+#' times longer to write and produces a file in the tens of megabytes, which the
+#' browser then has to parse. Pass `format = "svg"` to `pv_init` for vector
+#' output instead, which additionally requires `svglite`. The raster output is
+#' re-rendered whenever the viewer changes size, so it is never scaled up.
 #'
 #' The history holds one entry per page: `plot()` and friends start a new one,
 #' while incremental drawing, a refresh, and a resize re-render the current
@@ -685,8 +745,8 @@ shinyApp(ui, server)
 #' using `later::later` while registered; resizing the viewer is picked up the
 #' same way. The polling stops on `pv_off()`.
 #'
-#' @importFrom grDevices dev.control dev.cur dev.list dev.off pdf recordPlot
-#' @importFrom grDevices replayPlot
+#' @importFrom grDevices dev.control dev.cur dev.list dev.off pdf png
+#' @importFrom grDevices recordPlot replayPlot
 #'
 #' @returns
 #' `pv_init`, `pv_off`, and `pv_show` invisibly return a logical value
