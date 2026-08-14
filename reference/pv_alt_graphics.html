@@ -81,7 +81,9 @@ else are left untouched.</p>
 
 
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>currently ignored, reserved for future use</p></dd>
+<dd><p>passed to the internal handlers; <code>pv_init</code> accepts <code>hooks</code>, a
+character vector of new-page hook names to watch, and <code>watch</code>, see
+'Details'</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -101,6 +103,14 @@ enabled, a top-level task callback named <code>tools:plotview</code> re-renders 
 recorded plot whenever a new page is drawn, and helper functions
 (<code>.pv_show</code>, <code>.pv_dims</code>, <code>.pv_start</code>, <code>.pv_stop</code>) are attached to the search
 path under <code>tools:plotview</code>.</p>
+<p>Incremental drawing such as <code><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points()</a></code>, <code><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines()</a></code>, or <code><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend()</a></code> runs no
+hook, so the hooks alone would miss it. Instead the callback compares the
+length of the device display list with the length at the last render, and
+re-renders when it differs; the <code>plot.new</code> hook still covers the case of a
+new page that happens to have the same length. This means the display list
+is recorded once per top-level command, which is the cost of the feature;
+pass <code>watch = FALSE</code> to <code>pv_init</code> to disable it and fall back to the hooks
+alone.</p>
 <p>While a <code>shiny</code> application is running in the current session (that is,
 <code><a href="https://rdrr.io/pkg/shiny/man/isRunning.html" class="external-link">shiny::isRunning()</a></code> is <code>TRUE</code> or a reactive domain is active), the hooks
 step aside: new devices are opened with the original device and plots are
@@ -109,11 +119,13 @@ application stops. The viewer's own application does not count, as it runs
 in a separate process.</p>
 <p>The viewer runs in a background <span style="R">R</span> process and reports its own width and
 height back to the main session, so plots are re-drawn at the size of the
-viewer pane. Only the 20 most recent images are kept on disk.</p>
-<p>Three buttons in the top-right corner of the viewer navigate the plot
-history: previous steps back one image (and does nothing at the oldest one
-still on disk), next steps forward one image, and the last button jumps to
-the newest image. Stepping forward from the newest image, or pressing the
+viewer pane. Only the 20 most recent pages are kept on disk.</p>
+<p>The history holds one entry per page: <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and friends start a new one,
+while incremental drawing, a refresh, and a resize re-render the current
+entry in place instead of appending a copy of it. Three buttons in the
+top-right corner of the viewer navigate that history: previous steps back
+one page (and does nothing at the oldest one still on disk), next steps
+forward one page, and the last button jumps to the newest page. Stepping forward from the newest image, or pressing the
 last button, also asks the main session to re-render the current plot, the
 same as calling <code>pv_show()</code>. Such a request is passed back through the
 viewer configuration file, which the main session polls once per second
