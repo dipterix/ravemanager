@@ -68,10 +68,24 @@ server <- function(input, output, session) {
       write_cfg()
     }
   })
-  idx <- reactiveFileReader(300, session, file.path(dir, "img_index"), function(f) {
-    if (!file.exists(f)) return(0L)
-    suppressWarnings(as.integer(readLines(f, warn = FALSE)[1]))
-  })
+  # `img_index` holds the number of pages and an ever-increasing render number.
+  # Poll its *contents*: an update in place leaves the page count alone, and
+  # `reactiveFileReader` compares only mtime (whole seconds) and size, so it
+  # would miss exactly that case
+  state_path <- file.path(dir, "img_index")
+  read_state <- function() {
+    if (!file.exists(state_path)) return(character(0))
+    tryCatch(readLines(state_path, warn = FALSE), error = function(e) character(0))
+  }
+  hist_state <- reactivePoll(300, session,
+    checkFunc = function() paste(read_state(), collapse = "|"),
+    valueFunc = function() {
+      x <- suppressWarnings(as.integer(read_state()))
+      list(index = if (length(x) >= 1L && !is.na(x[[1]])) x[[1]] else 0L,
+           ver = if (length(x) >= 2L && !is.na(x[[2]])) x[[2]] else 0L)
+    })
+  idx <- function() hist_state()$index
+
   paths <- function() {
     f <- file.path(dir, "img_paths")
     if (!file.exists(f)) return(character(0))
@@ -86,10 +100,15 @@ server <- function(input, output, session) {
   }
 
   cur <- reactiveVal(0L)
-  # always follow the newest plot
-  observeEvent(idx(), {
+  # follow the newest page, but only when a page is actually added: updates in
+  # place must not drag the user forward while browsing back
+  seen <- reactiveVal(0L)
+  observeEvent(hist_state(), {
     i <- idx()
-    if (!is.na(i) && i > 0L) cur(i)
+    if (!is.na(i) && i > 0L && !identical(i, seen())) {
+      seen(i)
+      cur(i)
+    }
   })
 
   observeEvent(input$pv_prev, {
@@ -108,6 +127,7 @@ server <- function(input, output, session) {
   })
 
   output$plot <- renderUI({
+    hist_state()               # re-read on every render, in place or not
     i <- cur(); req(!is.na(i), i > 0L)
     p <- paths()
     req(length(p) >= i)
@@ -122,12 +142,17 @@ shinyApp(ui, server)
   dir <- file.path(tempdir(), "plotview")
   proc <- NULL
   port <- NULL
-  n <- 0L
+  # one entry per page; a render either appends a page or updates the last one
+  img_list <- character(0)
+  # always increments, so every render gets a file name the browser has not seen
+  fileno <- 0L
   lastlen <- -1L
   busy <- FALSE
   old_device <- NULL
   own_devices <- integer(0)
   dirty <- FALSE
+  # watch the display list so incremental drawing is picked up too
+  watch_dl <- TRUE
   last_cfg <- NULL
   poll_id <- 0L
   poll_interval <- 0.5
@@ -322,7 +347,9 @@ shinyApp(ui, server)
     TRUE
   }
 
-  render <- function(cur) {
+  # A history entry is a *page*: `new_page` appends one, anything else (drawing
+  # onto the current page, a refresh, a resize) updates the last entry in place
+  render <- function(cur, new_page = isTRUE(dirty)) {
     svglite <- ns_get("svglite", "svglite")
     if (!is.function(svglite)) {
       return(report_missing("svglite"))
@@ -331,18 +358,31 @@ shinyApp(ui, server)
       return(invisible(FALSE))
     }
     d <- dims()
-    n <<- n + 1L
+    fileno <<- fileno + 1L
 
-    f <- file.path(dir, "plots", sprintf("p%d.svg", n))
+    f <- file.path(dir, "plots", sprintf("p%d.svg", fileno))
     svglite(f, width = d[1] / 96, height = d[2] / 96, bg = "white")
     tryCatch(grDevices::replayPlot(cur), finally = grDevices::dev.off())
 
-    cat(f, "\n", sep = "", file = file.path(dir, "img_paths"), append = TRUE)
-    atomic(n, file.path(dir, "img_index"))
-
-    for (i in seq_len(max(0L, n - 20L))) {
-      unlink(file.path(dir, "plots", sprintf("p%d.svg", i)))
+    if (new_page || !length(img_list)) {
+      img_list <<- c(img_list, f)
+    } else {
+      unlink(img_list[[length(img_list)]])
+      img_list[[length(img_list)]] <<- f
     }
+
+    # `img_index` is written last: once the viewer sees it change, `img_paths`
+    # is already up to date
+    atomic(img_list, file.path(dir, "img_paths"))
+    atomic(c(length(img_list), fileno), file.path(dir, "img_index"))
+
+    # keep the files for the 20 most recent pages, but keep every line so the
+    # viewer can still tell how far back it may step
+    for (i in seq_len(max(0L, length(img_list) - 20L))) {
+      unlink(img_list[[i]])
+    }
+    dirty <<- FALSE
+    lastlen <<- if (is.null(cur)) -1L else length(cur[[1]])
     invisible(TRUE)
   }
 
@@ -357,7 +397,6 @@ shinyApp(ui, server)
     if (is.null(cur) || is.null(cur[[1]]) || length(cur[[1]]) == 0L) {
       return(invisible(FALSE))
     }
-    lastlen <<- length(cur[[1]])
     render(cur)
   }
 
@@ -457,7 +496,7 @@ shinyApp(ui, server)
     invisible(TRUE)
   }
 
-  register <- function(hooks) {
+  register <- function(hooks, watch = TRUE) {
     if (!interactive() || !nzchar(Sys.getenv("RSTUDIO"))) {
       return(invisible(FALSE))
     }
@@ -467,10 +506,15 @@ shinyApp(ui, server)
     }
     unregister()
 
+    watch_dl <<- isTRUE(watch)
     dir.create(file.path(dir, "plots"), recursive = TRUE, showWarnings = FALSE)
     writeLines(app_src, file.path(dir, "app.R"))
     unlink(file.path(dir, c("img_paths", "img_index")))
-    n <<- 0L
+    # start from a clean slate: images left behind by an earlier session are
+    # not in `img_list` and would only confuse the viewer
+    unlink(list.files(file.path(dir, "plots"), full.names = TRUE))
+    img_list <<- character(0)
+    fileno <<- 0L
 
     old_device <<- getOption("device")
     options(device = function(...) {
@@ -492,17 +536,30 @@ shinyApp(ui, server)
           dirty <<- FALSE
           return(TRUE)
         }
-        if (!dirty || busy || is.null(grDevices::dev.list())) {
+        if (busy || is.null(grDevices::dev.list())) {
           return(TRUE)
         }
-        dirty <<- FALSE
+        # `points()`, `lines()`, `text()`, ... run no hook, they only append to
+        # the display list, so watch its length: anything that draws on the
+        # current page changes it. `dirty` (set by the `plot.new` hook) covers
+        # the case of a new page that happens to be the same length
+        if (!dirty && !watch_dl) {
+          return(TRUE)
+        }
         cur <- tryCatch(grDevices::recordPlot(), error = function(e) NULL)
         if (is.null(cur) || is.null(cur[[1]]) || length(cur[[1]]) == 0L) {
           return(TRUE)
         }
+        if (!dirty && length(cur[[1]]) == lastlen) {
+          return(TRUE)
+        }
         busy <<- TRUE
         on.exit(busy <<- FALSE)
+        # `render()` reads `dirty` to decide new page vs. update, and clears it
         tryCatch(render(cur), error = function(e) {
+          # clear it here too, so a failing render does not report itself again
+          # after every command
+          dirty <<- FALSE
           message("tools:plotview: ", conditionMessage(e))
         })
         TRUE
@@ -582,7 +639,9 @@ shinyApp(ui, server)
 #' plot starts on a fresh device with the defaults. Devices opened by anything
 #' else are left untouched.
 #'
-#' @param ... currently ignored, reserved for future use
+#' @param ... passed to the internal handlers; `pv_init` accepts `hooks`, a
+#' character vector of new-page hook names to watch, and `watch`, see
+#' 'Details'
 #'
 #' @details
 #' `pv_init` only takes effect in interactive `RStudio` sessions, and requires
@@ -594,6 +653,15 @@ shinyApp(ui, server)
 #' (`.pv_show`, `.pv_dims`, `.pv_start`, `.pv_stop`) are attached to the search
 #' path under `tools:plotview`.
 #'
+#' Incremental drawing such as `points()`, `lines()`, or `legend()` runs no
+#' hook, so the hooks alone would miss it. Instead the callback compares the
+#' length of the device display list with the length at the last render, and
+#' re-renders when it differs; the `plot.new` hook still covers the case of a
+#' new page that happens to have the same length. This means the display list
+#' is recorded once per top-level command, which is the cost of the feature;
+#' pass `watch = FALSE` to `pv_init` to disable it and fall back to the hooks
+#' alone.
+#'
 #' While a `shiny` application is running in the current session (that is,
 #' `shiny::isRunning()` is `TRUE` or a reactive domain is active), the hooks
 #' step aside: new devices are opened with the original device and plots are
@@ -603,12 +671,14 @@ shinyApp(ui, server)
 #'
 #' The viewer runs in a background \R process and reports its own width and
 #' height back to the main session, so plots are re-drawn at the size of the
-#' viewer pane. Only the 20 most recent images are kept on disk.
+#' viewer pane. Only the 20 most recent pages are kept on disk.
 #'
-#' Three buttons in the top-right corner of the viewer navigate the plot
-#' history: previous steps back one image (and does nothing at the oldest one
-#' still on disk), next steps forward one image, and the last button jumps to
-#' the newest image. Stepping forward from the newest image, or pressing the
+#' The history holds one entry per page: `plot()` and friends start a new one,
+#' while incremental drawing, a refresh, and a resize re-render the current
+#' entry in place instead of appending a copy of it. Three buttons in the
+#' top-right corner of the viewer navigate that history: previous steps back
+#' one page (and does nothing at the oldest one still on disk), next steps
+#' forward one page, and the last button jumps to the newest page. Stepping forward from the newest image, or pressing the
 #' last button, also asks the main session to re-render the current plot, the
 #' same as calling `pv_show()`. Such a request is passed back through the
 #' viewer configuration file, which the main session polls once per second

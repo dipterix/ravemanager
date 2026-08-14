@@ -17,7 +17,9 @@ pv_show(...)
 pv_dims(...)
 }
 \arguments{
-\item{...}{currently ignored, reserved for future use}
+\item{...}{passed to the internal handlers; \code{pv_init} accepts \code{hooks}, a
+character vector of new-page hook names to watch, and \code{watch}, see
+'Details'}
 }
 \value{
 \code{pv_init}, \code{pv_off}, and \code{pv_show} invisibly return a logical value
@@ -50,6 +52,15 @@ recorded plot whenever a new page is drawn, and helper functions
 (\code{.pv_show}, \code{.pv_dims}, \code{.pv_start}, \code{.pv_stop}) are attached to the search
 path under \code{tools:plotview}.
 
+Incremental drawing such as \code{points()}, \code{lines()}, or \code{legend()} runs no
+hook, so the hooks alone would miss it. Instead the callback compares the
+length of the device display list with the length at the last render, and
+re-renders when it differs; the \code{plot.new} hook still covers the case of a
+new page that happens to have the same length. This means the display list
+is recorded once per top-level command, which is the cost of the feature;
+pass \code{watch = FALSE} to \code{pv_init} to disable it and fall back to the hooks
+alone.
+
 While a \code{shiny} application is running in the current session (that is,
 \code{shiny::isRunning()} is \code{TRUE} or a reactive domain is active), the hooks
 step aside: new devices are opened with the original device and plots are
@@ -59,12 +70,14 @@ in a separate process.
 
 The viewer runs in a background \R process and reports its own width and
 height back to the main session, so plots are re-drawn at the size of the
-viewer pane. Only the 20 most recent images are kept on disk.
+viewer pane. Only the 20 most recent pages are kept on disk.
 
-Three buttons in the top-right corner of the viewer navigate the plot
-history: previous steps back one image (and does nothing at the oldest one
-still on disk), next steps forward one image, and the last button jumps to
-the newest image. Stepping forward from the newest image, or pressing the
+The history holds one entry per page: \code{plot()} and friends start a new one,
+while incremental drawing, a refresh, and a resize re-render the current
+entry in place instead of appending a copy of it. Three buttons in the
+top-right corner of the viewer navigate that history: previous steps back
+one page (and does nothing at the oldest one still on disk), next steps
+forward one page, and the last button jumps to the newest page. Stepping forward from the newest image, or pressing the
 last button, also asks the main session to re-render the current plot, the
 same as calling \code{pv_show()}. Such a request is passed back through the
 viewer configuration file, which the main session polls once per second
