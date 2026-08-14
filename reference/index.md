@@ -31,6 +31,14 @@
   [`add_py_package()`](http://dipterix.org/ravemanager/reference/install_packages.md)
   : Install/Update R or Python packages to RAVE environment
 
+- [`pv_init()`](http://dipterix.org/ravemanager/reference/pv_alt_graphics.md)
+  [`pv_off()`](http://dipterix.org/ravemanager/reference/pv_alt_graphics.md)
+  [`pv_show()`](http://dipterix.org/ravemanager/reference/pv_alt_graphics.md)
+  [`pv_dims()`](http://dipterix.org/ravemanager/reference/pv_alt_graphics.md)
+  :
+
+  Alternative graphics device for `RStudio`
+
 - [`make_profile()`](http://dipterix.org/ravemanager/reference/rave-profile.md)
   [`use_profile()`](http://dipterix.org/ravemanager/reference/rave-profile.md)
   :
