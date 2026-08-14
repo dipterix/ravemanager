@@ -146,7 +146,14 @@ shinyApp(ui, server)
 '
 
   tool_env <- NULL
-  dir <- file.path(tempdir(), "plotview")
+  # NOTE: this `local()` is evaluated when the package is *installed*, so
+  # anything computed here is frozen into the build. `tempdir()` in particular
+  # would be the temporary directory of the session that built the package,
+  # which no longer exists for the user -- hence a function, resolved on every
+  # call. `check = TRUE` also recreates it if it was cleaned up mid-session
+  work_dir <- function() {
+    file.path(tempdir(check = TRUE), "plotview")
+  }
   proc <- NULL
   port <- NULL
   # one entry per page; a render either appends a page or updates the last one
@@ -284,7 +291,7 @@ shinyApp(ui, server)
   # `viewer_cfg` has three lines: width, height, and a token that the viewer
   # bumps whenever it wants the main session to re-render
   read_cfg <- function() {
-    f <- file.path(dir, "viewer_cfg")
+    f <- file.path(work_dir(), "viewer_cfg")
     x <- if (file.exists(f)) {
       tryCatch(readLines(f, warn = FALSE), error = function(e) NULL)
     }
@@ -310,8 +317,17 @@ shinyApp(ui, server)
     if (is.null(port) || !is.function(viewer)) {
       return(invisible(FALSE))
     }
-    viewer(sprintf("http://127.0.0.1:%d/", port), height = 800)
-    invisible(TRUE)
+    # showing the pane is optional: if it fails, the app is still running and
+    # reachable, and `register()` must not be left half-finished
+    ok <- tryCatch({
+      viewer(sprintf("http://127.0.0.1:%d/", port), height = 800)
+      TRUE
+    }, error = function(e) {
+      message("tools:plotview: cannot open the viewer pane: ",
+              conditionMessage(e))
+      FALSE
+    })
+    invisible(ok)
   }
 
   wait_port <- function(timeout = 15) {
@@ -365,7 +381,7 @@ shinyApp(ui, server)
           launch.browser = FALSE
         )
       },
-      args = list(dir, port),
+      args = list(work_dir(), port),
       supervise = TRUE
     )
     if (!wait_port()) {
@@ -400,7 +416,7 @@ shinyApp(ui, server)
     d <- cfg$dim
     fileno <<- fileno + 1L
 
-    f <- file.path(dir, "plots",
+    f <- file.path(work_dir(), "plots",
                    sprintf("p%d.%s", fileno, if (is.null(svglite)) "png" else "svg"))
     if (is.null(svglite)) {
       open_png(f, d[[1]], d[[2]], cfg$dpr)
@@ -418,8 +434,8 @@ shinyApp(ui, server)
 
     # `img_index` is written last: once the viewer sees it change, `img_paths`
     # is already up to date
-    atomic(img_list, file.path(dir, "img_paths"))
-    atomic(c(length(img_list), fileno), file.path(dir, "img_index"))
+    atomic(img_list, file.path(work_dir(), "img_paths"))
+    atomic(c(length(img_list), fileno), file.path(work_dir(), "img_index"))
 
     # keep the files for the 20 most recent pages, but keep every line so the
     # viewer can still tell how far back it may step
@@ -557,12 +573,18 @@ shinyApp(ui, server)
 
     watch_dl <<- isTRUE(watch)
     out_format <<- format
-    dir.create(file.path(dir, "plots"), recursive = TRUE, showWarnings = FALSE)
+    dir <- work_dir()
+    plots <- file.path(dir, "plots")
+    dir.create(plots, recursive = TRUE, showWarnings = FALSE)
+    if (!dir.exists(plots)) {
+      message("tools:plotview: cannot create the working directory ", plots)
+      return(invisible(FALSE))
+    }
     writeLines(app_src, file.path(dir, "app.R"))
     unlink(file.path(dir, c("img_paths", "img_index")))
     # start from a clean slate: images left behind by an earlier session are
     # not in `img_list` and would only confuse the viewer
-    unlink(list.files(file.path(dir, "plots"), full.names = TRUE))
+    unlink(list.files(plots, full.names = TRUE))
     img_list <<- character(0)
     fileno <<- 0L
 
