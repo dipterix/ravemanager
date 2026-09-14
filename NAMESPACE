@@ -33,11 +33,13 @@ export(use_profile)
 export(validate_python)
 export(version_info)
 export(webr_view)
-importFrom(grDevices,dev.control)
-importFrom(grDevices,dev.cur)
-importFrom(grDevices,dev.list)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,pdf)
-importFrom(grDevices,png)
-importFrom(grDevices,recordPlot)
-importFrom(grDevices,replayPlot)
+importFrom(grDevices,
+  dev.control,
+  dev.cur,
+  dev.list,
+  dev.off,
+  pdf,
+  png,
+  recordPlot,
+  replayPlot
+)

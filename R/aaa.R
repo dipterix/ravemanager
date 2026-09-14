@@ -23,9 +23,13 @@ rave_suggests <- c(
   "nloptr", "minqa", "lme4", "circular", "learnr", "RcppEigen", "zoo",
   "lmtest", "distill", "shinychat", "ellmer", "btw", "BH", "RcppDate",
   "RcppTOML", "RcppArmadillo", "quarto", "httr", "plotly", "htmltools",
-  "startup", "servr", "DT")
+  "startup", "servr", "DT", "r3js", "svglite", "reshape2", "car", "emmeans", "lmerTest")
 
-# "devtools", "signal", "shinyjs",
+rave_devops <- c(
+  "devtools", "signal", "shinyjs", "spelling", "usethis", "lobstr", "reprex",
+  "lintr", "languageserver", "ellmer", "btw", "rgl", "r3js", "h5lite", "rhub",
+  "fftwtools", "microbenchmark", "attachment", "checkhelper", "goodpractice"
+)
 
 
 rspm_install <- c("abind", "anytime", "askpass", "assertthat", "backports", "base64enc", "base64url", "BH", "bit", "bit64", "bitops", "boot", "brew", "brio", "broom", "bslib", "cachem", "callr", "car", "carData", "circular", "cli", "clipr", "codetools", "colorspace", "commonmark", "cpp11", "crayon", "credentials", "crosstalk", "curl", "data.table", "desc", "devtools", "diffobj", "digest", "dipsaus", "downlit", "downloader", "dplyr", "DT", "edfReader", "ellipsis", "emmeans", "estimability", "evaluate", "fansi", "farver", "fastmap", "fftwtools", "filearray", "fontawesome", "foreign", "formatR", "freesurferformats", "fs", "fst", "fstcore", "future", "future.apply", "generics", "gert", "ggplot2", "gh", "gifti", "gitcreds", "globals", "glue", "gtable", "hdf5r", "here", "highr", "htmltools", "htmlwidgets", "httpuv", "httr", "igraph", "ini", "IRdisplay", "IRkernel", "isoband", "jquerylib", "jsonlite", "knitr", "labeling", "later", "lattice", "lazyeval", "lifecycle", "listenv", "lme4", "lmerTest", "logger", "magrittr", "maptools", "MASS", "Matrix", "MatrixModels", "memoise", "mgcv", "mime", "miniUI", "minqa", "munsell", "mvtnorm", "nlme", "nloptr", "nnet", "numDeriv", "openssl", "oro.nifti", "parallelly", "pbdZMQ", "pbkrtest", "pillar", "pkgbuild", "pkgconfig", "pkgdown", "pkgfilecache", "pkgload", "plyr", "png", "praise", "prettyunits", "processx", "profvis", "progressr", "promises", "ps", "purrr", "quantreg", "R.matlab", "R.methodsS3", "R.oo", "R.utils", "R6", "ragg", "rappdirs", "rave", "ravedash", "raveio", "ravetools", "rcmdcheck", "RColorBrewer", "Rcpp", "RcppEigen", "RcppParallel", "RcppTOML", "rematch2", "remotes", "repr", "reshape2", "reticulate", "rlang", "rmarkdown", "RNifti", "roxygen2", "rprojroot", "rpymat", "rstudioapi", "rutabaga", "rversions", "sass", "scales", "sessioninfo", "shidashi", "shiny", "shinydashboard", "shinyFiles", "shinyjs", "shinyvalidate", "shinyWidgets", "signal", "sourcetools", "sp", "SparseM", "startup", "stringi", "stringr", "survival", "sys", "systemfonts", "targets", "testthat", "textshaping", "threeBrain", "tibble", "tidyr", "tidyselect", "tinytex", "urlchecker", "usethis", "utf8", "uuid", "vctrs", "viridisLite", "waldo", "waveslim", "whisker", "withr", "xfun", "xml2", "xopen", "xtable", "yaml", "zip", "Rvcg", "readNSx", "RcppEigen")
