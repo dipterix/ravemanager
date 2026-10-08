@@ -144,6 +144,12 @@ validate_python <- function(verbose = TRUE, env_name = NA) {
           package,
           mat73 = {
             verb({ message("  ", package, ": ", module$core$`__version__`) })
+          },
+          scipy = {
+            # `import scipy` loads no compiled code; these load its Fortran modules
+            reticulate$import("scipy.optimize")
+            reticulate$import("scipy.integrate")
+            verb({ message("  ", package, ": ", module$`__version__`) })
           }, {
             verb({ message("  ", package, ": ", module$`__version__`) })
           }
@@ -422,6 +428,14 @@ configure_python <- function(python_ver = "3.11", verbose = TRUE) {
   pkgs <- c("antspyx")
   pkgs <- pkgs[!pkgs %in% installed_pkgs_tbl$package]
   if (length(pkgs)) {
+    # antspyx pins numpy<2.4 & scipy<1.16. Left to pip, they get replaced by PyPI
+    # wheels, and PyPI scipy<1.16 for macOS arm64 fails to load on macOS 27.
+    # Get the pinned versions from conda-forge first so pip keeps them.
+    if (identical(get_os(), "darwin")) {
+      try({
+        rpymat$add_packages(packages = c("numpy<2.4", "scipy<1.16"))
+      })
+    }
     for (pkg in get_python_package_name(pkgs)) {
       if ( pkg %in% pkgs ) {
         try({
