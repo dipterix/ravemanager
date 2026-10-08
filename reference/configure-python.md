@@ -50,18 +50,21 @@ In this isolated environment, the following packages will be installed:
 `rpymat::add_packages(...)` or `pip` packages via
 `rpymat::add_packages(..., pip = TRUE)`.
 
-To use the 'python' environment, please run `rpymat::ensure_rpymat()` to
-activate in your current session. If you are running via `'RStudio'`,
+To use the 'python' environment, please run
+[`rpymat::ensure_rpymat()`](http://dipterix.org/rpymat/reference/conda-env.md)
+to activate in your current session. If you are running via `'RStudio'`,
 open any 'python' script and use `'ctrl/cmd+enter'` to run line-by-line.
 To switch from `R` to `python` mode, using command
-`rpymat::repl_python()`
+[`rpymat::repl_python()`](http://dipterix.org/rpymat/reference/repl_python.md)
 
 A `jupyterlab` will be automatically installed during the configuration.
-To launch the `jupyterlab`, use `rpymat::jupyter_launch()`
+To launch the `jupyterlab`, use
+[`rpymat::jupyter_launch()`](http://dipterix.org/rpymat/reference/jupyter.md)
 
 If you want to remove this `conda` environment, use R command
-`rpymat::remove_conda()`. This procedure is absolutely safe and will not
-affect your other installations.
+[`rpymat::remove_conda()`](http://dipterix.org/rpymat/reference/conda-env.md).
+This procedure is absolutely safe and will not affect your other
+installations.
 
 ## Examples
 
