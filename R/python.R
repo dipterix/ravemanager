@@ -260,6 +260,14 @@ configure_antspynet <- function() {
   }
 
   if (!configured) {
+    if (identical(get_os(), "darwin")) {
+      try({
+        rpymat$add_packages(
+          packages = c("numpy<2.4", "scipy<1.16"),
+          env_name = "rave-ants"
+        )
+      })
+    }
     rpymat$add_packages(packages = "antspynet==0.3.2",
                         env_name = "rave-ants",
                         pip = TRUE)
