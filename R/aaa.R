@@ -23,7 +23,8 @@ rave_suggests <- c(
   "nloptr", "minqa", "lme4", "circular", "learnr", "RcppEigen", "zoo",
   "lmtest", "distill", "shinychat", "ellmer", "btw", "BH", "RcppDate",
   "RcppTOML", "RcppArmadillo", "quarto", "httr", "plotly", "htmltools",
-  "startup", "servr", "DT", "r3js", "svglite", "reshape2", "car", "emmeans", "lmerTest")
+  "startup", "servr", "DT", "r3js", "svglite", "reshape2", "car", "emmeans", "lmerTest",
+  "docopt")
 
 rave_devops <- c(
   "devtools", "signal", "shinyjs", "spelling", "usethis", "lobstr", "reprex",

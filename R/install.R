@@ -26,7 +26,9 @@
 #' works. In such case, restarting R session is always the solution.
 #' @param ... passed to internal functions
 #' @param branch_name for 'RAVE' developers, development branch to install
-#' @return Nothing
+#' @return \code{install} and \code{update_rave} invisibly return \code{TRUE}
+#' if the installation finished and \code{FALSE} if it failed; other functions
+#' return nothing.
 NULL
 
 
@@ -37,16 +39,7 @@ add_shortcuts <- function() {
   switch(
     os,
     "darwin" = {
-      app <- system.file("shell/rave-2.0.app", package = "ravemanager")
-      dir.create("/Applications/RAVE/", showWarnings = FALSE, recursive = TRUE)
-      if (dir.exists("/Applications/RAVE/rave-2.0.app")) {
-        unlink("/Applications/RAVE/rave-2.0.app", recursive = TRUE)
-      }
-      file.copy(app, "/Applications/RAVE/",
-                overwrite = TRUE, copy.date = TRUE, recursive = TRUE)
-      Sys.chmod("/Applications/RAVE/rave-2.0.app/Contents/MacOS/executable",
-                mode = "0755", use_umask = FALSE)
-      system("open /Applications/RAVE/")
+      message("RAVE does not provide a macOS app. To open RAVE, run this in a terminal:\n\n  rave start\n\nThe `rave` command comes with `brew install rave-ieeg/tap/rave-ieeg`.")
     }
   )
 }
@@ -573,7 +566,7 @@ install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
   }
 
   nightly <- FALSE
-  tryCatch({
+  status <- tryCatch({
     install_internal(
       nightly = nightly,
       upgrade_manager = upgrade_manager,
@@ -582,6 +575,7 @@ install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
       python = python,
       ...
     )
+    TRUE
   }, error = function(e) {
 
     line_width <- as.integer(getOption("width", 80L))
@@ -648,7 +642,9 @@ install <- function(allow_cache = FALSE, upgrade_manager = FALSE,
     message(e$message)
     error_verbosed <- TRUE
 
+    FALSE
   })
+  invisible(status)
 }
 
 #' @rdname RAVE-install

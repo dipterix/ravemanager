@@ -61,3 +61,9 @@ jobs:
         run: |
           chmod a+x ./inst/installer.sh
           ./inst/installer.sh -c 1
+
+      - name: Check rave command
+        if: runner.os == 'macOS'
+        run: |
+          bash ./inst/shell/rave --help
+          bash ./inst/shell/rave --version

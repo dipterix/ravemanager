@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-doc <- "RAVE command-line interface
+doc <- sprintf("RAVE command-line interface
 
 Usage:
   rave start [--port=<n>] [--host=<addr>] [--no-browser] [--new-session]
@@ -11,17 +11,17 @@ Options:
   -h --help       Show this screen.
   --version       Show version.
   --port=<n>      Port number (1024-65535) [default: 8788].
-  --host=<addr>   Host address [default: 0.0.0.0].
+  --host=<addr>   Host address [default: %s].
   --no-browser    Do not launch browser [default: TRUE]
   --new-session   Start a brand new session [default: FALSE]
-"
+", Sys.getenv("RAVE_HOST", unset = "127.0.0.1"))
 
 version <- sprintf("RAVE 2.0 (manager=v%s)", as.character(packageVersion("ravemanager")))
 opts <- docopt::docopt(doc, version = version)
 
 if (isTRUE(opts$start)) {
-  port <- as.integer(opts$port)
-  if (is.na(port) && port < 1024 || port > 65535) {
+  port <- suppressWarnings(as.integer(opts$port))
+  if (is.na(port) || port < 1024 || port > 65535) {
     stop("Invalid port number: port must be an integer between 1024-65535")
   }
   host <- opts$host

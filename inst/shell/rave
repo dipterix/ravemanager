@@ -1,0 +1,203 @@
+#!/bin/bash
+
+# Command-line entry point for RAVE on macOS, used by the Homebrew cask
+# `rave-ieeg`. The cask downloads only this file, so it must stay standalone.
+
+set -u
+
+# Always CRAN R: Homebrew's `r` formula cannot use the binary packages
+RSCRIPT="/Library/Frameworks/R.framework/Resources/bin/Rscript"
+RAVE_REPO="https://rave-ieeg.r-universe.dev"
+
+# Homebrew removes LANG from the environment of installer scripts
+export LANG="${LANG:-en_US.UTF-8}"
+
+# Chooses the library as in inst/installer.sh. Leaves it in `lib`.
+R_LIBRARY=(
+  -e 'lib <- Sys.getenv("RAVE_LIB_PATH", unset = Sys.getenv("R_LIBS_USER", unset = .libPaths()[[1]]))'
+  -e 'lib <- strsplit(lib, ":", fixed = TRUE)[[1]][[1]]'
+  -e 'dir.create(lib, recursive = TRUE, showWarnings = FALSE)'
+  -e '.libPaths(lib)'
+)
+
+usage() {
+  cat <<'EOF'
+RAVE command-line interface
+
+Usage:
+  rave start [options]           Open RAVE, installing it first if needed
+  rave update [--reset-python]   Install or update RAVE
+  rave -h | --help               Show this screen
+  rave --version                 Show version
+
+Run `rave start --help` to see the options for `rave start`.
+EOF
+}
+
+ohai() { printf '==> %s\n' "$*"; }
+warn() { printf 'Warning: %s\n' "$*" >&2; }
+abort() { printf 'Error: %s\n' "$*" >&2; exit 1; }
+
+# Prints the value of an R expression. An .Rprofile may print too, so only the
+# last line counts.
+r_value() {
+  "$RSCRIPT" "${R_LIBRARY[@]}" -e "writeLines(c('', $1))" | tail -n 1
+}
+
+has_marker() {
+  "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e 'quit(save = "no", status = if (file.exists(file.path(lib, ".rave-installed"))) 0L else 1L)'
+}
+
+rave_ready() {
+  [ -x "$RSCRIPT" ] || return 1
+  has_marker || return 1
+  "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e 'found <- vapply(c("ravemanager", "rave", "docopt"), function(p) { nzchar(system.file(package = p)) }, TRUE)' \
+    -e 'quit(save = "no", status = if (all(found)) 0L else 1L)'
+}
+
+install_failed() {
+  local retry="rave start"
+  has_marker && retry="rave update"
+  abort "RAVE did not finish installing. Check your internet connection and run \`$retry\` to try again. If that keeps failing, email help@rave.wiki."
+}
+
+# Keeps R if it is the same minor version as the r-app cask or one behind
+check_r_version() {
+  local latest current
+  latest=$(brew info --cask --json=v2 r-app 2>/dev/null |
+    sed -n 's/^ *"version": "\([0-9]*\.[0-9]*\).*/\1/p' | head -n 1)
+  [ -n "$latest" ] || return 0
+
+  current=$(r_value 'paste(R.version$major, strsplit(R.version$minor, ".", fixed = TRUE)[[1]][[1]], sep = ".")')
+  [[ "$current" =~ ^[0-9]+\.[0-9]+$ ]] || abort "R could not run. Fix the error above, then run \`rave start\`."
+  local current_major=${current%%.*} current_minor=${current#*.}
+  local latest_major=${latest%%.*} latest_minor=${latest#*.}
+  if [ "$current_major" -gt "$latest_major" ] ||
+    { [ "$current_major" -eq "$latest_major" ] && [ $((current_minor + 1)) -ge "$latest_minor" ]; }; then
+    return 0
+  fi
+
+  local command="brew install --cask r-app"
+  if brew list --cask r-app >/dev/null 2>&1; then
+    command="brew upgrade --cask r-app"
+  fi
+
+  warn "R $current is too old for RAVE. Homebrew can update it to R $latest, which may remove R $current. Your R packages stay on disk, but the new R won't use them."
+  [ -t 0 ] || abort "R was not changed. Run \`$command\`, then run \`rave start\`."
+
+  printf 'Update R now? [y/N] '
+  local answer=""
+  read -r answer
+  case "$answer" in
+    [yY]*) $command || abort "Could not update R. Run \`$command\`, then run \`rave start\`." ;;
+    *) abort "R was not changed. Run \`$command\`, then run \`rave start\`." ;;
+  esac
+}
+
+install_rave() {
+  local reset_python="${1:-}"
+
+  if [ -x "$RSCRIPT" ]; then
+    check_r_version
+  else
+    ohai "Installing R with Homebrew. This may ask for your password."
+    brew install --cask r-app ||
+      abort "Could not install R. Run \`brew install --cask r-app\`, then run \`rave start\`."
+  fi
+
+  ohai "Installing RAVE. This can take 10 minutes or more."
+
+  # A new R process for each step, so a newer ravemanager is the one that gets
+  # loaded. A build of ravemanager at least as new as r-universe's is left alone.
+  # Stops if r-universe can't be reached: install.packages() would only warn, so
+  # install() would report success without updating anything.
+  /usr/bin/caffeinate -i "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e "repo <- '$RAVE_REPO'" \
+    -e 'available <- suppressWarnings(utils::available.packages(repos = repo, type = "source"))' \
+    -e 'if (!"ravemanager" %in% rownames(available)) { quit(save = "no", status = 1L) }' \
+    -e 'latest <- available["ravemanager", "Version"]' \
+    -e 'installed <- nzchar(system.file(package = "ravemanager"))' \
+    -e 'if (!installed || utils::packageVersion("ravemanager") < latest) { utils::install.packages("ravemanager", repos = repo, lib = lib) }' \
+    -e 'quit(save = "no", status = if (nzchar(system.file(package = "ravemanager"))) 0L else 1L)' ||
+    install_failed
+
+  # configure_python() does not recreate an environment whose folder exists, and
+  # rpymat::remove_conda() refuses to run outside an interactive session
+  if [ -n "$reset_python" ]; then
+    ohai "Removing the Python environment"
+    "$RSCRIPT" "${R_LIBRARY[@]}" -e 'unlink(asNamespace("rpymat")$install_root(), recursive = TRUE, force = TRUE)' ||
+      warn "Could not remove the Python environment."
+  fi
+
+  # RETICULATE_USE_MANAGED_VENV=no stops reticulate from answering a broken
+  # Python by downloading and running uv from astral.sh
+  RETICULATE_USE_MANAGED_VENV=no /usr/bin/caffeinate -i "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e 'status <- ravemanager::install(allow_cache = FALSE, python = TRUE)' \
+    -e 'quit(save = "no", status = if (isTRUE(status)) 0L else 1L)' ||
+    install_failed
+
+  # RAVE cannot start without these packages and pipelines, and install() only
+  # warns if they fail. The marker stays in the R library, so a new R minor
+  # version installs again.
+  "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e 'found <- all(vapply(c("ravemanager", "rave", "docopt"), function(p) { nzchar(system.file(package = p)) }, TRUE)) && length(ravepipeline::pipeline_list()) > 0' \
+    -e 'if (found) { file.create(file.path(lib, ".rave-installed")) }' \
+    -e 'quit(save = "no", status = if (found) 0L else 1L)' >/dev/null ||
+    install_failed
+
+  if ! RETICULATE_USE_MANAGED_VENV=no "$RSCRIPT" "${R_LIBRARY[@]}" -e 'rpyANTs::load_ants()' >/dev/null 2>&1; then
+    warn "Python did not finish installing, so modules that need it won't work. Run \`rave update --reset-python\` to repair it."
+  fi
+
+  "$RSCRIPT" "${R_LIBRARY[@]}" -e 'ravecore::clear_cached_files(quiet = TRUE)' >/dev/null 2>&1 ||
+    warn "Could not clear RAVE's cached files."
+
+  ohai "RAVE is installed. Open it with \`rave start\`."
+}
+
+run_launcher() {
+  exec "$RSCRIPT" "$(r_value 'system.file("shell/launcher.R", package = "ravemanager")')" "$@"
+}
+
+command="${1:-}"
+[ $# -eq 0 ] || shift
+
+case "$command" in
+  start)
+    if ! rave_ready; then
+      case " $* " in
+        *" -h "* | *" --help "*)
+          usage
+          exit 0
+          ;;
+      esac
+      install_rave
+    fi
+    run_launcher start "$@"
+    ;;
+  update)
+    case "${1:-}" in
+      "") install_rave ;;
+      --reset-python) install_rave reset ;;
+      *)
+        usage >&2
+        exit 1
+        ;;
+    esac
+    ;;
+  --version)
+    if rave_ready; then
+      run_launcher --version
+    fi
+    echo "RAVE is not installed yet. Run \`rave start\` to install it."
+    ;;
+  "" | -h | --help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac

@@ -86,7 +86,9 @@ without restarting the R session; however, this solution not always
 works. In such case, restarting R session is always the solution.}
 }
 \value{
-Nothing
+\code{install} and \code{update_rave} invisibly return \code{TRUE}
+if the installation finished and \code{FALSE} if it failed; other functions
+return nothing.
 }
 \description{
 Installs the newest version of 'RAVE' and its dependence

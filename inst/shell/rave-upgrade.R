@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-utils::install.packages("ravemanager", repos = options(repos = c(
+utils::install.packages("ravemanager", repos = c(
   "rave-ieeg" = "https://rave-ieeg.r-universe.dev",
-  "CRAN" = "https://cloud.r-project.org")))
+  "CRAN" = "https://cloud.r-project.org"))
 ravemanager::install()
 

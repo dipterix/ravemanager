@@ -1,3 +1,4 @@
+RAVE_HOST=0.0.0.0
 RAVE_LIB_PATH=/opt/shared/rave/lib/R
 R_LIBS=/opt/shared/rave/lib/R:/usr/local/lib/R/library
 R_RPYMAT_CONDA_EXE=/opt/shared/rave/lib/conda/condabin/conda
