@@ -110,4 +110,5 @@ upgrade_installer(reload = TRUE)
 
 ## Value
 
-Nothing
+`install` and `update_rave` invisibly return `TRUE` if the installation
+finished and `FALSE` if it failed; other functions return nothing.
