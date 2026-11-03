@@ -25,10 +25,12 @@ usage() {
 RAVE command-line interface
 
 Usage:
-  rave start [options]           Open RAVE, installing it first if needed
-  rave update [--reset-python]   Install or update RAVE
-  rave -h | --help               Show this screen
-  rave --version                 Show version
+  rave start [options]             Open RAVE, installing it first if needed
+  rave update                      Install or update RAVE
+  rave configure python [--reset]  Set up Python, which some modules need
+  rave install <name>...           Add packages: r-<name> for R, py-<name> for Python
+  rave -h | --help                 Show this screen
+  rave --version                   Show version
 
 Run `rave start --help` to see the options for `rave start`.
 EOF
@@ -97,8 +99,6 @@ check_r_version() {
 }
 
 install_rave() {
-  local reset_python="${1:-}"
-
   if [ -x "$RSCRIPT" ]; then
     check_r_version
   else
@@ -123,18 +123,10 @@ install_rave() {
     -e 'quit(save = "no", status = if (nzchar(system.file(package = "ravemanager"))) 0L else 1L)' ||
     install_failed
 
-  # configure_python() does not recreate an environment whose folder exists, and
-  # rpymat::remove_conda() refuses to run outside an interactive session
-  if [ -n "$reset_python" ]; then
-    ohai "Removing the Python environment"
-    "$RSCRIPT" "${R_LIBRARY[@]}" -e 'unlink(asNamespace("rpymat")$install_root(), recursive = TRUE, force = TRUE)' ||
-      warn "Could not remove the Python environment."
-  fi
-
   # RETICULATE_USE_MANAGED_VENV=no stops reticulate from answering a broken
   # Python by downloading and running uv from astral.sh
   RETICULATE_USE_MANAGED_VENV=no /usr/bin/caffeinate -i "$RSCRIPT" "${R_LIBRARY[@]}" \
-    -e 'status <- ravemanager::install(allow_cache = FALSE, python = TRUE)' \
+    -e 'status <- ravemanager::install(allow_cache = FALSE, python = FALSE)' \
     -e 'quit(save = "no", status = if (isTRUE(status)) 0L else 1L)' ||
     install_failed
 
@@ -147,14 +139,156 @@ install_rave() {
     -e 'quit(save = "no", status = if (found) 0L else 1L)' >/dev/null ||
     install_failed
 
-  if ! RETICULATE_USE_MANAGED_VENV=no "$RSCRIPT" "${R_LIBRARY[@]}" -e 'rpyANTs::load_ants()' >/dev/null 2>&1; then
-    warn "Python did not finish installing, so modules that need it won't work. Run \`rave update --reset-python\` to repair it."
-  fi
-
   "$RSCRIPT" "${R_LIBRARY[@]}" -e 'ravecore::clear_cached_files(quiet = TRUE)' >/dev/null 2>&1 ||
     warn "Could not clear RAVE's cached files."
 
   ohai "RAVE is installed. Open it with \`rave start\`."
+  ohai "Some modules need Python. To set it up, run \`rave configure python\`."
+}
+
+require_rave() {
+  rave_ready || abort "RAVE is not installed yet. Run \`rave start\` to install it."
+}
+
+# Homebrew's conda, for when rpymat has none. Links in rpymat's folder let every
+# R session find it with no setting, and environments stay in that folder.
+ensure_conda() {
+  local root caskroom cask name base=""
+  root=$(r_value 'with(asNamespace("rpymat"), if (conda_is_user_defined()) "custom" else conda_path())')
+  case "$root" in
+    custom) return 0 ;;
+    /*) ;;
+    *) abort "R could not load rpymat. Run \`rave update\`, then run \`rave configure python\`." ;;
+  esac
+  [ -x "$root/condabin/conda" ] && return 0
+
+  # A broken conda of rpymat's own: `ln` would put the links inside its folders
+  for name in bin condabin etc; do
+    if [ -d "$root/$name" ] && [ ! -L "$root/$name" ]; then
+      abort "rpymat's conda folder is incomplete. Run \`rave configure python --reset\`."
+    fi
+  done
+
+  caskroom=$(brew --caskroom 2>/dev/null)
+  for cask in miniforge miniconda; do
+    if [ -x "$caskroom/$cask/base/condabin/conda" ]; then
+      base="$caskroom/$cask/base"
+      break
+    fi
+  done
+
+  if [ -z "$base" ]; then
+    ohai "Installing Miniforge with Homebrew."
+    brew install --cask miniforge ||
+      abort "Could not install Miniforge. Run \`brew install --cask miniforge\`, then run \`rave configure python\`."
+    base="$(brew --caskroom)/miniforge/base"
+  fi
+
+  mkdir -p "$root"
+  for name in bin condabin etc; do
+    ln -sfn "$base/$name" "$root/$name"
+  done
+  [ -x "$root/condabin/conda" ] ||
+    abort "Could not use Homebrew's conda. Run \`brew reinstall --cask miniforge\`, then run \`rave configure python\`."
+}
+
+configure_python() {
+  local reset="${1:-}" missing
+  local repair="Python did not finish installing, so modules that need it won't work. Run \`rave configure python\` to try again. If that keeps failing, run \`rave configure python --reset\`."
+
+  require_rave
+
+  # configure_python() does not recreate an environment whose folder exists, and
+  # rpymat::remove_conda() refuses to run outside an interactive session
+  if [ -n "$reset" ]; then
+    ohai "Removing the Python environment"
+    "$RSCRIPT" "${R_LIBRARY[@]}" \
+      -e 'quit(save = "no", status = unlink(asNamespace("rpymat")$install_root(), recursive = TRUE, force = TRUE))' ||
+      warn "Could not remove the Python environment."
+  fi
+
+  ensure_conda
+
+  ohai "Setting up Python. This can take 10 minutes or more."
+
+  # Created here because configure_python() answers a failure by downloading
+  # Miniconda. See install_rave() for RETICULATE_USE_MANAGED_VENV.
+  RETICULATE_USE_MANAGED_VENV=no /usr/bin/caffeinate -i "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e 'rpymat <- asNamespace("rpymat")' \
+    -e 'python_ver <- formals(ravemanager::configure_python)$python_ver' \
+    -e 'if (!dir.exists(rpymat$env_path())) { rpymat$configure_conda(python_ver = python_ver, force = TRUE) }' ||
+    abort "Could not create the Python environment. Check your internet connection and run \`rave configure python\` to try again."
+
+  RETICULATE_USE_MANAGED_VENV=no /usr/bin/caffeinate -i "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e 'ravemanager::configure_python()' ||
+    abort "$repair"
+
+  RETICULATE_USE_MANAGED_VENV=no "$RSCRIPT" "${R_LIBRARY[@]}" -e 'rpyANTs::load_ants()' >/dev/null 2>&1 ||
+    abort "$repair"
+
+  ohai "Python is set up."
+
+  # configure_python() only tries most packages once, and does not install these two
+  missing=$(RETICULATE_USE_MANAGED_VENV=no r_value 'paste(setdiff(ravemanager::validate_python(verbose = FALSE), c("nipy", "antspynet")), collapse = " ")')
+  if [ -n "$missing" ]; then
+    warn "Some Python packages did not install: $missing. Run \`rave configure python\` to try again."
+  fi
+
+  if [ -L "$(r_value 'asNamespace("rpymat")$conda_path()')/condabin" ]; then
+    ohai "RAVE's Python needs Homebrew's conda, so keep it installed. If you remove it, run \`rave configure python\` to repair Python."
+  fi
+}
+
+# Names reach R as arguments, so they can't run as R code. The word before them
+# stops Rscript from reading a name as one of its own options.
+add_packages() {
+  local installer="$1"
+  shift
+  RETICULATE_USE_MANAGED_VENV=no /usr/bin/caffeinate -i "$RSCRIPT" "${R_LIBRARY[@]}" \
+    -e "for (name in commandArgs(TRUE)[-1]) { ravemanager::$installer(name) }" \
+    names "$@"
+}
+
+install_packages() {
+  if [ $# -eq 0 ]; then
+    usage >&2
+    exit 1
+  fi
+
+  local name
+  local r_names=() py_names=()
+  for name in "$@"; do
+    case "$name" in
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      r-?*) r_names+=("${name#r-}") ;;
+      py-?*) py_names+=("${name#py-}") ;;
+      r- | py-) abort "\`$name\` needs a package name after it." ;;
+      *) abort "Package names start with r- or py-, as in r-$name or py-$name." ;;
+    esac
+  done
+
+  require_rave
+
+  if [ "${#py_names[@]}" -gt 0 ]; then
+    "$RSCRIPT" "${R_LIBRARY[@]}" \
+      -e 'quit(save = "no", status = if (dir.exists(asNamespace("rpymat")$env_path())) 0L else 1L)' ||
+      abort "Python is not set up yet. Run \`rave configure python\` first."
+  fi
+
+  if [ "${#r_names[@]}" -gt 0 ]; then
+    add_packages add_r_package "${r_names[@]}" ||
+      abort "Could not install the R packages. Check the names and your internet connection."
+  fi
+
+  if [ "${#py_names[@]}" -gt 0 ]; then
+    add_packages add_py_package "${py_names[@]}" ||
+      abort "Could not install the Python packages. Check the names and your internet connection. If that keeps failing, run \`rave configure python\` to repair Python."
+  fi
+
+  ohai "Done."
 }
 
 run_launcher() {
@@ -178,14 +312,24 @@ case "$command" in
     run_launcher start "$@"
     ;;
   update)
-    case "${1:-}" in
-      "") install_rave ;;
-      --reset-python) install_rave reset ;;
+    if [ $# -gt 0 ]; then
+      usage >&2
+      exit 1
+    fi
+    install_rave
+    ;;
+  configure)
+    case "$*" in
+      python) configure_python ;;
+      "python --reset") configure_python reset ;;
       *)
         usage >&2
         exit 1
         ;;
     esac
+    ;;
+  install)
+    install_packages "$@"
     ;;
   --version)
     if rave_ready; then
